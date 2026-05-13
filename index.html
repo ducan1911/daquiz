@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title> Hệ thống thi trắc nghiệm</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="supabase-config.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+    
+    * {
+      font-family: 'Inter', sans-serif;
+    }
+    
+    body {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
+    }
+    
+    /* Animated Background Particles */
+    .particle {
+      position: absolute;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+      pointer-events: none;
+      animation: float 20s infinite;
+    }
+    
+    @keyframes float {
+      0%, 100% { transform: translateY(0) translateX(0) rotate(0deg); }
+      33% { transform: translateY(-100px) translateX(50px) rotate(120deg); }
+      66% { transform: translateY(-50px) translateX(-50px) rotate(240deg); }
+    }
+    
+    .particle:nth-child(1) { width: 80px; height: 80px; top: 10%; left: 10%; animation-delay: 0s; }
+    .particle:nth-child(2) { width: 120px; height: 120px; top: 60%; left: 80%; animation-delay: 4s; }
+    .particle:nth-child(3) { width: 60px; height: 60px; top: 80%; left: 20%; animation-delay: 8s; }
+    .particle:nth-child(4) { width: 100px; height: 100px; top: 20%; right: 15%; animation-delay: 12s; }
+    .particle:nth-child(5) { width: 70px; height: 70px; bottom: 15%; right: 30%; animation-delay: 16s; }
+    
+    /* Glassmorphism Card */
+    .glass-card {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    }
+    
+    /* Animated Gradient Text */
+    .gradient-text {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+      background-size: 200% 200%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: gradient-shift 3s ease infinite;
+    }
+    
+    @keyframes gradient-shift {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+    
+    /* Button Hover Effects */
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .btn-primary::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+      transition: left 0.5s;
+    }
+    
+    .btn-primary:hover::before {
+      left: 100%;
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-2px) scale(1.02);
+      box-shadow: 0 20px 40px -10px rgba(102, 126, 234, 0.5);
+    }
+    
+    .btn-primary:active {
+      transform: translateY(0) scale(0.98);
+    }
+    
+    .btn-success {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .btn-success::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+      transition: left 0.5s;
+    }
+    
+    .btn-success:hover::before {
+      left: 100%;
+    }
+    
+    .btn-success:hover {
+      transform: translateY(-2px) scale(1.02);
+      box-shadow: 0 20px 40px -10px rgba(16, 185, 129, 0.5);
+    }
+    
+    .btn-success:active {
+      transform: translateY(0) scale(0.98);
+    }
+    
+    /* Input Focus Animation */
+    .input-code {
+      transition: all 0.3s ease;
+      border: 2px solid rgba(209, 213, 219, 0.5);
+    }
+    
+    .input-code:focus {
+      border-color: #667eea;
+      box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+      transform: translateY(-2px);
+    }
+    
+    /* Icon Bounce Animation */
+    @keyframes bounce-slow {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+    
+    .icon-bounce {
+      animation: bounce-slow 2s ease-in-out infinite;
+    }
+    
+    /* Divider Animation */
+    .divider {
+      position: relative;
+      text-align: center;
+      margin: 24px 0;
+    }
+    
+    .divider::before,
+    .divider::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      width: calc(50% - 60px);
+      height: 1px;
+      background: linear-gradient(to right, transparent, rgba(156, 163, 175, 0.4), transparent);
+    }
+    
+    .divider::before { left: 0; }
+    .divider::after { right: 0; }
+    
+    /* Loading Spinner */
+    .spinner {
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-top: 3px solid #667eea;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    /* Feature Cards */
+    .feature-card {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      transition: all 0.3s ease;
+    }
+    
+    .feature-card:hover {
+      background: rgba(255, 255, 255, 0.15);
+      transform: translateY(-5px);
+      box-shadow: 0 15px 30px -10px rgba(0, 0, 0, 0.2);
+    }
+    
+    /* Fade In Animation */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .fade-in-up {
+      animation: fadeInUp 0.6s ease-out forwards;
+    }
+    
+    .delay-1 { animation-delay: 0.1s; opacity: 0; }
+    .delay-2 { animation-delay: 0.2s; opacity: 0; }
+    .delay-3 { animation-delay: 0.3s; opacity: 0; }
+    .delay-4 { animation-delay: 0.4s; opacity: 0; }
+    
+    /* Mobile Responsive */
+    @media (max-width: 640px) {
+      .glass-card {
+        margin: 1rem;
+      }
+    }
+  </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4 relative">
+  
+  <!-- Animated Background Particles -->
+  <div class="particle"></div>
+  <div class="particle"></div>
+  <div class="particle"></div>
+  <div class="particle"></div>
+  <div class="particle"></div>
+  
+  <!-- Main Card -->
+  <div class="glass-card rounded-3xl shadow-2xl p-8 md:p-10 max-w-lg w-full text-center relative z-10 fade-in-up">
+    
+    <!-- Logo Animation -->
+    <div class="text-7xl mb-6 icon-bounce delay-1">📝</div>
+    
+    <!-- Title -->
+    <h1 class="text-4xl md:text-5xl font-black mb-3 gradient-text delay-2 fade-in-up">
+      Hệ thống trắc nghiệm trực tuyến
+    </h1>
+    
+    <p class="text-gray-600 text-base md:text-lg mb-8 font-medium delay-2 fade-in-up">
+      Hệ thống trắc nghiệm trực tuyến
+    </p>
+    
+    <!-- Feature Highlights
+    <div class="grid grid-cols-3 gap-3 mb-8 delay-3 fade-in-up">
+      <div class="feature-card rounded-xl p-3 text-center">
+        <div class="text-2xl mb-1">⚡</div>
+        <div class="text-xs text-white font-semibold">Nhanh chóng</div>
+      </div>
+      <div class="feature-card rounded-xl p-3 text-center">
+        <div class="text-2xl mb-1">🔒</div>
+        <div class="text-xs text-white font-semibold">Bảo mật</div>
+      </div>
+      <div class="feature-card rounded-xl p-3 text-center">
+        <div class="text-2xl mb-1">📊</div>
+        <div class="text-xs text-white font-semibold">Thống kê</div>
+      </div>
+    </div> -->
+    
+    <!-- Action Buttons -->
+    <div class="space-y-4 delay-4 fade-in-up">
+      
+      <!-- Teacher Login Button -->
+      <a href="teacher-login.html"
+         class="btn-primary block w-full text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 shadow-lg hover:shadow-2xl text-base md:text-lg">
+        <span class="flex items-center justify-center gap-3">
+          <span class="text-2xl">👨‍🏫</span>
+          <span>Giáo viên đăng nhập</span>
+        </span>
+      </a>
+      
+      <!-- Divider -->
+      <div class="divider">
+        <span class="text-gray-400 text-sm font-medium bg-white px-4 relative z-10">
+          hoặc
+        </span>
+      </div>
+      
+      <!-- Student Section -->
+      <div class="space-y-3">
+        <label class="block text-left text-sm font-semibold text-gray-700 mb-2">
+          <span class="flex items-center gap-2">
+            <span>🎓</span>
+            <span>Học sinh - Nhập mã bài kiểm tra</span>
+          </span>
+        </label>
+        
+        <div class="relative">
+          <input 
+            type="text" 
+            id="testCode" 
+            placeholder="VD: ABC123"
+            class="input-code w-full rounded-xl px-5 py-4 text-center focus:outline-none text-xl tracking-widest font-bold uppercase placeholder:text-gray-300 placeholder:font-normal"
+            maxlength="6"
+            autocomplete="off"
+            oninput="this.value = this.value.toUpperCase()">
+          
+          <!-- Input Icon -->
+          <div class="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
+            </svg>
+          </div>
+        </div>
+        
+        <button 
+          onclick="goToStudent()"
+          class="btn-success w-full text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 shadow-lg hover:shadow-2xl text-base md:text-lg">
+          <span class="flex items-center justify-center gap-3">
+            <span class="text-2xl">🚀</span>
+            <span>Vào thi ngay</span>
+          </span>
+        </button>
+      </div>
+      
+    </div>
+    
+    <!-- Footer Info -->
+    <div class="mt-8 pt-6 border-t border-gray-200">
+      <p class="text-xs text-gray-500 flex items-center justify-center gap-2">
+        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+        </svg>
+        <span>Đảm bảo kết nối internet ổn định khi làm bài</span>
+      </p>
+    </div>
+    
+  </div>
+  
+  <!-- Quick Stats (Optional)
+  <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 hidden md:flex gap-8 text-white text-sm font-medium fade-in-up delay-4">
+    <div class="flex items-center gap-2 bg-white bg-opacity-10 backdrop-blur-md px-4 py-2 rounded-full">
+      <span class="text-lg">✅</span>
+      <span>100% An toàn</span>
+    </div>
+    <div class="flex items-center gap-2 bg-white bg-opacity-10 backdrop-blur-md px-4 py-2 rounded-full">
+      <span class="text-lg">⚡</span>
+      <span>Chấm điểm tức thì</span>
+    </div>
+    <div class="flex items-center gap-2 bg-white bg-opacity-10 backdrop-blur-md px-4 py-2 rounded-full">
+      <span class="text-lg">📱</span>
+      <span>Hỗ trợ mobile</span>
+    </div>
+  </div> -->
+  
+  <script>
+    function goToStudent() {
+      const code = document.getElementById('testCode').value.trim();
+      
+      if (!code || code.length < 4) {
+        // Shake animation on error
+        const input = document.getElementById('testCode');
+        input.classList.add('animate-shake');
+        input.style.borderColor = '#ef4444';
+        
+        setTimeout(() => {
+          input.classList.remove('animate-shake');
+          input.style.borderColor = '';
+        }, 500);
+        
+        alert('⚠️ Vui lòng nhập mã bài kiểm tra (4-6 ký tự)');
+        return;
+      }
+      
+      // Show loading state
+      const btn = event.target;
+      const originalHTML = btn.innerHTML;
+      btn.innerHTML = '<div class="spinner"></div>';
+      btn.disabled = true;
+      
+      // Navigate after brief delay for UX
+      setTimeout(() => {
+        window.location.href = `student.html?code=${encodeURIComponent(code)}`;
+      }, 300);
+    }
+
+    // Allow Enter key to submit
+    document.getElementById('testCode').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        goToStudent();
+      }
+    });
+    
+    // Auto-focus input on page load
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        document.getElementById('testCode').focus();
+      }, 500);
+    });
+    
+    // Add shake animation CSS
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-10px); }
+        75% { transform: translateX(10px); }
+      }
+      .animate-shake {
+        animation: shake 0.3s ease-in-out;
+      }
+    `;
+    document.head.appendChild(style);
+  </script>
+  
+</body>
+</html>

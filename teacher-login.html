@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Giáo viên đăng nhập - DaQuiz</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="supabase-config.js"></script>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+  <div class="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full">
+    <div class="text-center mb-6">
+      <a href="index.html" class="text-sm text-indigo-600 hover:underline float-left">← Quay lại</a>
+      <h1 class="text-2xl font-bold text-gray-800 mt-4" id="formTitle">Đăng nhập</h1>
+      <p class="text-gray-500 text-sm" id="formSubtitle">Dành cho giáo viên</p>
+    </div>
+
+    <form id="loginForm" class="space-y-4">
+      <input type="text" id="name" placeholder="Họ và tên" 
+             class="hidden w-full border rounded-lg px-4 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none">
+      <input type="email" id="email" placeholder="Email" required
+             class="w-full border rounded-lg px-4 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none">
+      <input type="password" id="password" placeholder="Mật khẩu (ít nhất 6 ký tự)" required
+             class="w-full border rounded-lg px-4 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none">
+      <button type="submit" id="submitBtn"
+              class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-lg transition-colors">
+        Đăng nhập
+      </button>
+    </form>
+
+    <p class="text-center text-sm mt-4">
+      <span id="toggleText">Chưa có tài khoản?</span>
+      <a href="#" id="toggleLink" class="text-indigo-600 hover:underline font-medium">Đăng ký</a>
+    </p>
+
+    <div id="errorMsg" class="hidden mt-4 p-3 bg-red-100 text-red-700 rounded-lg text-sm"></div>
+  </div>
+
+  <script>
+    let isLoginMode = true;
+
+    document.getElementById('toggleLink').addEventListener('click', (e) => {
+      e.preventDefault();
+      isLoginMode = !isLoginMode;
+      const nameField = document.getElementById('name');
+      if (isLoginMode) {
+        document.getElementById('formTitle').textContent = 'Đăng nhập';
+        document.getElementById('formSubtitle').textContent = 'Dành cho giáo viên';
+        document.getElementById('submitBtn').textContent = 'Đăng nhập';
+        document.getElementById('toggleText').textContent = 'Chưa có tài khoản?';
+        document.getElementById('toggleLink').textContent = 'Đăng ký';
+        nameField.classList.add('hidden');
+        nameField.required = false;
+      } else {
+        document.getElementById('formTitle').textContent = 'Đăng ký';
+        document.getElementById('formSubtitle').textContent = 'Tạo tài khoản giáo viên';
+        document.getElementById('submitBtn').textContent = 'Đăng ký';
+        document.getElementById('toggleText').textContent = 'Đã có tài khoản?';
+        document.getElementById('toggleLink').textContent = 'Đăng nhập';
+        nameField.classList.remove('hidden');
+        nameField.required = true;
+      }
+      document.getElementById('errorMsg').classList.add('hidden');
+    });
+
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const name = document.getElementById('name').value.trim();
+      const errorDiv = document.getElementById('errorMsg');
+      errorDiv.classList.add('hidden');
+
+      try {
+        if (isLoginMode) {
+          const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+          if (error) throw error;
+          // Đảm bảo teacher record tồn tại
+          await ensureTeacherRecord(data.user);
+          window.location.href = 'teacher.html';
+        } else {
+          if (!name) { showError('Vui lòng nhập họ tên'); return; }
+          const { data, error } = await supabase.auth.signUp({
+            email,
+            password,
+            options: { data: { name } }
+          });
+          if (error) throw error;
+          // Tạo teacher record
+          if (data.user) {
+            await supabase.from('teachers').insert({
+              id: data.user.id,
+              email: email,
+              name: name
+            });
+          }
+          window.location.href = 'teacher.html';
+        }
+      } catch (error) {
+        console.error(error);
+        let message = 'Có lỗi xảy ra. Vui lòng thử lại.';
+        if (error.message?.includes('already registered') || error.message?.includes('already been registered'))
+          message = 'Email đã được đăng ký.';
+        else if (error.message?.includes('Invalid email'))
+          message = 'Email không hợp lệ.';
+        else if (error.message?.includes('password'))
+          message = 'Mật khẩu phải có ít nhất 6 ký tự.';
+        else if (error.message?.includes('Invalid login') || error.message?.includes('Invalid authentication'))
+          message = 'Email hoặc mật khẩu không chính xác.';
+        else
+          message = error.message || message;
+        showError(message);
+      }
+    });
+
+    function showError(msg) {
+      const errorDiv = document.getElementById('errorMsg');
+      errorDiv.textContent = msg;
+      errorDiv.classList.remove('hidden');
+    }
+
+    async function ensureTeacherRecord(user) {
+      const { data } = await supabase.from('teachers').select('id').eq('id', user.id).single();
+      if (!data) {
+        await supabase.from('teachers').insert({
+          id: user.id,
+          email: user.email,
+          name: user.user_metadata?.name || user.email
+        });
+      }
+    }
+
+    // Kiểm tra nếu đã đăng nhập
+    (async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) window.location.href = 'teacher.html';
+    })();
+  </script>
+</body>
+</html>
