@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hệ thống trắc nghiệm trực tuyến  - Học sinh</title>
+  <title>Hệ thống thi trắc nghiệm - Học sinh</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <script src="supabase-config.js"></script>
@@ -334,7 +334,7 @@
         <div class="w-10 h-10 bg-white bg-opacity-20 backdrop-blur-md rounded-xl flex items-center justify-center text-white text-xl font-bold shadow-lg">
           Q
         </div>
-        <h1 class="text-xl md:text-2xl font-bold text-white">Hệ thống trắc nghiệm trực tuyến</h1>
+        <h1 class="text-xl md:text-2xl font-bold text-white">Hệ thống thi trắc nghiệm</h1>
       </div>
       <div id="studentInfo" class="hidden md:flex items-center gap-2 bg-white bg-opacity-20 backdrop-blur-md px-4 py-2 rounded-xl text-white font-medium text-sm">
       </div>
@@ -892,7 +892,9 @@
         
         const score = await gradeTest(testData, answers, questionMapping);
         const totalPoints = (questionMapping.questionOrder||[]).reduce((sum, q) => sum + (q.points||1), 0);
-        await supabase.from('submissions').update({ score, total_points: totalPoints }).eq('id', submissionId);
+        const roundedScore = Math.round(score * 100) / 100;
+        await supabase.from('submissions').update({ score: roundedScore, total_points: totalPoints }).eq('id', submissionId);
+        score = roundedScore;
         await showResult(score, answers);
       } catch (e) {
         document.getElementById('mainContent').innerHTML = `

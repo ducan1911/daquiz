@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hệ thống trắc nghiệm trực tuyến - Giáo viên</title>
+  <title>Hệ thống thi trắc nghiệm - Giáo viên</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
@@ -207,7 +207,7 @@
     <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
       <div class="flex items-center gap-3">
         <div class="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center text-white text-xl font-bold shadow-lg">Q</div>
-        <h1 class="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">Hệ thống trắc nghiệm trực tuyến</h1>
+        <h1 class="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">Hệ thống thi trắc nghiệm</h1>
       </div>
       <div class="flex items-center gap-4">
         <div class="hidden md:flex items-center gap-2 bg-gradient-to-r from-indigo-50 to-purple-50 px-4 py-2 rounded-xl">
@@ -926,8 +926,8 @@
         </div>
       `;
 
-      // Lấy danh sách questionId từ bài kiểm tra
-      const qIds = (test.questions || []).map(q => q.questionId).filter(Boolean);
+      // Hỗ trợ cả cấu trúc cũ {id, points} và mới {questionId, points}
+      const qIds = (test.questions || []).map(q => q.questionId || q.id).filter(Boolean);
 
       let testQuestions = [];
       if (qIds.length > 0) {
@@ -942,7 +942,7 @@
       const typeIcons = { single: '📌', multiple: '☑️', truefalse: '✓✗' };
 
       const questionsHTML = test.questions.map((tq, idx) => {
-        const q = testQuestions.find(x => x.id === tq.questionId);
+        const q = testQuestions.find(x => x.id === (tq.questionId || tq.id));
         if (!q) return `
           <div class="border-2 border-red-100 rounded-xl p-4 text-sm text-red-400">
             ⚠️ Câu ${idx + 1}: Không tìm thấy câu hỏi (có thể đã bị xóa)
@@ -1240,7 +1240,7 @@
               <span class="badge bg-gray-100 text-gray-700">Lần ${sub.attempt_number || 1}</span>
             </td>
             <td class="p-3 text-center">
-              <span class="font-bold text-lg ${scoreColor}">${sub.score || 0}</span>
+              <span class="font-bold text-lg ${scoreColor}">${parseFloat((sub.score || 0).toFixed(2))}</span>
               <span class="text-gray-500 text-xs">/${totalPoints}</span>
               <div class="text-xs text-gray-500">(${scorePercent}%)</div>
             </td>
@@ -1305,7 +1305,7 @@
         'STT': idx + 1,
         'Họ tên': sub.student_name || '',
         'Lần thi': sub.attempt_number || 1,
-        'Điểm': sub.score || 0,
+        'Điểm': parseFloat((sub.score || 0).toFixed(2)),
         'Tổng điểm': totalPoints,
         'Phần trăm': totalPoints > 0 ? `${((sub.score / totalPoints) * 100).toFixed(1)}%` : '0%',
         'Thời gian làm': calculateTimeSpent(sub),
