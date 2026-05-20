@@ -1725,10 +1725,10 @@
         <p class="text-xs text-gray-400 mt-3">* Học sinh được sắp xếp theo điểm từ cao đến thấp. % trên tiêu đề cột = tỉ lệ học sinh trả lời đúng câu đó.</p>
       `;
     }
+    async function deleteSubmission(submissionId) {
       if (!confirm('Xóa bài nộp này? Hành động không thể hoàn tác.')) return;
       const { error } = await supabase.from('submissions').delete().eq('id', submissionId);
       if (error) return alert('Lỗi khi xóa: ' + error.message);
-      // Reload lại kết quả
       await loadResults();
     }
 
