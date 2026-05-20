@@ -1424,7 +1424,7 @@
         </div>
         
         <!-- Student Results Table -->
-        <div class="card p-6">
+        <div class="card p-6 mb-6">
           <div class="flex items-center justify-between mb-4">
             <h3 class="text-xl font-bold text-gray-800">📝 Kết quả chi tiết</h3>
             <button onclick="exportToExcel('${testId}')" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all">
@@ -1449,6 +1449,15 @@
             </table>
           </div>
         </div>
+
+        <!-- Question Matrix Table -->
+        <div class="card p-6">
+          <h3 class="text-xl font-bold text-gray-800 mb-1">🔢 Thống kê theo từng câu hỏi</h3>
+          <p class="text-sm text-gray-500 mb-4">✅ Đúng &nbsp;❌ Sai &nbsp;— Chưa trả lời</p>
+          <div id="questionMatrixContainer">
+            <div class="text-center py-6"><div class="spinner mx-auto mb-2"></div><p class="text-gray-400 text-sm">Đang tải...</p></div>
+          </div>
+        </div>
       `;
       
       // Render score distribution chart
@@ -1456,6 +1465,9 @@
       
       // Render results table
       renderResultsTable(completedSubs, test);
+
+      // Render question matrix
+      renderQuestionMatrix(completedSubs, test);
     }
 
     function calculateAdvancedStats(submissions, test) {
@@ -1602,7 +1614,117 @@
       }).join('');
     }
 
-    async function deleteSubmission(submissionId) {
+    async function renderQuestionMatrix(submissions, test) {
+      const container = document.getElementById('questionMatrixContainer');
+      if (!container) return;
+
+      // Lấy danh sách câu hỏi của bài thi
+      const qIds = (test.questions || []).map(q => q.questionId || q.id).filter(Boolean);
+      if (!qIds.length) { container.innerHTML = '<p class="text-gray-400 text-sm text-center py-4">Không có câu hỏi</p>'; return; }
+
+      const { data: questionData } = await supabase.from('questions').select('id, content, correct_answers, options').in('id', qIds);
+      const qMap = {};
+      (questionData || []).forEach(q => qMap[q.id] = q);
+
+      // Sắp xếp học sinh theo điểm giảm dần
+      const sorted = [...submissions].sort((a, b) => (b.score || 0) - (a.score || 0));
+      const totalPoints = test.questions.reduce((s, q) => s + (q.points || 1), 0);
+
+      // Tính % đúng mỗi câu (dùng thứ tự trong test.questions, không phải question_order)
+      const correctCountPerQ = new Array(qIds.length).fill(0);
+      const attemptCountPerQ = new Array(qIds.length).fill(0);
+
+      // Xây dựng ma trận kết quả: mỗi submission → mảng true/false/null theo thứ tự câu
+      const matrix = sorted.map(sub => {
+        const answers = sub.answers || [];       // [{questionId, selectedOptions}, ...]
+        const answerMap = {};
+        answers.forEach(a => { answerMap[a.questionId] = a.selectedOptions || []; });
+
+        return qIds.map((qId, qi) => {
+          const q = qMap[qId];
+          if (!q) return null;
+          const selected = answerMap[qId];
+          if (selected === undefined || selected === null) return null; // chưa trả lời
+
+          attemptCountPerQ[qi]++;
+          const correct = q.correct_answers || [];
+          const isCorrect = correct.length === selected.length &&
+            correct.every(c => selected.includes(c)) &&
+            selected.every(s => correct.includes(s));
+          if (isCorrect) correctCountPerQ[qi]++;
+          return isCorrect;
+        });
+      });
+
+      // Build HTML
+      const colWidth = 'min-width:64px;width:64px;';
+
+      // Header hàng 1: tên cột câu hỏi + % đúng
+      let headerHTML = `
+        <tr>
+          <th class="sticky left-0 bg-gray-50 z-10 text-left px-4 py-3 font-semibold text-gray-700 border-b-2 border-r-2 border-gray-200" style="min-width:180px;">
+            Người tham gia
+          </th>
+          <th class="px-3 py-3 text-center font-semibold text-gray-700 border-b-2 border-r border-gray-200 whitespace-nowrap" style="${colWidth}">
+            Điểm<br><span class="text-xs font-normal text-gray-500">Hết ${totalPoints}</span>
+          </th>`;
+
+      qIds.forEach((qId, qi) => {
+        const pct = attemptCountPerQ[qi] > 0 ? Math.round(correctCountPerQ[qi] / attemptCountPerQ[qi] * 100) : 0;
+        const badgeColor = pct >= 80 ? 'background:#22c55e;color:white;' :
+                           pct >= 50 ? 'background:#f97316;color:white;' :
+                                       'background:#ef4444;color:white;';
+        headerHTML += `
+          <th class="px-2 py-3 text-center border-b-2 border-r border-gray-100" style="${colWidth}">
+            <div class="text-xs font-semibold text-gray-600 mb-1">Q${qi + 1}</div>
+            <div class="inline-block px-2 py-0.5 rounded-full text-xs font-bold" style="${badgeColor}">${pct}%</div>
+          </th>`;
+      });
+      headerHTML += '</tr>';
+
+      // Data rows
+      let rowsHTML = sorted.map((sub, si) => {
+        const scorePercent = totalPoints > 0 ? Math.round((sub.score || 0) / totalPoints * 100) : 0;
+        const scoreColor = scorePercent >= 80 ? '#16a34a' : scorePercent >= 60 ? '#2563eb' : scorePercent >= 40 ? '#d97706' : '#dc2626';
+
+        let cells = `
+          <td class="sticky left-0 bg-white z-10 px-4 py-3 font-medium text-gray-800 border-r-2 border-gray-200 whitespace-nowrap" style="min-width:180px;">
+            ${sub.student_name || 'N/A'}
+          </td>
+          <td class="px-3 py-3 text-center border-r border-gray-100" style="${colWidth}">
+            <span class="font-bold text-sm" style="color:${scoreColor}">${parseFloat((sub.score||0).toFixed(1))}</span>
+            <div class="text-xs text-gray-400">(${scorePercent}%)</div>
+          </td>`;
+
+        matrix[si].forEach(result => {
+          if (result === null) {
+            cells += `<td class="px-2 py-3 text-center border-r border-gray-100 bg-gray-50" style="${colWidth}">
+              <span class="text-gray-300 text-sm font-bold">—</span>
+            </td>`;
+          } else if (result) {
+            cells += `<td class="px-2 py-3 text-center border-r border-gray-100" style="${colWidth};background:#dcfce7;">
+              <span style="color:#16a34a;font-size:16px;">✓</span>
+            </td>`;
+          } else {
+            cells += `<td class="px-2 py-3 text-center border-r border-gray-100" style="${colWidth};background:#fee2e2;">
+              <span style="color:#dc2626;font-size:16px;">✕</span>
+            </td>`;
+          }
+        });
+
+        return `<tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">${cells}</tr>`;
+      }).join('');
+
+      container.innerHTML = `
+        <div class="overflow-x-auto rounded-xl border border-gray-200">
+          <table class="border-collapse text-sm" style="border-spacing:0;">
+            <thead class="bg-gray-50">${headerHTML}</thead>
+            <tbody>${rowsHTML}</tbody>
+          </table>
+        </div>
+        <p class="text-xs text-gray-400 mt-3">* Học sinh được sắp xếp theo điểm từ cao đến thấp. % trên tiêu đề cột = tỉ lệ học sinh trả lời đúng câu đó.</p>
+      `;
+    }
       if (!confirm('Xóa bài nộp này? Hành động không thể hoàn tác.')) return;
       const { error } = await supabase.from('submissions').delete().eq('id', submissionId);
       if (error) return alert('Lỗi khi xóa: ' + error.message);
