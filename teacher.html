@@ -1451,10 +1451,10 @@
         </div>
 
         <!-- Question Matrix Table -->
-        <div class="card p-6">
+        <div class="card p-6 overflow-hidden">
           <h3 class="text-xl font-bold text-gray-800 mb-1">🔢 Thống kê theo từng câu hỏi</h3>
           <p class="text-sm text-gray-500 mb-4">✅ Đúng &nbsp;❌ Sai &nbsp;— Chưa trả lời</p>
-          <div id="questionMatrixContainer">
+          <div id="questionMatrixContainer" style="max-width:100%;overflow-x:auto;">
             <div class="text-center py-6"><div class="spinner mx-auto mb-2"></div><p class="text-gray-400 text-sm">Đang tải...</p></div>
           </div>
         </div>
@@ -1662,7 +1662,7 @@
       // Header hàng 1: tên cột câu hỏi + % đúng
       let headerHTML = `
         <tr>
-          <th class="sticky left-0 bg-gray-50 z-10 text-left px-4 py-3 font-semibold text-gray-700 border-b-2 border-r-2 border-gray-200" style="min-width:180px;">
+          <th class="sticky left-0 z-10 text-left px-4 py-3 font-semibold text-gray-700 border-b-2 border-r-2 border-gray-200" style="min-width:160px; background:#f9fafb;">
             Người tham gia
           </th>
           <th class="px-3 py-3 text-center font-semibold text-gray-700 border-b-2 border-r border-gray-200 whitespace-nowrap" style="${colWidth}">
@@ -1688,7 +1688,7 @@
         const scoreColor = scorePercent >= 80 ? '#16a34a' : scorePercent >= 60 ? '#2563eb' : scorePercent >= 40 ? '#d97706' : '#dc2626';
 
         let cells = `
-          <td class="sticky left-0 bg-white z-10 px-4 py-3 font-medium text-gray-800 border-r-2 border-gray-200 whitespace-nowrap" style="min-width:180px;">
+          <td class="sticky left-0 z-10 px-4 py-3 font-medium text-gray-800 border-r-2 border-gray-200 whitespace-nowrap" style="min-width:160px; background:white;">
             ${sub.student_name || 'N/A'}
           </td>
           <td class="px-3 py-3 text-center border-r border-gray-100" style="${colWidth}">
@@ -1716,8 +1716,8 @@
       }).join('');
 
       container.innerHTML = `
-        <div class="overflow-x-auto rounded-xl border border-gray-200">
-          <table class="border-collapse text-sm" style="border-spacing:0;">
+        <div style="overflow-x:auto; width:100%; border:1px solid #e5e7eb; border-radius:12px;">
+          <table class="border-collapse text-sm" style="border-spacing:0; min-width:100%;">
             <thead class="bg-gray-50">${headerHTML}</thead>
             <tbody>${rowsHTML}</tbody>
           </table>
