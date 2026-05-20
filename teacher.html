@@ -362,21 +362,38 @@
       };
     }
 
-    // ==== NEW: IMAGE UPLOAD FUNCTIONS ====
+    // ==== IMAGE UPLOAD FUNCTIONS ====
     async function uploadQuestionImage(file) {
       if (!file) return null;
       
-      const fileExt = file.name.split('.').pop();
+      const fileExt = file.name.split('.').pop().toLowerCase();
       const fileName = `${currentUser.id}/${Date.now()}.${fileExt}`;
+      
+      // Hiển thị trạng thái đang upload
+      const previewContainer = document.getElementById('imagePreviewContainer');
+      if (previewContainer) {
+        previewContainer.innerHTML += `<p id="uploadStatus" class="text-xs text-indigo-600 mt-1">⏳ Đang tải ảnh lên...</p>`;
+      }
       
       const { data, error } = await supabase.storage
         .from('question-images')
-        .upload(fileName, file);
+        .upload(fileName, file, { cacheControl: '3600', upsert: false });
+      
+      const statusEl = document.getElementById('uploadStatus');
       
       if (error) {
         console.error('Upload error:', error);
+        if (statusEl) statusEl.remove();
+        // Hiển thị lỗi rõ ràng
+        if (error.message?.includes('Bucket not found') || error.message?.includes('bucket')) {
+          alert('❌ Lỗi: Bucket "question-images" chưa được tạo trong Supabase Storage.\n\nVui lòng vào Supabase Dashboard → Storage → New bucket → đặt tên "question-images" và bật Public.');
+        } else {
+          alert('❌ Lỗi upload ảnh: ' + error.message);
+        }
         return null;
       }
+      
+      if (statusEl) statusEl.remove();
       
       const { data: urlData } = supabase.storage
         .from('question-images')
@@ -462,8 +479,15 @@
                   <span class="badge bg-orange-100 text-orange-700">⭐ ${q.points} điểm</span>
                   ${q.image_url ? '<span class="badge bg-pink-100 text-pink-700">🖼️ Có hình ảnh</span>' : ''}
                 </div>
-                ${q.image_url ? `<img src="${q.image_url}" alt="Question image" class="max-w-xs rounded-lg mb-3 border-2 border-gray-200">` : ''}
                 <p class="text-gray-800 font-medium mb-3">${q.content || 'N/A'}</p>
+                ${q.image_url ? `
+                  <div class="mb-3">
+                    <img src="${q.image_url}" alt="Hình minh họa" 
+                         class="max-w-sm rounded-xl border-2 border-gray-200 shadow-sm cursor-pointer hover:opacity-90 transition-opacity"
+                         style="max-height:200px; object-fit:contain;"
+                         onclick="window.open('${q.image_url}','_blank')"
+                         title="Click để xem ảnh đầy đủ">
+                  </div>` : ''}
                 <div class="space-y-1">
                   ${(q.options || []).map((opt, i) => {
                     const isCorrect = (q.correct_answers || []).includes(i);
@@ -473,9 +497,14 @@
                   }).join('')}
                 </div>
               </div>
-              <button onclick="deleteQuestion('${q.id}')" class="text-red-500 hover:text-red-700 hover:bg-red-50 p-2 rounded-lg transition-all" title="Xóa">
-                🗑️
-              </button>
+              <div class="flex flex-col gap-2">
+                <button onclick="openEditQuestionModal('${q.id}')" class="text-indigo-500 hover:text-indigo-700 hover:bg-indigo-50 p-2 rounded-lg transition-all" title="Sửa">
+                  ✏️
+                </button>
+                <button onclick="deleteQuestion('${q.id}')" class="text-red-500 hover:text-red-700 hover:bg-red-50 p-2 rounded-lg transition-all" title="Xóa">
+                  🗑️
+                </button>
+              </div>
             </div>
           </div>
         `;
@@ -485,6 +514,148 @@
     async function deleteQuestion(id) {
       if (!confirm('Xóa câu hỏi này?')) return;
       await supabase.from('questions').delete().eq('id', id);
+      await loadQuestions();
+    }
+
+    function openEditQuestionModal(id) {
+      const q = allQuestions.find(x => x.id === id);
+      if (!q) return;
+      questionImageFile = null;
+
+      const typeLabels = { single: 'Single choice', multiple: 'Multiple choice', truefalse: 'True/False' };
+      let optionsHTML = '';
+      if (q.type === 'truefalse') {
+        optionsHTML = `
+          <label class="block text-sm font-semibold text-gray-700 mb-2">Đáp án đúng</label>
+          <select id="tfAnswer" class="w-full border-2 border-gray-200 rounded-xl px-4 py-2.5 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all">
+            <option value="0" ${(q.correct_answers||[]).includes(0)?'selected':''}>True (Đúng)</option>
+            <option value="1" ${(q.correct_answers||[]).includes(1)?'selected':''}>False (Sai)</option>
+          </select>`;
+      } else {
+        const inputType = q.type === 'multiple' ? 'checkbox' : 'radio';
+        optionsHTML = `
+          <label class="block text-sm font-semibold text-gray-700 mb-2">Các đáp án ${q.type === 'multiple' ? '(chọn nhiều đáp án đúng)' : ''}</label>
+          <div id="optionsList" class="space-y-2">
+            ${(q.options||[]).map((opt, i) => `
+              <div class="flex items-center gap-2 option-row">
+                <input type="${inputType}" name="correctOpt" value="${i}" class="w-5 h-5 text-indigo-600 rounded focus:ring-2 focus:ring-indigo-500" ${(q.correct_answers||[]).includes(i)?'checked':''}>
+                <input type="text" value="${opt.replace(/"/g,'&quot;')}" class="flex-1 border-2 border-gray-200 rounded-xl px-4 py-2 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all option-text">
+                <button type="button" onclick="this.closest('.option-row').remove()" class="text-red-500 hover:text-red-700 p-2">🗑️</button>
+              </div>`).join('')}
+          </div>
+          <button type="button" onclick="addOption()" class="mt-2 text-indigo-600 hover:text-indigo-700 font-medium text-sm">+ Thêm đáp án</button>`;
+      }
+
+      const currentImageHTML = q.image_url ? `
+        <div class="mb-3 p-3 bg-gray-50 rounded-xl border-2 border-gray-200">
+          <p class="text-xs text-gray-500 mb-2 font-semibold">Ảnh hiện tại:</p>
+          <img src="${q.image_url}" alt="Current" class="max-w-full rounded-lg" style="max-height:160px; object-fit:contain;">
+          <button type="button" onclick="removeCurrentImage('${id}')" class="mt-2 text-xs text-red-600 hover:text-red-700 font-medium">🗑️ Xóa ảnh này</button>
+        </div>` : '';
+
+      const modal = `
+        <div class="modal show fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" onclick="if(event.target===this) closeModal()">
+          <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div class="sticky top-0 bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-6 rounded-t-2xl">
+              <h3 class="text-2xl font-bold">✏️ Sửa câu hỏi</h3>
+            </div>
+            <div class="p-6 space-y-4">
+              <input type="hidden" id="editQuestionId" value="${id}">
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Loại câu hỏi</label>
+                <select id="qType" class="w-full border-2 border-gray-200 rounded-xl px-4 py-2.5 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all bg-gray-50 cursor-not-allowed" disabled>
+                  <option value="${q.type}">${typeLabels[q.type]}</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Chủ đề</label>
+                <input type="text" id="qCategory" value="${(q.category||'').replace(/"/g,'&quot;')}" class="w-full border-2 border-gray-200 rounded-xl px-4 py-2.5 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all">
+              </div>
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Nội dung câu hỏi</label>
+                <textarea id="qContent" rows="3" class="w-full border-2 border-gray-200 rounded-xl px-4 py-2.5 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all">${q.content||''}</textarea>
+              </div>
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">🖼️ Hình ảnh minh họa</label>
+                ${currentImageHTML}
+                <div class="upload-area" onclick="document.getElementById('qImageInput').click()">
+                  <div class="text-3xl mb-1">📷</div>
+                  <p class="text-sm text-gray-600">${q.image_url ? 'Click để thay ảnh mới' : 'Click để chọn ảnh'}</p>
+                  <p class="text-xs text-gray-400">JPG, PNG, GIF (tối đa 5MB)</p>
+                </div>
+                <input type="file" id="qImageInput" accept="image/*" class="hidden" onchange="handleImageUpload(event)">
+                <div id="imagePreviewContainer" class="mt-3"></div>
+              </div>
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Điểm số</label>
+                <input type="number" id="qPoints" value="${q.points||1}" min="0.1" step="0.1" class="w-full border-2 border-gray-200 rounded-xl px-4 py-2.5 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all">
+              </div>
+              <div id="optionsContainer">${optionsHTML}</div>
+              <div class="flex gap-3 pt-4">
+                <button onclick="closeModal()" class="flex-1 border-2 border-gray-300 text-gray-700 px-6 py-3 rounded-xl font-medium hover:bg-gray-50 transition-all">Hủy</button>
+                <button onclick="updateQuestion()" class="flex-1 btn-primary text-white px-6 py-3 rounded-xl font-medium shadow-md">💾 Lưu thay đổi</button>
+              </div>
+            </div>
+          </div>
+        </div>`;
+      document.getElementById('modalContainer').innerHTML = modal;
+      optionCounter = (q.options||[]).length;
+    }
+
+    // Xóa ảnh hiện tại của câu hỏi (chỉ xóa URL trong DB, không xóa file)
+    function removeCurrentImage(questionId) {
+      if (!confirm('Xóa ảnh khỏi câu hỏi này?')) return;
+      const modal = document.getElementById('modalContainer');
+      const currentImgDiv = modal.querySelector('.bg-gray-50.rounded-xl');
+      if (currentImgDiv) currentImgDiv.remove();
+      // Đánh dấu để xóa khi save
+      document.getElementById('editQuestionId').dataset.removeImage = 'true';
+    }
+
+    async function updateQuestion() {
+      const id = document.getElementById('editQuestionId').value;
+      const removeImage = document.getElementById('editQuestionId').dataset.removeImage === 'true';
+      const q = allQuestions.find(x => x.id === id);
+      if (!q) return;
+
+      const category = document.getElementById('qCategory').value.trim();
+      const content = document.getElementById('qContent').value.trim();
+      const points = parseFloat(document.getElementById('qPoints').value);
+      if (!content) return alert('Vui lòng nhập nội dung câu hỏi');
+
+      let options = q.options || [], correct_answers = q.correct_answers || [];
+
+      if (q.type === 'truefalse') {
+        options = ['True', 'False'];
+        correct_answers = [parseInt(document.getElementById('tfAnswer').value)];
+      } else {
+        options = []; correct_answers = [];
+        document.querySelectorAll('.option-row').forEach(row => {
+          const text = row.querySelector('.option-text').value.trim();
+          if (text) {
+            options.push(text);
+            const inp = row.querySelector('input[type="checkbox"], input[type="radio"]');
+            if (inp?.checked) correct_answers.push(options.length - 1);
+          }
+        });
+        if (options.length < 2) return alert('Cần ít nhất 2 đáp án');
+        if (correct_answers.length === 0) return alert('Chọn ít nhất 1 đáp án đúng');
+      }
+
+      // Xử lý ảnh
+      let imageUrl = q.image_url || null;
+      if (removeImage) imageUrl = null;
+      if (questionImageFile) {
+        const uploaded = await uploadQuestionImage(questionImageFile);
+        if (uploaded) imageUrl = uploaded;
+      }
+
+      const { error } = await supabase.from('questions').update({
+        category, content, points, options, correct_answers, image_url: imageUrl
+      }).eq('id', id);
+
+      if (error) return alert('Lỗi: ' + error.message);
+      closeModal();
       await loadQuestions();
     }
 
@@ -544,7 +715,9 @@
     }
 
     function updateQuestionForm() {
-      const type = document.getElementById('qType').value;
+      const typeEl = document.getElementById('qType');
+      if (!typeEl) return;
+      const type = typeEl.value;
       const container = document.getElementById('optionsContainer');
       if (type === 'truefalse') {
         container.innerHTML = `
@@ -953,7 +1126,14 @@
               <span class="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-sm font-bold flex-shrink-0">${idx + 1}</span>
               <div class="flex-1">
                 <p class="font-medium text-gray-800 mb-2">${typeIcons[q.type] || ''} ${q.content}</p>
-                ${q.image_url ? `<img src="${q.image_url}" alt="Question" class="max-w-sm rounded-lg mb-2 border-2 border-gray-200">` : ''}
+                ${q.image_url ? `
+                  <div class="mb-3">
+                    <img src="${q.image_url}" alt="Hình minh họa" 
+                         class="max-w-sm rounded-xl border-2 border-gray-200 shadow-sm cursor-pointer hover:opacity-90 transition-opacity"
+                         style="max-height:220px; object-fit:contain;"
+                         onclick="window.open('${q.image_url}','_blank')"
+                         title="Click để xem ảnh đầy đủ">
+                  </div>` : ''}
                 <div class="space-y-1 mt-2">
                   ${(q.options || []).map((opt, oi) => {
                     const isCorrect = (q.correct_answers || []).includes(oi);
