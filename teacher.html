@@ -12,11 +12,10 @@
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
     * { font-family: 'Inter', sans-serif; }
-    html, body { overflow-x: hidden; max-width: 100vw; }
-    
+
     .section { display: none; }
     .section.active { display: block; }
-    
+
     .sidebar-link { 
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       position: relative;
@@ -41,10 +40,10 @@
     .sidebar-link.active::before {
       height: 70%;
     }
-    
+
     .modal { display: none; }
     .modal.show { display: flex; }
-    
+
     .spinner {
       border: 3px solid #e5e7eb; 
       border-top: 3px solid #667eea;
@@ -54,7 +53,7 @@
       animation: spin 0.8s linear infinite;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
-    
+
     .bar-chart { 
       display: flex; 
       align-items: flex-end; 
@@ -77,7 +76,7 @@
       transform: translateY(-4px);
       box-shadow: 0 8px 12px rgba(102, 126, 234, 0.5);
     }
-    
+
     .card {
       background: white;
       border-radius: 16px;
@@ -89,7 +88,7 @@
       box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
       transform: translateY(-2px);
     }
-    
+
     .btn-primary {
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       transition: all 0.3s ease;
@@ -98,7 +97,7 @@
       box-shadow: 0 8px 16px rgba(102, 126, 234, 0.4);
       transform: translateY(-2px);
     }
-    
+
     .btn-danger {
       background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
       transition: all 0.3s ease;
@@ -107,7 +106,7 @@
       box-shadow: 0 8px 16px rgba(245, 87, 108, 0.4);
       transform: translateY(-2px);
     }
-    
+
     .btn-success {
       background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
       transition: all 0.3s ease;
@@ -116,7 +115,7 @@
       box-shadow: 0 8px 16px rgba(79, 172, 254, 0.4);
       transform: translateY(-2px);
     }
-    
+
     .badge {
       display: inline-flex;
       align-items: center;
@@ -127,12 +126,12 @@
       font-weight: 600;
       letter-spacing: 0.5px;
     }
-    
+
     input[type="checkbox"].question-check:checked + span { 
       color: #667eea; 
       font-weight: 600; 
     }
-    
+
     .fade-in {
       animation: fadeIn 0.3s ease-in;
     }
@@ -140,7 +139,7 @@
       from { opacity: 0; transform: translateY(10px); }
       to { opacity: 1; transform: translateY(0); }
     }
-    
+
     .stat-card {
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       color: white;
@@ -148,7 +147,8 @@
       padding: 24px;
       box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3);
     }
-    
+
+    /* NEW: Image preview styles */
     .image-preview {
       position: relative;
       max-width: 200px;
@@ -181,7 +181,8 @@
       background: rgba(220, 38, 38, 1);
       transform: scale(1.1);
     }
-    
+
+    /* NEW: Upload area styles */
     .upload-area {
       border: 2px dashed #d1d5db;
       border-radius: 12px;
@@ -238,7 +239,7 @@
       </nav>
     </aside>
 
-    <main class="flex-1 p-6 min-w-0 overflow-hidden" id="mainContent">
+    <main class="flex-1 p-6" id="mainContent">
       <div id="loadingOverlay" class="flex items-center justify-center py-20">
         <div class="text-center">
           <div class="spinner mx-auto mb-3"></div>
@@ -262,7 +263,7 @@
             </button>
           </div>
         </div>
-        
+
         <div class="card p-4 mb-4">
           <div class="flex flex-wrap gap-3">
             <select id="qFilterType" class="border-2 border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all" onchange="loadQuestions()">
@@ -277,7 +278,7 @@
             <input type="text" id="qFilterSearch" placeholder="🔍 Tìm kiếm câu hỏi..." class="border-2 border-gray-200 rounded-xl px-4 py-2.5 text-sm flex-1 min-w-[200px] focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all" oninput="debounce(loadQuestions, 300)()">
           </div>
         </div>
-        
+
         <div id="questionList" class="space-y-3"></div>
       </div>
 
@@ -301,14 +302,14 @@
           <h2 class="text-3xl font-bold text-gray-800 mb-1">📊 Kết quả & Thống kê nâng cao</h2>
           <p class="text-gray-500 text-sm">Phân tích chi tiết kết quả học sinh</p>
         </div>
-        
+
         <div class="card p-4 mb-6">
           <label class="text-sm font-semibold text-gray-700 block mb-2">Chọn bài kiểm tra:</label>
           <select id="resultTestSelect" class="w-full md:w-auto border-2 border-gray-200 rounded-xl px-4 py-2.5 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all" onchange="loadResults()">
             <option value="">-- Chọn bài kiểm tra --</option>
           </select>
         </div>
-        
+
         <div id="resultContent"></div>
       </div>
     </main>
@@ -322,19 +323,17 @@
     let allQuestions = [];
     let allTests = [];
     let debounceTimers = {};
-    let questionImageFile = null;
-    let optionCounter = 0;
-    let matchingPairCounter = 0;
+    let questionImageFile = null; // NEW: Store uploaded image
 
     // ==== KHỞI TẠO ====
     (async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) { window.location.href = 'teacher-login.html'; return; }
       currentUser = user;
-      
+
       const { data: teacher } = await supabase.from('teachers').select('*').eq('id', user.id).single();
       document.getElementById('teacherName').textContent = teacher?.name || user.email;
-      
+
       await loadQuestions();
       await loadTests();
       showSection('questions');
@@ -347,7 +346,7 @@
       document.getElementById('section-' + name).classList.add('active');
       document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
       document.querySelector(`[data-section="${name}"]`)?.classList.add('active');
-      
+
       if (name === 'results') loadResultOptions();
     }
 
@@ -366,24 +365,26 @@
     // ==== IMAGE UPLOAD FUNCTIONS ====
     async function uploadQuestionImage(file) {
       if (!file) return null;
-      
+
       const fileExt = file.name.split('.').pop().toLowerCase();
       const fileName = `${currentUser.id}/${Date.now()}.${fileExt}`;
-      
+
+      // Hiển thị trạng thái đang upload
       const previewContainer = document.getElementById('imagePreviewContainer');
       if (previewContainer) {
         previewContainer.innerHTML += `<p id="uploadStatus" class="text-xs text-indigo-600 mt-1">⏳ Đang tải ảnh lên...</p>`;
       }
-      
+
       const { data, error } = await supabase.storage
         .from('question-images')
         .upload(fileName, file, { cacheControl: '3600', upsert: false });
-      
+
       const statusEl = document.getElementById('uploadStatus');
-      
+
       if (error) {
         console.error('Upload error:', error);
         if (statusEl) statusEl.remove();
+        // Hiển thị lỗi rõ ràng
         if (error.message?.includes('Bucket not found') || error.message?.includes('bucket')) {
           alert('❌ Lỗi: Bucket "question-images" chưa được tạo trong Supabase Storage.\n\nVui lòng vào Supabase Dashboard → Storage → New bucket → đặt tên "question-images" và bật Public.');
         } else {
@@ -391,32 +392,32 @@
         }
         return null;
       }
-      
+
       if (statusEl) statusEl.remove();
-      
+
       const { data: urlData } = supabase.storage
         .from('question-images')
         .getPublicUrl(fileName);
-      
+
       return urlData.publicUrl;
     }
 
     function handleImageUpload(event) {
       const file = event.target.files[0];
       if (!file) return;
-      
+
       if (!file.type.startsWith('image/')) {
         alert('Vui lòng chọn file hình ảnh!');
         return;
       }
-      
+
       if (file.size > 5 * 1024 * 1024) {
         alert('Kích thước ảnh phải nhỏ hơn 5MB!');
         return;
       }
-      
+
       questionImageFile = file;
-      
+
       const reader = new FileReader();
       reader.onload = (e) => {
         document.getElementById('imagePreviewContainer').innerHTML = `
@@ -440,34 +441,34 @@
       const type = document.getElementById('qFilterType').value;
       const category = document.getElementById('qFilterCategory').value;
       const search = document.getElementById('qFilterSearch').value.trim().toLowerCase();
-      
+
       let query = supabase.from('questions').select('*').eq('teacher_id', currentUser.id).order('created_at', { ascending: false });
       if (type) query = query.eq('type', type);
       if (category) query = query.eq('category', category);
-      
+
       const { data } = await query;
       allQuestions = data || [];
-      
+
       let filtered = allQuestions;
       if (search) {
         filtered = allQuestions.filter(q => q.content?.toLowerCase().includes(search));
       }
-      
+
       const categories = [...new Set(allQuestions.map(q => q.category).filter(Boolean))];
       const catSelect = document.getElementById('qFilterCategory');
       const currentCat = catSelect.value;
       catSelect.innerHTML = '<option value="">📁 Tất cả chủ đề</option>' + categories.map(c => `<option value="${c}">${c}</option>`).join('');
       catSelect.value = currentCat;
-      
+
       const list = document.getElementById('questionList');
       if (!filtered.length) {
         list.innerHTML = '<div class="card p-8 text-center"><p class="text-gray-400">Chưa có câu hỏi nào</p></div>';
         return;
       }
-      
+
       list.innerHTML = filtered.map(q => {
-        const typeLabels = { single: '📌 Single', multiple: '☑️ Multiple', truefalse: '✓✗ True/False', matching: '🔗 Ghép đôi' };
-        const typeColors = { single: 'bg-blue-100 text-blue-700', multiple: 'bg-green-100 text-green-700', truefalse: 'bg-purple-100 text-purple-700', matching: 'bg-yellow-100 text-yellow-700' };
+        const typeLabels = { single: '📌 Single', multiple: '☑️ Multiple', truefalse: '✓✗ True/False' };
+        const typeColors = { single: 'bg-blue-100 text-blue-700', multiple: 'bg-green-100 text-green-700', truefalse: 'bg-purple-100 text-purple-700' };
         return `
           <div class="card p-5 hover:shadow-xl transition-all">
             <div class="flex items-start justify-between gap-4">
@@ -488,20 +489,12 @@
                          title="Click để xem ảnh đầy đủ">
                   </div>` : ''}
                 <div class="space-y-1">
-                  ${q.type === 'matching'
-                    ? (q.options||[]).map((a, i) => `
-                        <div class="flex items-center gap-2 text-sm text-gray-600">
-                          <span class="px-2 py-0.5 bg-blue-100 text-blue-700 rounded font-medium">${a}</span>
-                          <span class="text-gray-400">→</span>
-                          <span class="px-2 py-0.5 bg-green-100 text-green-700 rounded font-medium">${(q.correct_answers||[])[i] || '?'}</span>
-                        </div>`).join('')
-                    : (q.options || []).map((opt, i) => {
-                        const isCorrect = (q.correct_answers || []).includes(i);
-                        return `<div class="flex items-center gap-2 text-sm ${isCorrect ? 'text-green-600 font-semibold' : 'text-gray-600'}">
-                          ${isCorrect ? '✅' : '⚪'} ${opt}
-                        </div>`;
-                      }).join('')
-                  }
+                  ${(q.options || []).map((opt, i) => {
+                    const isCorrect = (q.correct_answers || []).includes(i);
+                    return `<div class="flex items-center gap-2 text-sm ${isCorrect ? 'text-green-600 font-semibold' : 'text-gray-600'}">
+                      ${isCorrect ? '✅' : '⚪'} ${opt}
+                    </div>`;
+                  }).join('')}
                 </div>
               </div>
               <div class="flex flex-col gap-2">
@@ -529,7 +522,7 @@
       if (!q) return;
       questionImageFile = null;
 
-      const typeLabels = { single: 'Single choice', multiple: 'Multiple choice', truefalse: 'True/False', matching: '🔗 Ghép đôi' };
+      const typeLabels = { single: 'Single choice', multiple: 'Multiple choice', truefalse: 'True/False' };
       let optionsHTML = '';
       if (q.type === 'truefalse') {
         optionsHTML = `
@@ -538,26 +531,6 @@
             <option value="0" ${(q.correct_answers||[]).includes(0)?'selected':''}>True (Đúng)</option>
             <option value="1" ${(q.correct_answers||[]).includes(1)?'selected':''}>False (Sai)</option>
           </select>`;
-      } else if (q.type === 'matching') {
-        optionsHTML = `
-          <div class="bg-yellow-50 border-2 border-yellow-200 rounded-xl p-3 mb-3">
-            <p class="text-sm font-semibold text-yellow-800">🔗 Các cặp ghép đôi</p>
-          </div>
-          <div class="grid grid-cols-2 gap-2 mb-2">
-            <div class="text-sm font-semibold text-gray-600 text-center py-1 bg-blue-50 rounded-lg">Cột A</div>
-            <div class="text-sm font-semibold text-gray-600 text-center py-1 bg-green-50 rounded-lg">Cột B</div>
-          </div>
-          <div id="matchingPairs" class="space-y-2">
-            ${(q.options||[]).map((a, i) => `
-              <div class="grid grid-cols-2 gap-2 matching-pair-row" data-pair="${i}">
-                <input type="text" value="${a.replace(/"/g,'&quot;')}" class="border-2 border-blue-200 rounded-xl px-3 py-2 text-sm match-col-a">
-                <div class="flex gap-1">
-                  <input type="text" value="${((q.correct_answers||[])[i]||'').toString().replace(/"/g,'&quot;')}" class="flex-1 border-2 border-green-200 rounded-xl px-3 py-2 text-sm match-col-b">
-                  <button type="button" onclick="this.closest('.matching-pair-row').remove()" class="text-red-500 hover:text-red-700 p-2">🗑️</button>
-                </div>
-              </div>`).join('')}
-          </div>
-          <button type="button" onclick="addMatchingPair()" class="mt-2 text-indigo-600 hover:text-indigo-700 font-medium text-sm">+ Thêm cặp</button>`;
       } else {
         const inputType = q.type === 'multiple' ? 'checkbox' : 'radio';
         optionsHTML = `
@@ -629,11 +602,13 @@
       optionCounter = (q.options||[]).length;
     }
 
+    // Xóa ảnh hiện tại của câu hỏi (chỉ xóa URL trong DB, không xóa file)
     function removeCurrentImage(questionId) {
       if (!confirm('Xóa ảnh khỏi câu hỏi này?')) return;
       const modal = document.getElementById('modalContainer');
       const currentImgDiv = modal.querySelector('.bg-gray-50.rounded-xl');
       if (currentImgDiv) currentImgDiv.remove();
+      // Đánh dấu để xóa khi save
       document.getElementById('editQuestionId').dataset.removeImage = 'true';
     }
 
@@ -653,14 +628,6 @@
       if (q.type === 'truefalse') {
         options = ['True', 'False'];
         correct_answers = [parseInt(document.getElementById('tfAnswer').value)];
-      } else if (q.type === 'matching') {
-        options = []; correct_answers = [];
-        document.querySelectorAll('.matching-pair-row').forEach(row => {
-          const a = row.querySelector('.match-col-a').value.trim();
-          const b = row.querySelector('.match-col-b').value.trim();
-          if (a && b) { options.push(a); correct_answers.push(b); }
-        });
-        if (options.length < 2) return alert('Cần ít nhất 2 cặp ghép đôi');
       } else {
         options = []; correct_answers = [];
         document.querySelectorAll('.option-row').forEach(row => {
@@ -675,6 +642,7 @@
         if (correct_answers.length === 0) return alert('Chọn ít nhất 1 đáp án đúng');
       }
 
+      // Xử lý ảnh
       let imageUrl = q.image_url || null;
       if (removeImage) imageUrl = null;
       if (questionImageFile) {
@@ -692,7 +660,7 @@
     }
 
     function openAddQuestionModal() {
-      questionImageFile = null;
+      questionImageFile = null; // Reset image
       const modal = `
         <div class="modal show fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" onclick="if(event.target===this) closeModal()">
           <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -706,7 +674,6 @@
                   <option value="single">Single choice</option>
                   <option value="multiple">Multiple choice</option>
                   <option value="truefalse">True/False</option>
-                  <option value="matching">🔗 Ghép đôi</option>
                 </select>
               </div>
               <div>
@@ -717,6 +684,8 @@
                 <label class="block text-sm font-semibold text-gray-700 mb-2">Nội dung câu hỏi</label>
                 <textarea id="qContent" rows="3" class="w-full border-2 border-gray-200 rounded-xl px-4 py-2.5 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all" placeholder="Nhập câu hỏi..."></textarea>
               </div>
+              
+              <!-- NEW: Image upload -->
               <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-2">🖼️ Hình ảnh minh họa (không bắt buộc)</label>
                 <div class="upload-area" onclick="document.getElementById('qImageInput').click()">
@@ -727,6 +696,7 @@
                 <input type="file" id="qImageInput" accept="image/*" class="hidden" onchange="handleImageUpload(event)">
                 <div id="imagePreviewContainer" class="mt-3"></div>
               </div>
+              
               <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-2">Điểm số</label>
                 <input type="number" id="qPoints" value="1" min="0.1" step="0.1" class="w-full border-2 border-gray-200 rounded-xl px-4 py-2.5 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all">
@@ -757,32 +727,17 @@
             <option value="1">False (Sai)</option>
           </select>
         `;
-      } else if (type === 'matching') {
-        container.innerHTML = `
-          <div class="bg-yellow-50 border-2 border-yellow-200 rounded-xl p-4 mb-3">
-            <p class="text-sm font-semibold text-yellow-800 mb-1">🔗 Ghép đôi</p>
-            <p class="text-xs text-yellow-700">Nhập các cặp ghép đôi. Học sinh sẽ nối Cột A với Cột B tương ứng.</p>
-          </div>
-          <div class="grid grid-cols-2 gap-2 mb-2">
-            <div class="text-sm font-semibold text-gray-600 text-center py-1 bg-blue-50 rounded-lg">Cột A</div>
-            <div class="text-sm font-semibold text-gray-600 text-center py-1 bg-green-50 rounded-lg">Cột B</div>
-          </div>
-          <div id="matchingPairs" class="space-y-2"></div>
-          <button type="button" onclick="addMatchingPair()" class="mt-2 text-indigo-600 hover:text-indigo-700 font-medium text-sm">+ Thêm cặp</button>
-        `;
-        matchingPairCounter = 0;
-        for (let i = 0; i < 4; i++) addMatchingPair();
       } else {
         container.innerHTML = `
           <label class="block text-sm font-semibold text-gray-700 mb-2">Các đáp án ${type === 'multiple' ? '(chọn nhiều đáp án đúng)' : ''}</label>
           <div id="optionsList" class="space-y-2"></div>
           <button type="button" onclick="addOption()" class="mt-2 text-indigo-600 hover:text-indigo-700 font-medium text-sm">+ Thêm đáp án</button>
         `;
-        optionCounter = 0;
         for (let i = 0; i < 4; i++) addOption();
       }
     }
 
+    let optionCounter = 0;
     function addOption() {
       const type = document.getElementById('qType').value;
       const inputType = type === 'multiple' ? 'checkbox' : 'radio';
@@ -797,46 +752,22 @@
       optionCounter++;
     }
 
-    function addMatchingPair() {
-      const idx = matchingPairCounter++;
-      const html = `
-        <div class="grid grid-cols-2 gap-2 matching-pair-row" data-pair="${idx}">
-          <input type="text" placeholder="Cột A ${idx+1}..." class="border-2 border-blue-200 rounded-xl px-3 py-2 text-sm focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-all match-col-a">
-          <div class="flex gap-1">
-            <input type="text" placeholder="Cột B ${idx+1}..." class="flex-1 border-2 border-green-200 rounded-xl px-3 py-2 text-sm focus:border-green-400 focus:ring-2 focus:ring-green-100 transition-all match-col-b">
-            <button type="button" onclick="this.closest('.matching-pair-row').remove()" class="text-red-500 hover:text-red-700 p-2">🗑️</button>
-          </div>
-        </div>`;
-      document.getElementById('matchingPairs').insertAdjacentHTML('beforeend', html);
-    }
-
     async function saveQuestion() {
       const type = document.getElementById('qType').value;
       const category = document.getElementById('qCategory').value.trim();
       const content = document.getElementById('qContent').value.trim();
       const points = parseFloat(document.getElementById('qPoints').value);
-      
+
       if (!content) return alert('Vui lòng nhập nội dung câu hỏi');
-      
+
       let options = [], correct_answers = [];
-      
+
       if (type === 'truefalse') {
         options = ['True', 'False'];
         correct_answers = [parseInt(document.getElementById('tfAnswer').value)];
-      } else if (type === 'matching') {
-        const pairs = document.querySelectorAll('.matching-pair-row');
-        const matchingData = [];
-        pairs.forEach(row => {
-          const a = row.querySelector('.match-col-a').value.trim();
-          const b = row.querySelector('.match-col-b').value.trim();
-          if (a && b) matchingData.push({ a, b });
-        });
-        if (matchingData.length < 2) return alert('Cần ít nhất 2 cặp ghép đôi');
-        options = matchingData.map(p => p.a);
-        correct_answers = matchingData.map(p => p.b);
       } else {
         const rows = document.querySelectorAll('.option-row');
-        rows.forEach((row) => {
+        rows.forEach((row, idx) => {
           const text = row.querySelector('.option-text').value.trim();
           if (text) {
             options.push(text);
@@ -844,23 +775,25 @@
             if (checkbox.checked) correct_answers.push(options.length - 1);
           }
         });
+
         if (options.length < 2) return alert('Cần ít nhất 2 đáp án');
         if (correct_answers.length === 0) return alert('Chọn ít nhất 1 đáp án đúng');
       }
-      
+
+      // NEW: Upload image if exists
       let imageUrl = null;
       if (questionImageFile) {
         imageUrl = await uploadQuestionImage(questionImageFile);
       }
-      
+
       const { error } = await supabase.from('questions').insert({
         teacher_id: currentUser.id,
         type, category, content, points, options, correct_answers,
-        image_url: imageUrl
+        image_url: imageUrl // NEW: Save image URL
       });
-      
+
       if (error) return alert('Lỗi: ' + error.message);
-      
+
       closeModal();
       await loadQuestions();
     }
@@ -874,20 +807,20 @@
     async function loadTests() {
       const { data } = await supabase.from('tests').select('*').eq('teacher_id', currentUser.id).order('created_at', { ascending: false });
       allTests = data || [];
-      
+
       const list = document.getElementById('testList');
       if (!allTests.length) {
         list.innerHTML = '<div class="col-span-full card p-8 text-center"><p class="text-gray-400">Chưa có bài kiểm tra nào</p></div>';
         return;
       }
-      
+
       list.innerHTML = allTests.map(t => {
         const now = new Date();
         const start = new Date(t.start_time);
         const end = new Date(t.end_time);
         let statusBadge = '';
         let statusColor = '';
-        
+
         if (now < start) {
           statusBadge = '⏰ Chưa mở';
           statusColor = 'bg-yellow-100 text-yellow-700';
@@ -898,7 +831,7 @@
           statusBadge = '✅ Đang mở';
           statusColor = 'bg-green-100 text-green-700';
         }
-        
+
         return `
           <div class="card p-6">
             <div class="flex items-start justify-between mb-4">
@@ -945,6 +878,7 @@
       const toLocalInput = (isoStr) => {
         if (!isoStr) return '';
         const d = new Date(isoStr);
+        // Chuyển về local time cho datetime-local input
         const offset = d.getTimezoneOffset() * 60000;
         return new Date(d - offset).toISOString().slice(0, 16);
       };
@@ -966,19 +900,24 @@
               <p class="text-sm opacity-90 mt-1 truncate">${test.title}</p>
             </div>
             <div class="p-6 space-y-4">
+              
               <div class="bg-gray-50 rounded-xl p-3 text-sm text-center">
                 Trạng thái hiện tại: <span class="font-bold ${statusColor}">${statusBadge}</span>
               </div>
+
               <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-2">📅 Thời gian mở</label>
                 <input type="datetime-local" id="editStartTime" value="${toLocalInput(test.start_time)}"
                   class="w-full border-2 border-gray-200 rounded-xl px-4 py-2.5 focus:border-yellow-400 focus:ring-2 focus:ring-yellow-200 transition-all">
               </div>
+
               <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-2">📅 Thời gian đóng</label>
                 <input type="datetime-local" id="editEndTime" value="${toLocalInput(test.end_time)}"
                   class="w-full border-2 border-gray-200 rounded-xl px-4 py-2.5 focus:border-yellow-400 focus:ring-2 focus:ring-yellow-200 transition-all">
               </div>
+
+              <!-- Nút tắt/mở nhanh -->
               <div class="bg-blue-50 rounded-xl p-4 space-y-2">
                 <p class="text-xs font-semibold text-blue-700 mb-3">⚡ Tắt/Mở nhanh:</p>
                 <div class="grid grid-cols-2 gap-2">
@@ -1000,6 +939,7 @@
                   </button>
                 </div>
               </div>
+
               <div class="flex gap-3 pt-2">
                 <button onclick="closeModal()" class="flex-1 border-2 border-gray-300 text-gray-700 px-6 py-3 rounded-xl font-medium hover:bg-gray-50 transition-all">Hủy</button>
                 <button onclick="saveTestTime('${testId}')" class="flex-1 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white px-6 py-3 rounded-xl font-medium shadow-md transition-all">
@@ -1028,6 +968,7 @@
       if (error) return alert('Lỗi: ' + error.message);
       closeModal();
       await loadTests();
+      // Cập nhật allTests local
       const t = allTests.find(x => x.id === testId);
       if (t) { t.start_time = start.toISOString(); t.end_time = end.toISOString(); }
     }
@@ -1037,6 +978,7 @@
       if (!test) return;
       const now = new Date();
       const end = new Date(test.end_time);
+      // Nếu end đã qua, tự gia hạn thêm 2 tiếng
       const newEnd = end <= now ? new Date(now.getTime() + 2 * 60 * 60 * 1000) : end;
       const { error } = await supabase.from('tests').update({
         start_time: now.toISOString(),
@@ -1045,6 +987,7 @@
       if (error) return alert('Lỗi: ' + error.message);
       closeModal();
       await loadTests();
+      // Cập nhật input nếu modal vẫn còn mở
     }
 
     async function quickClose(testId) {
@@ -1063,6 +1006,7 @@
       if (!test) return;
       const currentEnd = new Date(test.end_time);
       const now = new Date();
+      // Gia hạn từ thời điểm kết thúc hiện tại (hoặc từ bây giờ nếu đã qua)
       const base = currentEnd > now ? currentEnd : now;
       const newEnd = new Date(base.getTime() + 30 * 60 * 1000);
       const { error } = await supabase.from('tests').update({ end_time: newEnd.toISOString() }).eq('id', testId);
@@ -1085,6 +1029,7 @@
     }
 
     function generateTestCode() {
+      // Tạo mã 6 ký tự gồm chữ và số (loại bỏ ký tự dễ nhầm: 0,O,I,1)
       const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
       let code = '';
       for (let i = 0; i < 6; i++) {
@@ -1094,6 +1039,7 @@
     }
 
     async function openCreateTestModal() {
+      // Fetch TOÀN BỘ câu hỏi (không bị ảnh hưởng bởi filter hiện tại)
       document.getElementById('modalContainer').innerHTML = `
         <div class="modal show fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div class="bg-white rounded-2xl shadow-2xl p-10 text-center">
@@ -1117,7 +1063,7 @@
       const nowStr = now.toISOString().slice(0, 16);
       const tomorrowStr = tomorrow.toISOString().slice(0, 16);
 
-      const typeIconsMap = { single: '📌', multiple: '☑️', truefalse: '✓✗', matching: '🔗' };
+      const typeIconsMap = { single: '📌', multiple: '☑️', truefalse: '✓✗' };
       const questionCheckboxesHTML = allQsFetched.length === 0
         ? '<p class="text-gray-400 text-sm text-center py-4">Chưa có câu hỏi nào trong ngân hàng</p>'
         : allQsFetched.map(q => `
@@ -1139,6 +1085,8 @@
               <h3 class="text-2xl font-bold">📋 Tạo bài kiểm tra mới</h3>
             </div>
             <div class="p-6 space-y-4">
+
+              <!-- Mã bài thi tự động -->
               <div class="bg-indigo-50 border-2 border-indigo-200 rounded-xl p-4">
                 <label class="block text-sm font-semibold text-indigo-700 mb-2">🔑 Mã bài thi (học sinh dùng để vào thi)</label>
                 <div class="flex items-center gap-3">
@@ -1222,6 +1170,10 @@
       document.getElementById('modalContainer').innerHTML = modal;
     }
 
+    function renderQuestionCheckboxes() {
+      // Không còn dùng nữa, đã xử lý trong openCreateTestModal
+    }
+
     function updateSelectedCount() {
       const count = document.querySelectorAll('.question-check:checked').length;
       document.getElementById('selectedCount').textContent = count;
@@ -1247,17 +1199,19 @@
       const shuffleQuestions = document.getElementById('testShuffleQuestions').checked;
       const shuffleOptions = document.getElementById('testShuffleOptions').checked;
       const showAnswers = document.getElementById('testShowAnswers').checked;
-      
+
       if (!title) return alert('Vui lòng nhập tiêu đề');
       if (!startTime || !endTime) return alert('Vui lòng chọn thời gian');
-      
+
       const selectedQs = Array.from(document.querySelectorAll('.question-check:checked')).map(cb => cb.value);
       if (!selectedQs.length) return alert('Vui lòng chọn ít nhất 1 câu hỏi');
-      
+
+      // Lấy mã từ input trong form (đã tự sinh sẵn hoặc giáo viên sửa tay)
       const testCodeRaw = (document.getElementById('testCodeInput')?.value || '').trim().toUpperCase().replace(/[^A-Z0-9]/g,'');
       const testCode = testCodeRaw.length >= 4 ? testCodeRaw : generateTestCode();
       if (!testCode) return alert('Mã bài thi không hợp lệ');
-      
+
+      // Tính điểm mỗi câu = tổng điểm / số câu (làm tròn 2 chữ số thập phân)
       const totalScore = parseFloat(document.getElementById('testTotalScore').value) || 10;
       if (totalScore <= 0) return alert('Tổng điểm phải lớn hơn 0');
       const pointsPerQ = Math.round((totalScore / selectedQs.length) * 100) / 100;
@@ -1265,7 +1219,7 @@
         questionId: qId,
         points: pointsPerQ
       }));
-      
+
       const { error } = await supabase.from('tests').insert({
         teacher_id: currentUser.id,
         title, duration, test_code: testCode,
@@ -1277,9 +1231,9 @@
         show_answers: showAnswers,
         questions
       });
-      
+
       if (error) return alert('Lỗi: ' + error.message);
-      
+
       closeModal();
       await loadTests();
       alert(`✅ Đã tạo bài kiểm tra!\n\n🔑 Mã bài thi: ${testCode}\n📋 Số câu: ${questions.length}\n⭐ Tổng điểm: ${totalScore} điểm (mỗi câu ${pointsPerQ} điểm)\n⏱️ Thời gian: ${duration} phút`);
@@ -1289,6 +1243,7 @@
       const test = allTests.find(t => t.id === testId);
       if (!test) return;
 
+      // Hiển thị modal với loading trước
       document.getElementById('modalContainer').innerHTML = `
         <div class="modal show fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
@@ -1304,10 +1259,12 @@
         </div>
       `;
 
+      // Hỗ trợ cả cấu trúc cũ {id, points} và mới {questionId, points}
       const qIds = (test.questions || []).map(q => q.questionId || q.id).filter(Boolean);
 
       let testQuestions = [];
       if (qIds.length > 0) {
+        // Fetch trực tiếp từ Supabase theo ID
         const { data, error } = await supabase
           .from('questions')
           .select('*')
@@ -1315,7 +1272,7 @@
         if (!error && data) testQuestions = data;
       }
 
-      const typeIcons = { single: '📌', multiple: '☑️', truefalse: '✓✗', matching: '🔗' };
+      const typeIcons = { single: '📌', multiple: '☑️', truefalse: '✓✗' };
 
       const questionsHTML = test.questions.map((tq, idx) => {
         const q = testQuestions.find(x => x.id === (tq.questionId || tq.id));
@@ -1372,10 +1329,12 @@
                   <div class="font-semibold text-gray-800">${new Date(test.end_time).toLocaleString('vi-VN')}</div>
                 </div>
               </div>
+              
               <h4 class="font-bold text-gray-800 mb-3">Danh sách câu hỏi (${testQuestions.length}/${test.questions.length}):</h4>
               <div class="space-y-3 max-h-[500px] overflow-y-auto pr-1">
                 ${questionsHTML || '<p class="text-gray-400 text-sm text-center py-6">Không tìm thấy câu hỏi nào</p>'}
               </div>
+              
               <button onclick="closeModal()" class="w-full mt-6 bg-gray-200 hover:bg-gray-300 text-gray-700 px-6 py-3 rounded-xl font-medium transition-all">
                 Đóng
               </button>
@@ -1396,41 +1355,45 @@
     async function loadResults() {
       const testId = document.getElementById('resultTestSelect').value;
       const container = document.getElementById('resultContent');
-      
+
       if (!testId) {
         container.innerHTML = '';
         return;
       }
-      
+
       const test = allTests.find(t => t.id === testId);
       if (!test) return;
-      
+
       const { data: submissions } = await supabase
         .from('submissions')
         .select('*')
         .eq('test_id', testId)
         .order('submitted_at', { ascending: false });
-      
+
       if (!submissions || !submissions.length) {
         container.innerHTML = '<div class="card p-8 text-center"><p class="text-gray-400">Chưa có học sinh nào nộp bài</p></div>';
         return;
       }
-      
+
+      // Filter only submitted submissions
       const completedSubs = submissions.filter(s => s.status === 'submitted' || s.status === 'timed-out');
-      
+
       if (!completedSubs.length) {
         container.innerHTML = '<div class="card p-8 text-center"><p class="text-gray-400">Chưa có học sinh nào nộp bài</p></div>';
         return;
       }
-      
+
+      // Ensure allQuestions loaded before analysis
       if (!allQuestions || allQuestions.length === 0) {
         const { data: qs } = await supabase.from('questions').select('*').eq('teacher_id', currentUser.id);
         allQuestions = qs || [];
       }
 
+      // NEW: Advanced Statistics
       const stats = calculateAdvancedStats(completedSubs, test);
-      
+
       container.innerHTML = `
+        <!-- Summary Stats Cards -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
           <div class="stat-card">
             <div class="text-3xl mb-2">👥</div>
@@ -1454,13 +1417,13 @@
           </div>
         </div>
         
-        <div class="card p-6 mb-6" style="overflow:hidden; max-width:100%;">
+        <!-- Score Distribution Chart -->
+        <div class="card p-6 mb-6">
           <h3 class="text-xl font-bold text-gray-800 mb-4">📊 Phân bố điểm số</h3>
-          <div style="position:relative; width:100%; max-width:100%;">
-            <canvas id="scoreChart" height="80"></canvas>
-          </div>
+          <canvas id="scoreChart" height="80"></canvas>
         </div>
         
+        <!-- Student Results Table -->
         <div class="card p-6 mb-6">
           <div class="flex items-center justify-between mb-4">
             <h3 class="text-xl font-bold text-gray-800">📝 Kết quả chi tiết</h3>
@@ -1487,17 +1450,25 @@
           </div>
         </div>
 
-        <div class="card p-6" style="overflow:hidden; max-width:100%;">
+        <!-- Question Matrix Table -->
+        <div class="card p-6">
+        <div class="card p-6 overflow-hidden">
           <h3 class="text-xl font-bold text-gray-800 mb-1">🔢 Thống kê theo từng câu hỏi</h3>
           <p class="text-sm text-gray-500 mb-4">✅ Đúng &nbsp;❌ Sai &nbsp;— Chưa trả lời</p>
-          <div id="questionMatrixContainer" style="overflow-x:auto; width:100%;">
+          <div id="questionMatrixContainer">
+          <div id="questionMatrixContainer" style="max-width:100%;overflow-x:auto;">
             <div class="text-center py-6"><div class="spinner mx-auto mb-2"></div><p class="text-gray-400 text-sm">Đang tải...</p></div>
           </div>
         </div>
       `;
-      
+
+      // Render score distribution chart
       renderScoreChart(stats.scoreDistribution);
+
+      // Render results table
       renderResultsTable(completedSubs, test);
+
+      // Render question matrix
       renderQuestionMatrix(completedSubs, test);
     }
 
@@ -1506,18 +1477,20 @@
       const scores = submissions.map(s => s.score || 0);
       const avgScore = scores.reduce((a, b) => a + b, 0) / totalStudents;
       const highestScore = Math.max(...scores);
-      
+
+      // Calculate average time spent
       const times = submissions.map(s => {
         if (!s.started_at || !s.submitted_at) return 0;
         const start = new Date(s.started_at);
         const end = new Date(s.submitted_at);
-        return (end - start) / 1000 / 60;
+        return (end - start) / 1000 / 60; // minutes
       }).filter(t => t > 0);
-      
+
       const avgTime = times.length > 0 
         ? (times.reduce((a, b) => a + b, 0) / times.length).toFixed(1)
         : 'N/A';
-      
+
+      // Score distribution (0-20, 20-40, 40-60, 60-80, 80-100)
       const totalPoints = test.questions.reduce((sum, q) => sum + q.points, 0);
       const scoreDistribution = [0, 0, 0, 0, 0];
       submissions.forEach(s => {
@@ -1528,9 +1501,16 @@
         else if (percent < 80) scoreDistribution[3]++;
         else scoreDistribution[4]++;
       });
-      
-      return { totalStudents, avgScore, highestScore, avgTime, scoreDistribution };
+
+      return {
+        totalStudents,
+        avgScore,
+        highestScore,
+        avgTime,
+        scoreDistribution
+      };
     }
+
 
     function renderScoreChart(distribution) {
       const ctx = document.getElementById('scoreChart').getContext('2d');
@@ -1560,9 +1540,10 @@
         },
         options: {
           responsive: true,
-          maintainAspectRatio: true,
           plugins: {
-            legend: { display: false },
+            legend: {
+              display: false
+            },
             tooltip: {
               callbacks: {
                 label: function(context) {
@@ -1572,7 +1553,12 @@
             }
           },
           scales: {
-            y: { beginAtZero: true, ticks: { stepSize: 1 } }
+            y: {
+              beginAtZero: true,
+              ticks: {
+                stepSize: 1
+              }
+            }
           }
         }
       });
@@ -1580,25 +1566,26 @@
 
     function renderResultsTable(submissions, test) {
       const tbody = document.getElementById('resultsTableBody');
-      
+
+      // Calculate total points from questions array since test.total_points may not exist
       const totalPoints = test.questions
         ? test.questions.reduce((sum, q) => sum + (q.points || 1), 0)
         : (test.total_points || 0);
-      
+
       tbody.innerHTML = submissions.map((sub, idx) => {
         const timeSpent = calculateTimeSpent(sub);
         const statusBadge = sub.status === 'submitted' 
           ? '<span class="badge bg-green-100 text-green-700">✅ Đã nộp</span>'
           : '<span class="badge bg-orange-100 text-orange-700">⏰ Hết giờ</span>';
-        
+
         const scorePercent = totalPoints > 0 
           ? ((sub.score / totalPoints) * 100).toFixed(0)
           : 0;
-        
+
         const scoreColor = scorePercent >= 80 ? 'text-green-600' : 
                           scorePercent >= 60 ? 'text-blue-600' :
                           scorePercent >= 40 ? 'text-yellow-600' : 'text-red-600';
-        
+
         return `
           <tr class="border-b border-gray-200 hover:bg-gray-50 transition-colors">
             <td class="p-3">${idx + 1}</td>
@@ -1633,6 +1620,7 @@
       const container = document.getElementById('questionMatrixContainer');
       if (!container) return;
 
+      // Lấy danh sách câu hỏi của bài thi
       const qIds = (test.questions || []).map(q => q.questionId || q.id).filter(Boolean);
       if (!qIds.length) { container.innerHTML = '<p class="text-gray-400 text-sm text-center py-4">Không có câu hỏi</p>'; return; }
 
@@ -1640,14 +1628,17 @@
       const qMap = {};
       (questionData || []).forEach(q => qMap[q.id] = q);
 
+      // Sắp xếp học sinh theo điểm giảm dần
       const sorted = [...submissions].sort((a, b) => (b.score || 0) - (a.score || 0));
       const totalPoints = test.questions.reduce((s, q) => s + (q.points || 1), 0);
 
+      // Tính % đúng mỗi câu (dùng thứ tự trong test.questions, không phải question_order)
       const correctCountPerQ = new Array(qIds.length).fill(0);
       const attemptCountPerQ = new Array(qIds.length).fill(0);
 
+      // Xây dựng ma trận kết quả: mỗi submission → mảng true/false/null theo thứ tự câu
       const matrix = sorted.map(sub => {
-        const answers = sub.answers || [];
+        const answers = sub.answers || [];       // [{questionId, selectedOptions}, ...]
         const answerMap = {};
         answers.forEach(a => { answerMap[a.questionId] = a.selectedOptions || []; });
 
@@ -1655,7 +1646,7 @@
           const q = qMap[qId];
           if (!q) return null;
           const selected = answerMap[qId];
-          if (selected === undefined || selected === null) return null;
+          if (selected === undefined || selected === null) return null; // chưa trả lời
 
           attemptCountPerQ[qi]++;
           const correct = q.correct_answers || [];
@@ -1667,10 +1658,13 @@
         });
       });
 
+      // Build HTML
       const colWidth = 'min-width:64px;width:64px;';
 
+      // Header hàng 1: tên cột câu hỏi + % đúng
       let headerHTML = `
         <tr>
+          <th class="sticky left-0 bg-gray-50 z-10 text-left px-4 py-3 font-semibold text-gray-700 border-b-2 border-r-2 border-gray-200" style="min-width:180px;">
           <th class="sticky left-0 z-10 text-left px-4 py-3 font-semibold text-gray-700 border-b-2 border-r-2 border-gray-200" style="min-width:160px; background:#f9fafb;">
             Người tham gia
           </th>
@@ -1691,11 +1685,13 @@
       });
       headerHTML += '</tr>';
 
+      // Data rows
       let rowsHTML = sorted.map((sub, si) => {
         const scorePercent = totalPoints > 0 ? Math.round((sub.score || 0) / totalPoints * 100) : 0;
         const scoreColor = scorePercent >= 80 ? '#16a34a' : scorePercent >= 60 ? '#2563eb' : scorePercent >= 40 ? '#d97706' : '#dc2626';
 
         let cells = `
+          <td class="sticky left-0 bg-white z-10 px-4 py-3 font-medium text-gray-800 border-r-2 border-gray-200 whitespace-nowrap" style="min-width:180px;">
           <td class="sticky left-0 z-10 px-4 py-3 font-medium text-gray-800 border-r-2 border-gray-200 whitespace-nowrap" style="min-width:160px; background:white;">
             ${sub.student_name || 'N/A'}
           </td>
@@ -1724,6 +1720,8 @@
       }).join('');
 
       container.innerHTML = `
+        <div class="overflow-x-auto rounded-xl border border-gray-200">
+          <table class="border-collapse text-sm" style="border-spacing:0;">
         <div style="overflow-x:auto; width:100%; border:1px solid #e5e7eb; border-radius:12px;">
           <table class="border-collapse text-sm" style="border-spacing:0; min-width:100%;">
             <thead class="bg-gray-50">${headerHTML}</thead>
@@ -1733,7 +1731,6 @@
         <p class="text-xs text-gray-400 mt-3">* Học sinh được sắp xếp theo điểm từ cao đến thấp. % trên tiêu đề cột = tỉ lệ học sinh trả lời đúng câu đó.</p>
       `;
     }
-
     async function deleteSubmission(submissionId) {
       if (!confirm('Xóa bài nộp này? Hành động không thể hoàn tác.')) return;
       const { error } = await supabase.from('submissions').delete().eq('id', submissionId);
@@ -1743,33 +1740,35 @@
 
     function calculateTimeSpent(submission) {
       if (!submission.started_at || !submission.submitted_at) return 'N/A';
+
       const start = new Date(submission.started_at);
       const end = new Date(submission.submitted_at);
       const diffMs = end - start;
       const diffMins = Math.floor(diffMs / 1000 / 60);
       const diffSecs = Math.floor((diffMs / 1000) % 60);
+
       return `${diffMins}:${diffSecs.toString().padStart(2, '0')}`;
     }
 
     async function exportToExcel(testId) {
       const test = allTests.find(t => t.id === testId);
       if (!test) return;
-      
+
       const { data: submissions } = await supabase
         .from('submissions')
         .select('*')
         .eq('test_id', testId)
         .in('status', ['submitted', 'timed-out'])
         .order('score', { ascending: false });
-      
+
       if (!submissions || !submissions.length) {
         return alert('Không có dữ liệu để xuất');
       }
-      
+
       const totalPoints = test.questions
         ? test.questions.reduce((sum, q) => sum + (q.points || 1), 0)
         : (test.total_points || 0);
-      
+
       const excelData = submissions.map((sub, idx) => ({
         'STT': idx + 1,
         'Họ tên': sub.student_name || '',
@@ -1781,10 +1780,11 @@
         'Trạng thái': sub.status === 'submitted' ? 'Đã nộp' : 'Hết giờ',
         'Thời gian nộp': sub.submitted_at ? new Date(sub.submitted_at).toLocaleString('vi-VN') : ''
       }));
-      
+
       const ws = XLSX.utils.json_to_sheet(excelData);
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, 'Kết quả');
+
       XLSX.writeFile(wb, `KetQua_${test.title}_${new Date().toISOString().split('T')[0]}.xlsx`);
     }
 
@@ -1842,10 +1842,10 @@ D. 6</code></pre>
     async function processBulkImport() {
       const text = document.getElementById('bulkText').value.trim();
       if (!text) return alert('Vui lòng nhập nội dung');
-      
+
       const questions = parseBulkText(text);
       if (!questions.length) return alert('Không tìm thấy câu hỏi hợp lệ');
-      
+
       let successCount = 0;
       for (const q of questions) {
         const { error } = await supabase.from('questions').insert({
@@ -1854,7 +1854,7 @@ D. 6</code></pre>
         });
         if (!error) successCount++;
       }
-      
+
       closeModal();
       await loadQuestions();
       alert(`✅ Đã nhập ${successCount}/${questions.length} câu hỏi`);
@@ -1863,9 +1863,11 @@ D. 6</code></pre>
     function parseBulkText(text) {
       const questions = [];
 
+      // ── Kiểm tra xem có dùng format cũ [Single]/[Multiple] không ──
       const hasOldFormat = /\[(Single|Multiple|TrueFalse)\]/i.test(text);
 
       if (hasOldFormat) {
+        // ── FORMAT CŨ: [Single] Chủ đề: ... | Điểm: ... ──
         const blocks = text.split(/\n\s*\n/).filter(b => b.trim());
         blocks.forEach(block => {
           const lines = block.split('\n').map(l => l.trim()).filter(l => l);
@@ -1901,33 +1903,40 @@ D. 6</code></pre>
         return questions;
       }
 
+      // ── FORMAT WORD: Câu N: nội dung\nA. ...\nB. ...\nC. ...\nD. ...\n(Đáp án: X) ──
+      // Đọc toàn bộ header chủ đề (dòng in đậm hoặc dạng "Chủ đề: ...")
       let globalCategory = '';
       const catMatch = text.match(/Chủ\s*đề[:\s]+([^\n]+)/i);
       if (catMatch) globalCategory = catMatch[1].replace(/\*+/g, '').trim();
 
+      // Tách từng câu hỏi theo pattern "Câu N:"
       const questionBlocks = text.split(/(?=Câu\s+\d+\s*[:.])/i).filter(b => b.trim());
 
       questionBlocks.forEach(block => {
         const lines = block.split('\n').map(l => l.trim()).filter(l => l);
         if (lines.length < 3) return;
 
+        // Lấy nội dung câu hỏi từ dòng đầu
         const contentLine = lines[0].replace(/^Câu\s+\d+\s*[:.]\s*/i, '').trim();
         if (!contentLine) return;
 
         const options = [];
         const correctAnswers = [];
+        let answerFromKey = -1; // Đáp án từ dòng "Đáp án:"
 
         lines.forEach(line => {
+          // Đáp án đúng nếu có dòng "Đáp án: A" hoặc "Đáp án: B,C"
           const answerKeyMatch = line.match(/^[*\s]*Đáp\s*án\s*[:\s]+([A-D,\s]+)/i);
           if (answerKeyMatch) {
             const keys = answerKeyMatch[1].toUpperCase().match(/[A-D]/g) || [];
             keys.forEach(k => {
-              const idx = k.charCodeAt(0) - 65;
+              const idx = k.charCodeAt(0) - 65; // A=0, B=1, C=2, D=3
               if (!correctAnswers.includes(idx)) correctAnswers.push(idx);
             });
             return;
           }
 
+          // Parse đáp án dạng "A. nội dung *" (có dấu * là đúng)
           const optStar = line.match(/^([A-D])[.)]\s*(.+?)\s*(\*+)?\s*$/i);
           if (optStar) {
             const idx = options.length;
@@ -1938,6 +1947,7 @@ D. 6</code></pre>
 
         if (options.length < 2) return;
 
+        // Nếu không tìm thấy đáp án đúng, mặc định chọn đáp án A (index 0)
         const finalAnswers = correctAnswers.length > 0 ? correctAnswers : [0];
         const type = finalAnswers.length > 1 ? 'multiple' : 'single';
 
