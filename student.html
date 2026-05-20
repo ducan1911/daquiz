@@ -9,20 +9,20 @@
   <script src="supabase-config.js"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-    
+
     * { font-family: 'Inter', sans-serif; }
-    
+
     body { 
       background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
       min-height: 100vh;
     }
-    
+
     /* Enhanced Header */
     header {
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
     }
-    
+
     /* Loading Spinner */
     .spinner {
       border: 4px solid rgba(102, 126, 234, 0.1);
@@ -33,11 +33,11 @@
       animation: spin 0.8s linear infinite;
       margin: 0 auto;
     }
-    
+
     @keyframes spin {
       to { transform: rotate(360deg); }
     }
-    
+
     /* Timer Styles */
     .timer-normal { color: #667eea; }
     .timer-warning { 
@@ -48,24 +48,24 @@
       color: #ef4444;
       animation: pulse-danger 0.8s ease-in-out infinite;
     }
-    
+
     @keyframes pulse-warning {
       0%, 100% { opacity: 1; }
       50% { opacity: 0.7; }
     }
-    
+
     @keyframes pulse-danger {
       0%, 100% { opacity: 1; transform: scale(1); }
       50% { opacity: 0.8; transform: scale(1.05); }
     }
-    
+
     /* Progress Bar */
     .progress-bar {
       transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
       background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
       box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
     }
-    
+
     /* Question Cards */
     .question-card {
       background: white;
@@ -76,7 +76,7 @@
       position: relative;
       overflow: hidden;
     }
-    
+
     .question-card::before {
       content: '';
       position: absolute;
@@ -88,16 +88,16 @@
       opacity: 0;
       transition: opacity 0.3s ease;
     }
-    
+
     .question-card:hover {
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
       transform: translateY(-2px);
     }
-    
+
     .question-card.answered::before {
       opacity: 1;
     }
-    
+
     .question-number {
       display: inline-flex;
       align-items: center;
@@ -112,7 +112,7 @@
       flex-shrink: 0;
       box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
     }
-    
+
     /* Option Styles */
     .option-label {
       transition: all 0.2s ease;
@@ -120,19 +120,19 @@
       background: white;
       cursor: pointer;
     }
-    
+
     .option-label:hover {
       border-color: #667eea;
       background: #f0f4ff;
       transform: translateX(4px);
     }
-    
+
     .option-label.selected {
       border-color: #667eea;
       background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
       box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
     }
-    
+
     .option-checkbox,
     .option-radio {
       width: 22px;
@@ -142,22 +142,22 @@
       transition: all 0.2s ease;
       cursor: pointer;
     }
-    
+
     .option-checkbox {
       border-radius: 6px;
     }
-    
+
     .option-radio {
       border-radius: 50%;
     }
-    
+
     input[type="checkbox"]:checked ~ .option-checkbox,
     input[type="radio"]:checked ~ .option-radio {
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       border-color: #667eea;
       box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
     }
-    
+
     input[type="checkbox"]:checked ~ .option-checkbox::after {
       content: '✓';
       display: block;
@@ -167,7 +167,7 @@
       text-align: center;
       line-height: 18px;
     }
-    
+
     input[type="radio"]:checked ~ .option-radio::after {
       content: '';
       display: block;
@@ -177,30 +177,30 @@
       border-radius: 50%;
       margin: 4px auto;
     }
-    
+
     /* Sticky Header */
     .test-header {
       background: white;
       backdrop-filter: blur(10px);
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
     }
-    
+
     /* Submit Button */
     .btn-submit {
       background: linear-gradient(135deg, #10b981 0%, #059669 100%);
       transition: all 0.3s ease;
       box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
     }
-    
+
     .btn-submit:hover {
       box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
       transform: translateY(-2px);
     }
-    
+
     .btn-submit:active {
       transform: translateY(0);
     }
-    
+
     /* Result Card */
     .result-card {
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -210,7 +210,7 @@
       position: relative;
       overflow: hidden;
     }
-    
+
     .result-card::before {
       content: '';
       position: absolute;
@@ -221,38 +221,38 @@
       background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
       animation: shimmer 3s ease-in-out infinite;
     }
-    
+
     @keyframes shimmer {
       0%, 100% { transform: translate(0, 0); }
       50% { transform: translate(-30%, -30%); }
     }
-    
+
     /* Answer Review */
     .answer-correct {
       border-left: 4px solid #10b981;
       background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(5, 150, 105, 0.05) 100%);
     }
-    
+
     .answer-wrong {
       border-left: 4px solid #ef4444;
       background: linear-gradient(135deg, rgba(239, 68, 68, 0.05) 0%, rgba(220, 38, 38, 0.05) 100%);
     }
-    
+
     .option-correct {
       background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.1) 100%);
       border-color: #10b981;
     }
-    
+
     .option-wrong {
       background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(220, 38, 38, 0.1) 100%);
       border-color: #ef4444;
     }
-    
+
     .option-missed {
       background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(5, 150, 105, 0.05) 100%);
       border-color: #86efac;
     }
-    
+
     /* Glass Card */
     .glass-card {
       background: rgba(255, 255, 255, 0.95);
@@ -260,7 +260,7 @@
       border: 1px solid rgba(255, 255, 255, 0.5);
       box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
     }
-    
+
     /* Fade In Animation */
     @keyframes fadeInUp {
       from {
@@ -272,18 +272,18 @@
         transform: translateY(0);
       }
     }
-    
+
     .fade-in {
       animation: fadeInUp 0.5s ease-out;
     }
-    
+
     /* Question Navigation */
     .question-nav {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(45px, 1fr));
       gap: 8px;
     }
-    
+
     .question-nav-btn {
       width: 45px;
       height: 45px;
@@ -294,30 +294,30 @@
       transition: all 0.2s ease;
       cursor: pointer;
     }
-    
+
     .question-nav-btn:hover {
       border-color: #667eea;
       transform: scale(1.05);
     }
-    
+
     .question-nav-btn.answered {
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       color: white;
       border-color: transparent;
     }
-    
+
     .question-nav-btn.current {
       border-color: #667eea;
       box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
     }
-    
+
     /* Mobile Responsive */
     @media (max-width: 768px) {
       .question-card {
         border-radius: 12px;
         padding: 1rem;
       }
-      
+
       .test-header {
         position: sticky;
         top: 60px;
@@ -326,7 +326,7 @@
   </style>
 </head>
 <body class="min-h-screen">
-  
+
   <!-- Header -->
   <header class="sticky top-0 z-40">
     <div class="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
@@ -340,10 +340,10 @@
       </div>
     </div>
   </header>
-  
+
   <!-- Main Content -->
   <main class="max-w-5xl mx-auto p-4 pb-20" id="mainContent">
-    
+
     <!-- Loading State -->
     <div id="loading" class="flex items-center justify-center py-20">
       <div class="text-center">
@@ -351,7 +351,7 @@
         <p class="text-gray-600 font-medium">Đang tải bài kiểm tra...</p>
       </div>
     </div>
-    
+
     <!-- Error Message -->
     <div id="errorMsg" class="hidden glass-card rounded-2xl p-8 text-center">
       <div class="text-6xl mb-4">⚠️</div>
@@ -360,9 +360,9 @@
         ← Về trang chủ
       </a>
     </div>
-    
+
   </main>
-  
+
   <script>
     let testCode = null, testData = null, studentName = null;
     let currentScreen = 'name', submissionId = null, submissionData = null;
@@ -408,17 +408,17 @@
       const text = document.getElementById('progressText');
       if (bar) bar.style.width = pct + '%';
       if (text) text.textContent = `${answered}/${total}`;
-      
+
       // Update question cards visual state
       questionMapping.questionOrder.forEach((qo, idx) => {
         const card = document.getElementById(`q-card-${idx}`);
         const navBtn = document.getElementById(`nav-${idx}`);
         if (!card) return;
-        
+
         const checkboxes = document.querySelectorAll(`input[name^="answer_${qo.questionId}_"]:checked`);
         const radio = document.querySelector(`input[name="answer_${qo.questionId}"]:checked`);
         const isAnswered = checkboxes.length > 0 || radio;
-        
+
         if (isAnswered) {
           card.classList.add('answered');
           if (navBtn) navBtn.classList.add('answered');
@@ -465,14 +465,14 @@
     async function askName() {
       document.getElementById('loading').classList.add('hidden');
       const main = document.getElementById('mainContent');
-      
+
       const { data: test, error } = await supabase.from('tests').select('*').eq('test_code', testCode.toUpperCase()).single();
       if (error || !test) {
         showError('❌ Mã bài kiểm tra không tồn tại hoặc đã bị xóa.');
         return;
       }
       testData = test;
-      
+
       const now = new Date();
       if (now < new Date(test.start_time)) {
         showError(`⏰ Bài kiểm tra chưa mở. Thời gian mở: ${new Date(test.start_time).toLocaleString('vi-VN')}`);
@@ -546,20 +546,20 @@
       try {
         studentName = document.getElementById('studentNameInput')?.value.trim();
         if (!studentName) return alert('Vui lòng nhập họ và tên.');
-        
+
         const { data: existingSubs, error: subError } = await supabase.from('submissions')
           .select('*').eq('test_id', testData.id).eq('student_name', studentName)
           .order('attempt_number', { ascending: false });
-        
+
         if (subError) throw new Error('Lỗi kiểm tra lần làm: ' + subError.message);
-        
+
         // Kiểm tra xem có submission đang in-progress không
         const inProgressSub = (existingSubs || []).find(s => s.status === 'in-progress');
-        
+
         if (inProgressSub) {
           // Có bài đang làm dở - hỏi xem muốn tiếp tục hay làm lại
           const continueTest = confirm(`📝 Bạn có bài làm chưa hoàn thành (Lần ${inProgressSub.attempt_number}).\n\n✅ Nhấn OK để TIẾP TỤC bài làm cũ\n❌ Nhấn Cancel để LÀM LẠI từ đầu`);
-          
+
           if (continueTest) {
             // Tiếp tục bài làm cũ
             submissionId = inProgressSub.id;
@@ -568,7 +568,7 @@
               answers: inProgressSub.answers || [],
               status: 'in-progress'
             };
-            
+
             // Load lại question mapping từ submission
             if (inProgressSub.question_order && inProgressSub.option_mappings) {
               questionMapping = {
@@ -583,11 +583,11 @@
                 option_mappings: questionMapping.optionMappings
               }).eq('id', submissionId);
             }
-            
+
             // Tính thời gian kết thúc dựa trên thời gian bắt đầu ban đầu
             const startedAt = new Date(inProgressSub.started_at);
             const endTime = new Date(startedAt.getTime() + testData.duration * 60000);
-            
+
             currentScreen = 'taking';
             document.getElementById('studentInfo').innerHTML = `
               <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
@@ -604,7 +604,7 @@
             await supabase.from('submissions').delete().eq('id', inProgressSub.id);
           }
         }
-        
+
         // Kiểm tra số lần đã submit
         const submittedCount = (existingSubs || []).filter(s => s.status === 'submitted' || s.status === 'timed-out').length;
         if (submittedCount >= (testData.max_attempts || 1)) {
@@ -627,20 +627,20 @@
           answers: [],
           total_points: totalPointsForSub
         }).select().single();
-        
+
         if (insertError || !newSub) {
           throw new Error('Lỗi tạo phiên làm bài: ' + (insertError?.message || 'Không có dữ liệu trả về'));
         }
-        
+
         submissionId = newSub.id;
         submissionData = { started_at: now.toISOString(), answers: [], status: 'in-progress' };
         const { error: updateError } = await supabase.from('submissions').update({
           question_order: questionMapping.questionOrder,
           option_mappings: questionMapping.optionMappings
         }).eq('id', submissionId);
-        
+
         if (updateError) throw new Error('Lỗi cập nhật cấu hình: ' + updateError.message);
-        
+
         const endTime = new Date(now.getTime() + testData.duration * 60000);
         currentScreen = 'taking';
         document.getElementById('studentInfo').innerHTML = `
@@ -672,74 +672,20 @@
       const { data: qData } = await supabase.from('questions').select('*').in('id', qIds);
       const qMap = {}; (qData||[]).forEach(q => { qMap[q.id] = q; });
       const answerMap = {}; (submissionData.answers||[]).forEach(a => { answerMap[a.questionId] = a; });
-      
+
       const questionsHtml = questionMapping.questionOrder.map((qo, displayIdx) => {
         const q = qMap[qo.questionId] || {};
         let optionOrder = (q.options || []).map((text, oi) => ({ text, originalIndex: oi }));
         if (testData.shuffle_options && q.type !== 'truefalse') optionOrder.sort(() => Math.random() - 0.5);
         questionMapping.optionMappings[qo.questionId] = optionOrder.map(o => o.originalIndex);
         const saved = answerMap[qo.questionId]; const selected = saved?.selectedOptions || [];
-        
+
         return `<div class="question-card p-6 mb-4 fade-in" id="q-card-${displayIdx}" data-question-id="${qo.questionId}" style="animation-delay: ${displayIdx * 0.05}s">
           <div class="flex gap-4 mb-4">
             <div class="question-number">${displayIdx+1}</div>
             <div class="flex-1">
               <p class="text-gray-800 font-semibold text-lg mb-2">${escapeHtml(q.content||'')}</p>
-              ${q.image_url ? `<div class="mb-3"><img src="${q.image_url}" alt="Hình minh họa" class="max-w-full rounded-xl border border-gray-200 shadow-sm" style="max-height:300px;object-fit:contain;"></div>` : ''}
-              <div class="flex items-center gap-3 text-xs text-gray-500">
-                <span class="flex items-center gap-1">
-                  <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                  </svg>
-                  ${qo.points} điểm
-                </span>
-                ${q.type === 'multiple' ? '<span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-medium">Chọn nhiều đáp án</span>' : ''}
-                ${q.type === 'matching' ? '<span class="bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full font-medium">🔗 Ghép đôi</span>' : ''}
-              </div>
-            </div>
-          </div>
-          ${q.type === 'matching' ? (() => {
-            const colA = q.options || [];
-            const colBAll = [...(q.correct_answers || [])];
-            const shuffledB = [...colBAll].sort(() => Math.random() - 0.5);
-            const savedAns = answerMap[qo.questionId]?.selectedOptions || [];
-            return `<div class="ml-4 md:ml-12 space-y-3">
-              <div class="grid grid-cols-2 gap-2 mb-1">
-                <div class="text-xs font-semibold text-gray-500 text-center bg-blue-50 rounded-lg py-1">Cột A</div>
-                <div class="text-xs font-semibold text-gray-500 text-center bg-green-50 rounded-lg py-1">Cột B (chọn)</div>
-              </div>
-              ${colA.map((itemA, ai) => `
-                <div class="grid grid-cols-2 gap-2 items-center">
-                  <div class="px-3 py-2 bg-blue-50 border-2 border-blue-200 rounded-xl text-sm font-medium text-blue-800">${escapeHtml(itemA)}</div>
-                  <select class="border-2 border-gray-200 rounded-xl px-3 py-2 text-sm bg-white focus:border-yellow-400 focus:ring-2 focus:ring-yellow-100 transition-all"
-                          data-question-id="${qo.questionId}" data-col-a-index="${ai}"
-                          onchange="saveMatchingAnswer('${qo.questionId}')">
-                    <option value="">-- Chọn --</option>
-                    ${shuffledB.map(b => `<option value="${escapeHtml(String(b))}" ${(savedAns[ai]||'') === String(b) ? 'selected':''}>${escapeHtml(String(b))}</option>`).join('')}
-                  </select>
-                </div>`).join('')}
-            </div>`;
-          })() : `<div class="space-y-2 ml-12">
-            ${optionOrder.map((opt, optIdx) => {
-              const checked = selected.includes(opt.originalIndex);
-              const inputType = q.type === 'multiple' ? 'checkbox' : 'radio';
-              const name = q.type === 'multiple' ? `answer_${qo.questionId}_${opt.originalIndex}` : `answer_${qo.questionId}`;
-              const optionLetter = String.fromCharCode(65 + optIdx);
-              return `<label class="option-label flex items-start gap-3 p-4 rounded-xl ${checked?'selected':''}">
-                <input type="${inputType}" name="${name}" value="${opt.originalIndex}" ${checked?'checked':''}
-                       onchange="saveAnswer('${qo.questionId}')" class="hidden">
-                <div class="${inputType === 'checkbox' ? 'option-checkbox' : 'option-radio'}"></div>
-                <span class="flex-1 text-gray-700 font-medium">
-                  <span class="text-indigo-600 font-bold mr-2">${optionLetter}.</span>${escapeHtml(opt.text)}
-                </span>
-              </label>`;
-            }).join('')}
-          </div>`}
-        </div>`;        return `<div class="question-card p-6 mb-4 fade-in" id="q-card-${displayIdx}" data-question-id="${qo.questionId}" style="animation-delay: ${displayIdx * 0.05}s">
-          <div class="flex gap-4 mb-4">
-            <div class="question-number">${displayIdx+1}</div>
-            <div class="flex-1">
-              <p class="text-gray-800 font-semibold text-lg mb-2">${escapeHtml(q.content||'')}</p>
+              ${q.image_url ? `<div class="mb-3"><img src="${q.image_url}" alt="Hình minh họa" class="max-w-full rounded-xl border border-gray-200 shadow-sm" style="max-height:320px; object-fit:contain;"></div>` : ''}
               <div class="flex items-center gap-3 text-xs text-gray-500">
                 <span class="flex items-center gap-1">
                   <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
@@ -770,12 +716,12 @@
           </div>
         </div>`;
       }).join('');
-      
+
       // Question Navigation
       const navButtons = questionMapping.questionOrder.map((qo, idx) => 
         `<button class="question-nav-btn" id="nav-${idx}" onclick="scrollToQuestion(${idx})">${idx + 1}</button>`
       ).join('');
-      
+
       main.innerHTML = `
         <!-- Sticky Test Header -->
         <div class="test-header sticky top-16 md:top-20 z-30 -mx-4 px-4 py-4 mb-6">
@@ -824,18 +770,18 @@
           </button>
           <p class="text-sm text-gray-500 mt-3">Hãy kiểm tra kỹ trước khi nộp bài</p>
         </div>`;
-        
+
       startTimer(endTime);
       updateProgress();
     }
-    
+
     function scrollToQuestion(index) {
       const card = document.getElementById(`q-card-${index}`);
       if (card) {
         const headerHeight = 180;
         const cardTop = card.getBoundingClientRect().top + window.pageYOffset - headerHeight;
         window.scrollTo({ top: cardTop, behavior: 'smooth' });
-        
+
         // Highlight effect
         card.style.boxShadow = '0 0 0 4px rgba(102, 126, 234, 0.3)';
         setTimeout(() => {
@@ -853,17 +799,17 @@
       const diff = endTime - new Date();
       const el = document.getElementById('timer');
       if (!el) return false;
-      
+
       if (diff <= 0) {
         el.textContent = '00:00';
         el.className = 'timer-danger text-2xl md:text-3xl font-mono font-bold px-3 py-1 bg-red-50 rounded-xl';
         return true;
       }
-      
+
       const m = Math.floor(diff/60000);
       const s = Math.floor((diff%60000)/1000);
       el.textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-      
+
       if (diff < 60000) {
         el.className = 'timer-danger text-2xl md:text-3xl font-mono font-bold px-3 py-1 bg-red-50 rounded-xl';
       } else if (diff < 300000) {
@@ -871,7 +817,7 @@
       } else {
         el.className = 'timer-normal text-2xl md:text-3xl font-mono font-bold px-3 py-1 bg-gray-50 rounded-xl';
       }
-      
+
       return false;
     }
 
@@ -879,7 +825,7 @@
       const answers = collectAnswers();
       submissionData.answers = answers;
       updateProgress();
-      
+
       // Update selected class on all options for this question
       const questionDiv = document.querySelector(`[data-question-id="${questionId}"]`);
       if (questionDiv) {
@@ -894,7 +840,7 @@
           }
         });
       }
-      
+
       await supabase.from('submissions').update({ answers, auto_saved: true }).eq('id', submissionId);
     };
 
@@ -914,16 +860,16 @@
 
     async function submitTest() {
       if (currentScreen !== 'taking') return;
-      
+
       const answered = countAnswered();
       const total = questionMapping.questionOrder.length;
-      
+
       if (answered < total) {
         if (!confirm(`⚠️ Bạn mới trả lời ${answered}/${total} câu.\n\nBạn có chắc chắn muốn nộp bài?`)) return;
       } else {
         if (!confirm('✅ Bạn có chắc chắn muốn nộp bài?')) return;
       }
-      
+
       clearTimers();
       currentScreen = 'submitting';
 
@@ -944,7 +890,7 @@
           answers, 
           auto_saved: false 
         }).eq('id', submissionId);
-        
+
         const score = await gradeTest(testData, answers, questionMapping);
         const totalPoints = (questionMapping.questionOrder||[]).reduce((sum, q) => sum + (q.points||1), 0);
         await supabase.from('submissions').update({ score, total_points: totalPoints }).eq('id', submissionId);
@@ -979,7 +925,7 @@
       const qIds = questionMapping.questionOrder.map(q => q.questionId);
       const { data: qData } = await supabase.from('questions').select('*').in('id', qIds);
       const qMap = {}; (qData||[]).forEach(q => { qMap[q.id] = q; });
-      
+
       let correctCount = 0;
       const totalQuestions = questionMapping.questionOrder.length;
       questionMapping.questionOrder.forEach(qo => {
@@ -993,14 +939,14 @@
 
       const pct = totalPoints > 0 ? Math.round((score/totalPoints)*100) : 0;
       const roundedScore = score % 1 === 0 ? score : parseFloat(score.toFixed(1));
-      
+
       const resultHtml = testData.show_answers ? questionMapping.questionOrder.map((qo, idx) => {
         const q = qMap[qo.questionId]; if (!q) return '';
         const studentAns = submittedAnswers.find(a => a.questionId === qo.questionId);
         const selected = studentAns?.selectedOptions || [];
         const correct = q.correct_answers || [];
         const isCorrect = correct.length === selected.length && correct.every(c => selected.includes(c));
-        
+
         return `<div class="question-card ${isCorrect?'answer-correct':'answer-wrong'} p-6 mb-4">
           <div class="flex gap-3 mb-4">
             <div class="question-number ${isCorrect?'bg-gradient-to-br from-green-500 to-emerald-600':'bg-gradient-to-br from-red-500 to-rose-600'}">${idx+1}</div>
@@ -1009,6 +955,7 @@
                 <p class="text-gray-800 font-semibold text-lg">${escapeHtml(q.content||'')}</p>
                 <span class="text-2xl flex-shrink-0">${isCorrect?'✅':'❌'}</span>
               </div>
+              ${q.image_url ? `<div class="mb-3"><img src="${q.image_url}" alt="Hình minh họa" class="max-w-full rounded-xl border border-gray-200 shadow-sm" style="max-height:280px; object-fit:contain;"></div>` : ''}
               <span class="text-xs text-gray-500">${qo.points} điểm</span>
             </div>
           </div>
@@ -1038,7 +985,7 @@
           }).join('')}</div>
         </div>`;
       }).join('') : '<div class="glass-card rounded-2xl p-8 text-center"><p class="text-gray-500 font-medium">📝 Giáo viên không hiển thị đáp án chi tiết.</p></div>';
-      
+
       document.getElementById('mainContent').innerHTML = `
         <div class="result-card p-8 md:p-10 text-center mb-8 fade-in">
           <div class="relative z-10">
