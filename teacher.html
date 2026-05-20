@@ -12,6 +12,7 @@
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
     * { font-family: 'Inter', sans-serif; }
+    html, body { overflow-x: hidden; max-width: 100vw; }
     
     .section { display: none; }
     .section.active { display: block; }
@@ -239,7 +240,7 @@
       </nav>
     </aside>
 
-    <main class="flex-1 p-6" id="mainContent">
+    <main class="flex-1 p-6 min-w-0 overflow-hidden" id="mainContent">
       <div id="loadingOverlay" class="flex items-center justify-center py-20">
         <div class="text-center">
           <div class="spinner mx-auto mb-3"></div>
@@ -1418,9 +1419,11 @@
         </div>
         
         <!-- Score Distribution Chart -->
-        <div class="card p-6 mb-6">
+        <div class="card p-6 mb-6" style="overflow:hidden; max-width:100%;">
           <h3 class="text-xl font-bold text-gray-800 mb-4">📊 Phân bố điểm số</h3>
-          <canvas id="scoreChart" height="80"></canvas>
+          <div style="position:relative; width:100%; max-width:100%;">
+            <canvas id="scoreChart" height="80"></canvas>
+          </div>
         </div>
         
         <!-- Student Results Table -->
@@ -1451,10 +1454,10 @@
         </div>
 
         <!-- Question Matrix Table -->
-        <div class="card p-6 overflow-hidden">
+        <div class="card p-6" style="overflow:hidden; max-width:100%;">
           <h3 class="text-xl font-bold text-gray-800 mb-1">🔢 Thống kê theo từng câu hỏi</h3>
           <p class="text-sm text-gray-500 mb-4">✅ Đúng &nbsp;❌ Sai &nbsp;— Chưa trả lời</p>
-          <div id="questionMatrixContainer" style="max-width:100%;overflow-x:auto;">
+          <div id="questionMatrixContainer" style="overflow-x:auto; width:100%;">
             <div class="text-center py-6"><div class="spinner mx-auto mb-2"></div><p class="text-gray-400 text-sm">Đang tải...</p></div>
           </div>
         </div>
@@ -1538,10 +1541,9 @@
         },
         options: {
           responsive: true,
+          maintainAspectRatio: true,
           plugins: {
-            legend: {
-              display: false
-            },
+            legend: { display: false },
             tooltip: {
               callbacks: {
                 label: function(context) {
@@ -1551,12 +1553,7 @@
             }
           },
           scales: {
-            y: {
-              beginAtZero: true,
-              ticks: {
-                stepSize: 1
-              }
-            }
+            y: { beginAtZero: true, ticks: { stepSize: 1 } }
           }
         }
       });
