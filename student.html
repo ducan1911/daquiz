@@ -598,6 +598,7 @@
             document.getElementById('studentInfo').classList.remove('hidden');
             await renderTestTaking(endTime);
             startAutoSave();
+            activateAntiCheat();
             return;
           } else {
             // Xóa bài cũ và tạo bài mới
@@ -652,6 +653,7 @@
         document.getElementById('studentInfo').classList.remove('hidden');
         await renderTestTaking(endTime);
         startAutoSave();
+        activateAntiCheat();
       } catch (e) {
         alert('Lỗi: ' + e.message);
         await askName();
@@ -872,6 +874,7 @@
 
       clearTimers();
       currentScreen = 'submitting';
+      deactivateAntiCheat();
 
       const answers = collectAnswers();
 
@@ -1029,6 +1032,130 @@
       const div = document.createElement('div');
       div.textContent = str;
       return div.innerHTML;
+    }
+
+    // ============================================================
+    // FEATURE 4: CHỐNG GIAN LẬN (ANTI-CHEAT)
+    // ============================================================
+    let tabSwitchCount = 0;
+    let antiCheatActive = false;
+    const MAX_TAB_SWITCHES = 3;
+
+    function activateAntiCheat() {
+      antiCheatActive = true;
+      tabSwitchCount = 0;
+
+      // Phát hiện chuyển tab / ẩn trang
+      document.addEventListener('visibilitychange', handleVisibilityChange);
+      // Phát hiện mất focus cửa sổ
+      window.addEventListener('blur', handleWindowBlur);
+      // Chặn copy/paste
+      document.addEventListener('copy', e => { if (antiCheatActive) e.preventDefault(); });
+      document.addEventListener('cut', e => { if (antiCheatActive) e.preventDefault(); });
+      // Chặn chuột phải
+      document.addEventListener('contextmenu', e => { if (antiCheatActive) e.preventDefault(); });
+      // Chặn F12, Ctrl+Shift+I, Ctrl+U
+      document.addEventListener('keydown', handleKeyDown);
+
+      showAntiCheatBanner();
+    }
+
+    function deactivateAntiCheat() {
+      antiCheatActive = false;
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('blur', handleWindowBlur);
+    }
+
+    function showAntiCheatBanner() {
+      const banner = document.createElement('div');
+      banner.id = 'antiCheatBanner';
+      banner.style.cssText = `
+        position: fixed; bottom: 16px; right: 16px; z-index: 9999;
+        background: linear-gradient(135deg, #1e293b, #334155);
+        color: white; padding: 10px 16px; border-radius: 12px;
+        font-size: 12px; font-weight: 600; letter-spacing: 0.3px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+        display: flex; align-items: center; gap: 8px;
+        border: 1px solid rgba(255,255,255,0.1);
+      `;
+      banner.innerHTML = `<span style="color:#4ade80">🛡️</span> Chế độ thi nghiêm túc đang bật`;
+      document.body.appendChild(banner);
+    }
+
+    function handleVisibilityChange() {
+      if (!antiCheatActive || currentScreen !== 'taking') return;
+      if (document.hidden) {
+        tabSwitchCount++;
+        showWarning(tabSwitchCount);
+      }
+    }
+
+    function handleWindowBlur() {
+      if (!antiCheatActive || currentScreen !== 'taking') return;
+      tabSwitchCount++;
+      showWarning(tabSwitchCount);
+    }
+
+    function handleKeyDown(e) {
+      if (!antiCheatActive) return;
+      // F12
+      if (e.key === 'F12') { e.preventDefault(); return; }
+      // Ctrl+Shift+I (DevTools)
+      if (e.ctrlKey && e.shiftKey && e.key === 'I') { e.preventDefault(); return; }
+      // Ctrl+U (View source)
+      if (e.ctrlKey && e.key === 'u') { e.preventDefault(); return; }
+    }
+
+    function showWarning(count) {
+      const remaining = MAX_TAB_SWITCHES - count;
+      
+      // Remove existing warning if any
+      document.getElementById('antiCheatWarning')?.remove();
+      
+      if (count >= MAX_TAB_SWITCHES) {
+        // Auto-submit
+        const overlay = document.createElement('div');
+        overlay.style.cssText = `
+          position: fixed; inset: 0; z-index: 99999;
+          background: rgba(239,68,68,0.95);
+          display: flex; align-items: center; justify-content: center;
+          flex-direction: column; color: white; text-align: center;
+        `;
+        overlay.innerHTML = `
+          <div style="font-size:64px;margin-bottom:16px">🚫</div>
+          <h2 style="font-size:24px;font-weight:800;margin-bottom:8px">Vi phạm quy định thi!</h2>
+          <p style="font-size:14px;opacity:0.9;margin-bottom:20px">Bài thi sẽ được nộp tự động do chuyển tab quá ${MAX_TAB_SWITCHES} lần.</p>
+          <div style="font-size:12px;opacity:0.7">Đang nộp bài...</div>
+        `;
+        document.body.appendChild(overlay);
+        setTimeout(() => submitTest(), 2000);
+        return;
+      }
+
+      const warning = document.createElement('div');
+      warning.id = 'antiCheatWarning';
+      warning.style.cssText = `
+        position: fixed; top: 80px; left: 50%; transform: translateX(-50%);
+        z-index: 9999; background: linear-gradient(135deg, #dc2626, #b91c1c);
+        color: white; padding: 16px 24px; border-radius: 16px;
+        box-shadow: 0 16px 48px rgba(220,38,38,0.4);
+        font-weight: 700; text-align: center; animation: slideDown 0.3s ease;
+        max-width: 380px; width: 90%;
+      `;
+      warning.innerHTML = `
+        <div style="font-size:24px;margin-bottom:6px">⚠️ Cảnh báo vi phạm!</div>
+        <p style="font-size:13px;font-weight:600">Phát hiện chuyển tab/cửa sổ lần ${count}/${MAX_TAB_SWITCHES}</p>
+        ${remaining > 0 
+          ? `<p style="font-size:12px;opacity:0.9;margin-top:4px">Còn ${remaining} lần trước khi bài thi bị nộp tự động</p>` 
+          : ''}
+      `;
+      document.body.appendChild(warning);
+      setTimeout(() => warning.remove(), 4000);
+
+      // Add animation
+      const style = document.createElement('style');
+      style.textContent = `@keyframes slideDown { from { opacity:0; transform:translateX(-50%) translateY(-20px); } to { opacity:1; transform:translateX(-50%) translateY(0); } }`;
+      document.head.appendChild(style);
     }
 
     init();
