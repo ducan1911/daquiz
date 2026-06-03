@@ -2134,7 +2134,7 @@
                   <a href="https://aistudio.google.com/apikey" target="_blank" class="ml-2 text-violet-600 font-normal text-xs hover:underline">(Lấy key miễn phí ↗)</a>
                 </label>
                 <input type="password" id="aiApiKey"
-                  placeholder="AIzaSy..."
+                  placeholder="AIza... hoặc AQ.Ab8..."
                   class="w-full border-2 border-gray-200 rounded-xl px-4 py-2.5 focus:border-violet-500 focus:ring-2 focus:ring-violet-200 transition-all font-mono text-sm"
                   oninput="localStorage.setItem('ai_api_key', this.value)">
                 <p class="text-xs text-gray-400 mt-1">Key lưu trong trình duyệt của bạn, không chia sẻ với ai.</p>
@@ -2201,8 +2201,8 @@
       if (!sourceText || sourceText.length < 50) return alert('Vui lòng nhập đoạn văn bản (ít nhất 50 ký tự)');
 
       const apiKey = document.getElementById('aiApiKey')?.value.trim();
-      if (!apiKey || !apiKey.startsWith('AIza')) {
-        return alert('⚠️ Vui lòng nhập Google Gemini API Key hợp lệ\n\nLấy key miễn phí tại: https://aistudio.google.com/apikey');
+      if (!apiKey || apiKey.length < 10) {
+        return alert('⚠️ Vui lòng nhập Google Gemini API Key\n\nLấy key miễn phí tại: https://aistudio.google.com/apikey');
       }
       localStorage.setItem('ai_api_key', apiKey);
       
