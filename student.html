@@ -941,7 +941,16 @@
       });
 
       const pct = totalPoints > 0 ? Math.round((score/totalPoints)*100) : 0;
-      const roundedScore = parseFloat(Math.round(score * 10) / 10);
+
+      // Làm tròn điểm theo quy định giáo dục VN:
+      // Quy về thang 10, làm tròn đến 0.1 (nếu phần lẻ >= 0.05 thì làm tròn lên)
+      function roundScore(raw, total) {
+        if (!total || total === 0) return 0;
+        const on10 = (raw / total) * 10;          // quy về thang 10
+        const rounded = Math.round(on10 * 10) / 10; // làm tròn 1 chữ số thập phân
+        return parseFloat(rounded.toFixed(1));       // đảm bảo hiển thị đúng 1 chữ số
+      }
+      const roundedScore = roundScore(score, totalPoints);
 
       const resultHtml = testData.show_answers ? questionMapping.questionOrder.map((qo, idx) => {
         const q = qMap[qo.questionId]; if (!q) return '';
@@ -993,7 +1002,7 @@
         <div class="result-card p-8 md:p-10 text-center mb-8 fade-in">
           <div class="relative z-10">
             <div class="text-6xl mb-4">${pct>=80?'🏆':pct>=60?'🎉':pct>=40?'📚':'💪'}</div>
-            <h2 class="text-4xl md:text-5xl font-black mb-3">${roundedScore} / ${totalPoints}</h2>
+            <h2 class="text-4xl md:text-5xl font-black mb-3">${roundedScore} / 10</h2>
             <p class="text-2xl md:text-3xl opacity-90 mb-2">Điểm: ${pct}%</p>
             <p class="text-lg opacity-80 mb-2">Đúng: <strong>${correctCount}</strong> / ${totalQuestions} câu</p>
             <p class="text-xl font-semibold opacity-90 mt-4">
