@@ -2024,19 +2024,16 @@
         `).join('<div style="border-top:1px dashed #e5e7eb;margin:4px 0 12px;"></div>');
       }
 
-      // A4 = 210mm x 297mm → tại 96dpi: 794px x 1123px
-      // Tính padding pixel từ margin mm: 1mm ≈ 3.7795px
       const mmToPx = 3.7795;
       const pxTop    = Math.round(marginTop    * mmToPx);
       const pxBottom = Math.round(marginBottom * mmToPx);
       const pxLeft   = Math.round(marginLeft   * mmToPx);
       const pxRight  = Math.round(marginRight  * mmToPx);
-      const renderWidth = 794; // A4 width px
 
       const htmlContent = `
         <div id="pdf-render" style="
           font-family: 'Times New Roman', Times, serif;
-          width: ${renderWidth}px;
+          width: 794px;
           padding: ${pxTop}px ${pxRight}px ${pxBottom}px ${pxLeft}px;
           background: white;
           box-sizing: border-box;
@@ -2081,22 +2078,16 @@
         const pageW = pdf.internal.pageSize.getWidth();   // 210mm
         const pageH = pdf.internal.pageSize.getHeight();  // 297mm
 
-        // Vùng in = trang trừ lề trái + phải
         const printW = pageW - marginLeft - marginRight;
-        // Scale: canvas.width (px) → printW (mm)
-        const scale = printW / canvas.width;
-        const totalImgH = canvas.height * scale; // chiều cao ảnh quy ra mm
-
-        // Chiều cao vùng in mỗi trang (trừ lề trên + dưới)
         const printH = pageH - marginTop - marginBottom;
+        const scale  = printW / canvas.width;
+        const totalImgH  = canvas.height * scale;
         const totalPages = Math.ceil(totalImgH / printH);
 
         for (let page = 0; page < totalPages; page++) {
           if (page > 0) pdf.addPage();
-          // Tính vùng cắt trên canvas (px)
           const srcYpx = (page * printH) / scale;
           const srcHpx = Math.min(printH / scale, canvas.height - srcYpx);
-
           const pageCanvas = document.createElement('canvas');
           pageCanvas.width  = canvas.width;
           pageCanvas.height = Math.round(srcHpx);
@@ -2105,9 +2096,8 @@
           ctx.fillRect(0, 0, pageCanvas.width, pageCanvas.height);
           ctx.drawImage(canvas, 0, Math.round(srcYpx), canvas.width, Math.round(srcHpx),
                                 0, 0,                  canvas.width, Math.round(srcHpx));
-
           const imgData = pageCanvas.toDataURL('image/jpeg', 0.95);
-          const segH = pageCanvas.height * scale; // chiều cao thực tế đoạn này (mm)
+          const segH = pageCanvas.height * scale;
           pdf.addImage(imgData, 'JPEG', marginLeft, marginTop, printW, segH);
         }
 
@@ -2141,13 +2131,13 @@
               <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-2">
                   🔑 Google Gemini API Key <span class="text-red-500">*</span>
-                  <a href="https://aistudio.google.com/apikey" target="_blank" class="ml-2 text-violet-600 font-normal text-xs hover:underline">(Lấy key miễn phí tại đây ↗)</a>
+                  <a href="https://aistudio.google.com/apikey" target="_blank" class="ml-2 text-violet-600 font-normal text-xs hover:underline">(Lấy key miễn phí ↗)</a>
                 </label>
                 <input type="password" id="aiApiKey"
-                  placeholder="AIza..."
+                  placeholder="AIzaSy..."
                   class="w-full border-2 border-gray-200 rounded-xl px-4 py-2.5 focus:border-violet-500 focus:ring-2 focus:ring-violet-200 transition-all font-mono text-sm"
                   oninput="localStorage.setItem('ai_api_key', this.value)">
-                <p class="text-xs text-gray-400 mt-1">Key được lưu trên trình duyệt của bạn, không gửi đi đâu ngoài Google. Lấy key miễn phí tại <a href="https://aistudio.google.com/apikey" target="_blank" class="text-violet-500 hover:underline">aistudio.google.com/apikey ↗</a></p>
+                <p class="text-xs text-gray-400 mt-1">Key lưu trong trình duyệt của bạn, không chia sẻ với ai.</p>
               </div>
               <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-2">Văn bản nguồn <span class="text-red-500">*</span></label>
@@ -2198,7 +2188,7 @@
         </div>
       `;
       document.getElementById('modalContainer').innerHTML = modal;
-      // Tự điền key đã lưu (nếu có)
+      // Tự điền key đã lưu
       const savedKey = localStorage.getItem('ai_api_key') || '';
       const keyInput = document.getElementById('aiApiKey');
       if (keyInput && savedKey) keyInput.value = savedKey;
@@ -2209,12 +2199,11 @@
     async function generateAiQuestions() {
       const sourceText = document.getElementById('aiSourceText').value.trim();
       if (!sourceText || sourceText.length < 50) return alert('Vui lòng nhập đoạn văn bản (ít nhất 50 ký tự)');
-      
+
       const apiKey = document.getElementById('aiApiKey')?.value.trim();
       if (!apiKey || !apiKey.startsWith('AIza')) {
-        return alert('⚠️ Vui lòng nhập Google Gemini API Key hợp lệ (bắt đầu bằng AIza...)\n\nLấy key miễn phí tại: https://aistudio.google.com/apikey');
+        return alert('⚠️ Vui lòng nhập Google Gemini API Key hợp lệ\n\nLấy key miễn phí tại: https://aistudio.google.com/apikey');
       }
-      // Lưu key vào localStorage cho lần sau
       localStorage.setItem('ai_api_key', apiKey);
       
       const numQ = document.getElementById('aiNumQ').value;
@@ -2268,11 +2257,11 @@ YÊU CẦU:
 
         const data = await response.json();
         const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-        
+
         // Parse JSON
         const jsonMatch = text.match(/\[[\s\S]*\]/);
         if (!jsonMatch) throw new Error('AI không trả về đúng định dạng JSON');
-        
+
         const parsed = JSON.parse(jsonMatch[0]);
         aiGeneratedQuestions = parsed.map(q => ({
           type: 'single',
