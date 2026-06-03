@@ -2062,51 +2062,88 @@
         </div>
       `;
 
-      // Tạo container tạm ẩn để render
-      const container = document.createElement('div');
-      container.style.cssText = 'position:fixed;left:-9999px;top:0;z-index:-1;';
-      container.innerHTML = htmlContent;
-      document.body.appendChild(container);
-
       // Hiện loading
       const btnContainer = document.querySelector('.modal.show .flex.gap-3.pt-2');
       const originalBtns = btnContainer ? btnContainer.innerHTML : '';
       if (btnContainer) btnContainer.innerHTML = '<div style="text-align:center;padding:12px;color:#4338ca;font-weight:600;">⏳ Đang tạo PDF...</div>';
 
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF({ format: 'a4', unit: 'mm', orientation: 'portrait' });
+      const pageW = pdf.internal.pageSize.getWidth();
+      const pageH = pdf.internal.pageSize.getHeight();
+      const printW = pageW - marginLeft - marginRight;
+      const printH = pageH - marginTop - marginBottom;
+      // A4 render width px (794px = 210mm at 96dpi)
+      const renderW = 794;
+      // Chiều cao trang in quy ra px (printH mm -> px)
+      const printHpx = Math.round(printH * renderW / printW);
+
+      // Hàm render 1 nhóm câu hỏi thành canvas
+      async function renderBlock(questionsSlice, isFirst) {
+        const blockHtml = questionsSlice.map((q, i) => bodyHtmlForQ(q, i + (isFirst ? 0 : 0), questions.indexOf(q))).join('');
+        const wrapper = document.createElement('div');
+        wrapper.style.cssText = 'position:fixed;left:-9999px;top:0;z-index:-1;background:white;';
+        wrapper.innerHTML = `<div id="pdf-block" style="
+          font-family:'Times New Roman',Times,serif;
+          width:${renderW}px;
+          padding:${pxTop}px ${pxRight}px ${pxBottom}px ${pxLeft}px;
+          background:white;box-sizing:border-box;color:#111;">
+          ${isFirst ? `<div style="text-align:center;margin-bottom:20px;border-bottom:2px solid #4338ca;padding-bottom:14px;">
+            <div style="font-size:20px;font-weight:900;color:#4338ca;letter-spacing:1px;margin-bottom:4px;">${isAnswerKey ? '🔑 ĐÁP ÁN' : title}</div>
+            ${subject ? `<div style="font-size:13px;color:#6b7280;margin-top:4px;">${subject}</div>` : ''}
+            <div style="font-size:12px;color:#9ca3af;margin-top:4px;">Thời gian: ${duration} phút &nbsp;|&nbsp; Số câu: ${questions.length}</div>
+          </div>` : ''}
+          ${blockHtml}
+        </div>`;
+        document.body.appendChild(wrapper);
+        const c = await html2canvas(wrapper.querySelector('#pdf-block'), { scale:2, useCORS:true, backgroundColor:'#ffffff', logging:false });
+        document.body.removeChild(wrapper);
+        return c;
+      }
+
+      // Hàm sinh HTML 1 câu hỏi (tái sử dụng bodyHtml logic)
+      function bodyHtmlForQ(q, localIdx, globalIdx) {
+        const num = globalIdx + 1;
+        const opts = (q.options||[]).map((o,oi) => {
+          const label = String.fromCharCode(65+oi);
+          const isCorrect = isAnswerKey && (q.correct_answers||[]).includes(oi);
+          return `<div style="margin:3px 0 3px 24px;font-size:13px;${isCorrect?'color:#16a34a;font-weight:700;':''}">
+            ${label}. ${o}${isCorrect?' ✓':''}
+          </div>`;
+        }).join('');
+        return `<div style="margin-bottom:14px;padding:10px 12px;border:1px solid #e5e7eb;border-radius:6px;page-break-inside:avoid;">
+          <div style="font-size:14px;font-weight:700;margin-bottom:6px;">Câu ${num}: ${q.content||''}</div>
+          ${q.image_url?`<img src="${q.image_url}" style="max-width:100%;max-height:180px;margin:6px 0;border-radius:4px;" crossorigin="anonymous">`:''}
+          ${opts}
+        </div>`;
+      }
+
       try {
-        const canvas = await html2canvas(container.querySelector('#pdf-render'), {
-          scale: 2,
-          useCORS: true,
-          backgroundColor: '#ffffff',
-          logging: false
-        });
+        // Phân trang: nhóm câu hỏi sao cho mỗi trang không vượt printHpx
+        // Render thử từng câu để đo chiều cao
+        let pages = [[]];
+        let currentHeightPx = isAnswerKey ? 80 : 120; // header height ước lượng
 
-        const { jsPDF } = window.jspdf;
-        const pdf = new jsPDF({ format: 'a4', unit: 'mm', orientation: 'portrait' });
-        const pageW = pdf.internal.pageSize.getWidth();   // 210mm
-        const pageH = pdf.internal.pageSize.getHeight();  // 297mm
+        for (let i = 0; i < questions.length; i++) {
+          const q = questions[i];
+          // Ước lượng chiều cao câu hỏi (px): 40px base + 20px/đáp án + ảnh
+          const estH = 60 + (q.options||[]).length * 22 + (q.image_url ? 200 : 0);
+          if (currentHeightPx + estH > printHpx && pages[pages.length-1].length > 0) {
+            pages.push([]);
+            currentHeightPx = pxTop + pxBottom;
+          }
+          pages[pages.length-1].push(q);
+          currentHeightPx += estH;
+        }
 
-        const printW = pageW - marginLeft - marginRight;
-        const printH = pageH - marginTop - marginBottom;
-        const scale  = printW / canvas.width;
-        const totalImgH  = canvas.height * scale;
-        const totalPages = Math.ceil(totalImgH / printH);
-
-        for (let page = 0; page < totalPages; page++) {
-          if (page > 0) pdf.addPage();
-          const srcYpx = (page * printH) / scale;
-          const srcHpx = Math.min(printH / scale, canvas.height - srcYpx);
-          const pageCanvas = document.createElement('canvas');
-          pageCanvas.width  = canvas.width;
-          pageCanvas.height = Math.round(srcHpx);
-          const ctx = pageCanvas.getContext('2d');
-          ctx.fillStyle = '#ffffff';
-          ctx.fillRect(0, 0, pageCanvas.width, pageCanvas.height);
-          ctx.drawImage(canvas, 0, Math.round(srcYpx), canvas.width, Math.round(srcHpx),
-                                0, 0,                  canvas.width, Math.round(srcHpx));
-          const imgData = pageCanvas.toDataURL('image/jpeg', 0.95);
-          const segH = pageCanvas.height * scale;
-          pdf.addImage(imgData, 'JPEG', marginLeft, marginTop, printW, segH);
+        // Render từng trang
+        for (let pi = 0; pi < pages.length; pi++) {
+          if (pi > 0) pdf.addPage();
+          const canvas = await renderBlock(pages[pi], pi === 0);
+          const scale = printW / canvas.width;
+          const imgH = canvas.height * scale;
+          const imgData = canvas.toDataURL('image/jpeg', 0.95);
+          pdf.addImage(imgData, 'JPEG', marginLeft, marginTop, printW, imgH);
         }
 
         const filename = isAnswerKey
@@ -2116,7 +2153,6 @@
       } catch(err) {
         alert('Lỗi tạo PDF: ' + err.message);
       } finally {
-        document.body.removeChild(container);
         if (btnContainer && originalBtns) btnContainer.innerHTML = originalBtns;
       }
     }
