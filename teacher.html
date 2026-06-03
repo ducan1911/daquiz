@@ -2248,10 +2248,10 @@ YÊU CẦU:
       try {
         // Thử lần lượt các model cho đến khi thành công
         const models = [
-          'https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent',
-          'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent',
+          'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent',
           'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent',
-          'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent',
+          'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-8b:generateContent',
+          'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent',
         ];
 
         let response, lastError;
@@ -2276,6 +2276,9 @@ YÊU CẦU:
         }
 
         if (!response || !response.ok) {
+          if (lastError && lastError.includes('quota')) {
+            throw new Error('Hết quota miễn phí. Vào https://aistudio.google.com → Billing → bật thanh toán (Google không tự trừ tiền nếu dùng trong giới hạn free)');
+          }
           throw new Error(lastError || 'Không thể kết nối Gemini API');
         }
 
