@@ -2,8 +2,8 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hệ thống trắc nghiệm trực tuyến  - Học sinh</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Thi trắc nghiệm - TC Kinh tế Kỹ thuật TP Cần Thơ</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <script src="supabase-config.js"></script>
@@ -11,6 +11,56 @@
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
     * { font-family: 'Inter', sans-serif; }
+
+    /* ===== MOBILE OPTIMIZATION ===== */
+    /* Ngăn zoom khi tap input trên iOS */
+    input, select, textarea, button {
+      font-size: 16px !important;
+      -webkit-appearance: none;
+    }
+
+    /* Touch target tối thiểu 44px */
+    button, .option-label {
+      min-height: 44px;
+    }
+
+    /* Cải thiện scrolling trên mobile */
+    html { -webkit-overflow-scrolling: touch; }
+
+    /* Nút to hơn trên mobile */
+    @media (max-width: 640px) {
+      .option-label {
+        padding: 14px 16px !important;
+        font-size: 15px !important;
+      }
+      .question-card {
+        padding: 16px !important;
+      }
+      /* Ẩn padding thừa trên mobile */
+      .mobile-compact { padding: 12px !important; }
+    }
+
+    /* Safe area cho iPhone có notch */
+    body {
+      padding-bottom: env(safe-area-inset-bottom);
+      padding-left: env(safe-area-inset-left);
+      padding-right: env(safe-area-inset-right);
+    }
+
+    /* Sticky submit button trên mobile */
+    @media (max-width: 640px) {
+      .submit-sticky {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        padding: 12px 16px;
+        background: white;
+        box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
+        z-index: 20;
+      }
+      .question-list-bottom { padding-bottom: 80px; }
+    }
 
     body { 
       background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
@@ -941,16 +991,7 @@
       });
 
       const pct = totalPoints > 0 ? Math.round((score/totalPoints)*100) : 0;
-
-      // Làm tròn điểm theo quy định giáo dục VN:
-      // Quy về thang 10, làm tròn đến 0.1 (nếu phần lẻ >= 0.05 thì làm tròn lên)
-      function roundScore(raw, total) {
-        if (!total || total === 0) return 0;
-        const on10 = (raw / total) * 10;          // quy về thang 10
-        const rounded = Math.round(on10 * 10) / 10; // làm tròn 1 chữ số thập phân
-        return parseFloat(rounded.toFixed(1));       // đảm bảo hiển thị đúng 1 chữ số
-      }
-      const roundedScore = roundScore(score, totalPoints);
+      const roundedScore = parseFloat(Math.round(score * 10) / 10);
 
       const resultHtml = testData.show_answers ? questionMapping.questionOrder.map((qo, idx) => {
         const q = qMap[qo.questionId]; if (!q) return '';
@@ -1002,7 +1043,7 @@
         <div class="result-card p-8 md:p-10 text-center mb-8 fade-in">
           <div class="relative z-10">
             <div class="text-6xl mb-4">${pct>=80?'🏆':pct>=60?'🎉':pct>=40?'📚':'💪'}</div>
-            <h2 class="text-4xl md:text-5xl font-black mb-3">${roundedScore} / 10</h2>
+            <h2 class="text-4xl md:text-5xl font-black mb-3">${roundedScore} / ${totalPoints}</h2>
             <p class="text-2xl md:text-3xl opacity-90 mb-2">Điểm: ${pct}%</p>
             <p class="text-lg opacity-80 mb-2">Đúng: <strong>${correctCount}</strong> / ${totalQuestions} câu</p>
             <p class="text-xl font-semibold opacity-90 mt-4">
