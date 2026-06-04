@@ -10,6 +10,7 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
   <script src="supabase-config.js"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
@@ -298,6 +299,10 @@
           <span class="text-xl">🏆</span>
           <span>Bảng xếp hạng Live</span>
         </a>
+        <a href="#" onclick="showSection('battle')" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 font-medium text-sm" data-section="battle">
+          <span class="text-xl">⚡</span>
+          <span>Battle Realtime</span>
+        </a>
       </nav>
     </aside>
 
@@ -405,7 +410,58 @@
           </div>
         </div>
       </div>
+
+      <!-- SECTION BATTLE REALTIME -->
+      <div id="section-battle" class="section fade-in">
+        <div class="mb-6">
+          <h2 class="text-3xl font-bold text-gray-800 mb-1">⚡ Battle Realtime</h2>
+          <p class="text-gray-500 text-sm">Học sinh thi đua trả lời nhanh — điểm tính theo độ chính xác và tốc độ</p>
+        </div>
+        <div class="card p-4 mb-6">
+          <div class="flex flex-wrap gap-3 items-center">
+            <select id="battleTestSelect" class="border-2 border-gray-200 rounded-xl px-4 py-2.5 flex-1 min-w-[200px] focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all">
+              <option value="">-- Chọn bài kiểm tra --</option>
+            </select>
+            <button onclick="startBattle()" class="bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-6 py-2.5 rounded-xl font-bold hover:opacity-90 transition-all shadow-lg">
+              ⚡ Bắt đầu Battle
+            </button>
+            <button onclick="stopBattle()" class="bg-red-50 text-red-600 hover:bg-red-100 px-4 py-2.5 rounded-xl font-medium transition-all hidden" id="stopBattleBtn">
+              ⏹ Dừng
+            </button>
+          </div>
+        </div>
+
+        <div id="battleContent">
+          <div class="card p-12 text-center text-gray-400">
+            <div class="text-6xl mb-4">⚡</div>
+            <p class="text-lg font-medium">Chọn bài thi và nhấn "Bắt đầu Battle"</p>
+            <p class="text-sm mt-2">Bảng xếp hạng sẽ cập nhật realtime sau mỗi câu trả lời</p>
+          </div>
+        </div>
+      </div>
+
     </main>
+  </div>
+
+  <!-- MODAL QR CODE -->
+  <div id="qrModal" class="modal fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-sm w-full text-center">
+      <h3 class="text-xl font-bold text-gray-800 mb-1" id="qrTitle">QR Code bài thi</h3>
+      <p class="text-sm text-gray-500 mb-4" id="qrSubtitle">Học sinh quét để vào thi ngay</p>
+      <div id="qrcode" class="flex justify-center mb-4"></div>
+      <div class="bg-gray-50 rounded-xl px-4 py-2 mb-4">
+        <p class="text-xs text-gray-500 mb-1">Hoặc nhập mã</p>
+        <p class="text-3xl font-black tracking-widest text-indigo-600" id="qrCodeText"></p>
+      </div>
+      <div class="flex gap-3">
+        <button onclick="downloadQR()" class="flex-1 bg-indigo-600 text-white py-2.5 rounded-xl font-medium hover:bg-indigo-700 transition-all">
+          📥 Tải về
+        </button>
+        <button onclick="closeQRModal()" class="flex-1 bg-gray-100 text-gray-700 py-2.5 rounded-xl font-medium hover:bg-gray-200 transition-all">
+          Đóng
+        </button>
+      </div>
+    </div>
   </div>
 
   <div id="modalContainer"></div>
@@ -442,7 +498,9 @@
       
       if (name === 'results') loadResultOptions();
       if (name === 'leaderboard') loadLeaderboardOptions();
+      if (name === 'battle') loadBattleOptions();
       if (name !== 'leaderboard') stopLeaderboard();
+      if (name !== 'battle') stopBattle();
     }
 
     async function logout() {
@@ -950,6 +1008,9 @@
               </button>
               <button onclick="openEditTimeModal('${t.id}')" class="bg-yellow-50 text-yellow-600 hover:bg-yellow-100 px-4 py-2 rounded-lg text-sm font-medium transition-all" title="Chỉnh thời gian">
                 🕐
+              </button>
+              <button onclick="showQRModal('${t.test_code}', '${t.title}')" class="bg-blue-50 text-blue-600 hover:bg-blue-100 px-4 py-2 rounded-lg text-sm font-medium transition-all" title="QR Code">
+                📱
               </button>
               <button onclick="deleteTest('${t.id}')" class="bg-red-50 text-red-600 hover:bg-red-100 px-4 py-2 rounded-lg text-sm font-medium transition-all">
                 🗑️
@@ -2730,6 +2791,169 @@ D. 6</code></pre>
 
       return questions;
     }
+
+    // ============================================================
+    // QR CODE
+    // ============================================================
+    function showQRModal(testCode, testTitle) {
+      document.getElementById('qrTitle').textContent = testTitle || 'QR Code bài thi';
+      document.getElementById('qrCodeText').textContent = testCode;
+      const qrDiv = document.getElementById('qrcode');
+      qrDiv.innerHTML = '';
+      const baseUrl = window.location.origin + window.location.pathname.replace('teacher.html','');
+      const url = `${baseUrl}student.html?code=${testCode}`;
+      new QRCode(qrDiv, {
+        text: url,
+        width: 200,
+        height: 200,
+        colorDark: '#312e81',
+        colorLight: '#ffffff',
+        correctLevel: QRCode.CorrectLevel.H
+      });
+      document.getElementById('qrModal').classList.add('show');
+    }
+
+    function closeQRModal() {
+      document.getElementById('qrModal').classList.remove('show');
+    }
+
+    function downloadQR() {
+      const canvas = document.querySelector('#qrcode canvas');
+      if (!canvas) return alert('Không tìm thấy QR code');
+      const link = document.createElement('a');
+      link.download = `QR_${document.getElementById('qrCodeText').textContent}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    }
+
+    // ============================================================
+    // BATTLE REALTIME
+    // ============================================================
+    let battleInterval = null;
+    let battleStartTime = null;
+
+    function loadBattleOptions() {
+      const select = document.getElementById('battleTestSelect');
+      if (!select) return;
+      select.innerHTML = '<option value="">-- Chọn bài kiểm tra --</option>' +
+        allTests.map(t => `<option value="${t.id}">${t.title} (${t.test_code})</option>`).join('');
+    }
+
+    function stopBattle() {
+      if (battleInterval) { clearInterval(battleInterval); battleInterval = null; }
+      const btn = document.getElementById('stopBattleBtn');
+      if (btn) btn.classList.add('hidden');
+    }
+
+    async function startBattle() {
+      const testId = document.getElementById('battleTestSelect').value;
+      if (!testId) return alert('Vui lòng chọn bài kiểm tra');
+      battleStartTime = Date.now();
+      stopBattle();
+      await renderBattle(testId);
+      battleInterval = setInterval(() => renderBattle(testId), 3000);
+      const btn = document.getElementById('stopBattleBtn');
+      if (btn) btn.classList.remove('hidden');
+    }
+
+    async function renderBattle(testId) {
+      const test = allTests.find(t => t.id === testId);
+      if (!test) return;
+
+      const { data: submissions } = await supabase
+        .from('submissions')
+        .select('*')
+        .eq('test_id', testId)
+        .order('score', { ascending: false });
+
+      const all = submissions || [];
+      const completed = all.filter(s => s.status === 'submitted' || s.status === 'timed-out');
+      const inProgress = all.filter(s => s.status === 'in-progress');
+      const totalPoints = test.questions.reduce((s, q) => s + (q.points || 1), 0);
+
+      // Tính battle score: điểm + bonus tốc độ
+      const scored = completed.map(sub => {
+        const accuracy = totalPoints > 0 ? (sub.score || 0) / totalPoints : 0;
+        const timeTaken = sub.submitted_at && sub.started_at
+          ? (new Date(sub.submitted_at) - new Date(sub.started_at)) / 1000
+          : test.duration * 60;
+        const maxTime = test.duration * 60;
+        const speedBonus = accuracy > 0 ? Math.max(0, (1 - timeTaken / maxTime) * 20 * accuracy) : 0;
+        const battleScore = Math.round(accuracy * 100 + speedBonus);
+        const mins = Math.floor(timeTaken / 60);
+        const secs = Math.floor(timeTaken % 60);
+        return { ...sub, battleScore, timeTaken, timeStr: `${mins}:${secs.toString().padStart(2,'0')}`, accuracy };
+      }).sort((a, b) => b.battleScore - a.battleScore);
+
+      const rankEmojis = ['🥇', '🥈', '🥉'];
+      const maxBattle = scored[0]?.battleScore || 100;
+
+      const rows = scored.slice(0, 50).map((sub, i) => {
+        const pct = Math.round(sub.accuracy * 100);
+        const barW = Math.round((sub.battleScore / maxBattle) * 100);
+        const color = i === 0 ? '#f59e0b' : i === 1 ? '#94a3b8' : i === 2 ? '#f97316' : '#6366f1';
+        return `
+          <div class="leaderboard-row" style="animation-delay:${i*0.05}s">
+            <div class="w-10 text-center text-2xl font-black mr-3">${rankEmojis[i] || `<span class="text-base font-bold text-gray-500">${i+1}</span>`}</div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center justify-between mb-1">
+                <p class="font-bold text-gray-800 truncate">${sub.student_name || 'Ẩn danh'}</p>
+                <span class="text-xs text-gray-400 ml-2 whitespace-nowrap">⏱ ${sub.timeStr}</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <div class="flex-1 bg-gray-100 rounded-full h-2.5 overflow-hidden">
+                  <div class="h-2.5 rounded-full transition-all duration-700" style="width:${barW}%;background:${color}"></div>
+                </div>
+                <span class="text-xs font-medium text-gray-500 whitespace-nowrap">${pct}% chính xác</span>
+              </div>
+            </div>
+            <div class="ml-3 text-right">
+              <div class="text-2xl font-black" style="color:${color}">${sub.battleScore}</div>
+              <div class="text-xs text-gray-400">battle pts</div>
+            </div>
+          </div>`;
+      }).join('');
+
+      const container = document.getElementById('battleContent');
+      if (!container) return;
+      container.innerHTML = `
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+          <div class="stat-card text-center">
+            <div class="text-3xl mb-1">✅</div>
+            <div class="text-3xl font-bold">${completed.length}</div>
+            <div class="text-sm opacity-80">Đã nộp</div>
+          </div>
+          <div class="stat-card text-center">
+            <div class="text-3xl mb-1">✏️</div>
+            <div class="text-3xl font-bold">${inProgress.length}</div>
+            <div class="text-sm opacity-80">Đang thi</div>
+          </div>
+          <div class="stat-card text-center">
+            <div class="text-3xl mb-1">🏆</div>
+            <div class="text-3xl font-bold">${scored[0]?.battleScore || '--'}</div>
+            <div class="text-sm opacity-80">Điểm cao nhất</div>
+          </div>
+          <div class="stat-card text-center">
+            <div class="text-3xl mb-1">⚡</div>
+            <div class="text-3xl font-bold">${scored[0]?.student_name?.split(' ').pop() || '--'}</div>
+            <div class="text-sm opacity-80">Dẫn đầu</div>
+          </div>
+        </div>
+        <div class="card p-6">
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <h3 class="text-xl font-bold text-gray-800">⚡ Bảng xếp hạng Battle</h3>
+              <p class="text-xs text-gray-400 mt-1">Điểm = độ chính xác + bonus tốc độ</p>
+            </div>
+            <div class="flex items-center gap-2 text-sm">
+              <span class="inline-block w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+              <span class="text-gray-500">Live • ${new Date().toLocaleTimeString('vi-VN')}</span>
+            </div>
+          </div>
+          ${rows || '<div class="text-center py-12 text-gray-400"><div class="text-5xl mb-3">⏳</div><p>Chưa có học sinh nộp bài</p></div>'}
+        </div>`;
+    }
+
   </script>
 </body>
 </html>
