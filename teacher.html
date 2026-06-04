@@ -444,18 +444,20 @@
   </div>
 
   <!-- MODAL QR CODE -->
-  <div id="qrModal" class="modal fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+  <div id="qrModal" class="modal fixed inset-0 bg-black bg-opacity-50 z-50 items-center justify-center p-4">
     <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-sm w-full text-center">
+      <div class="text-4xl mb-3">📱</div>
       <h3 class="text-xl font-bold text-gray-800 mb-1" id="qrTitle">QR Code bài thi</h3>
-      <p class="text-sm text-gray-500 mb-4" id="qrSubtitle">Học sinh quét để vào thi ngay</p>
+      <p class="text-sm text-gray-500 mb-5">Học sinh dùng điện thoại quét để vào thi ngay</p>
       <div id="qrcode" class="flex justify-center mb-4"></div>
-      <div class="bg-gray-50 rounded-xl px-4 py-2 mb-4">
-        <p class="text-xs text-gray-500 mb-1">Hoặc nhập mã</p>
+      <div class="bg-indigo-50 rounded-xl px-4 py-3 mb-5">
+        <p class="text-xs text-gray-500 mb-1">Hoặc nhập mã thi</p>
         <p class="text-3xl font-black tracking-widest text-indigo-600" id="qrCodeText"></p>
       </div>
+      <p class="text-xs text-gray-400 mb-4" id="qrUrlText"></p>
       <div class="flex gap-3">
         <button onclick="downloadQR()" class="flex-1 bg-indigo-600 text-white py-2.5 rounded-xl font-medium hover:bg-indigo-700 transition-all">
-          📥 Tải về
+          📥 Tải QR về
         </button>
         <button onclick="closeQRModal()" class="flex-1 bg-gray-100 text-gray-700 py-2.5 rounded-xl font-medium hover:bg-gray-200 transition-all">
           Đóng
@@ -2798,10 +2800,11 @@ D. 6</code></pre>
     function showQRModal(testCode, testTitle) {
       document.getElementById('qrTitle').textContent = testTitle || 'QR Code bài thi';
       document.getElementById('qrCodeText').textContent = testCode;
+      const baseUrl = window.location.href.replace('teacher.html', '').replace('#', '');
+      const url = `${baseUrl}student.html?code=${testCode}`;
+      document.getElementById('qrUrlText').textContent = url;
       const qrDiv = document.getElementById('qrcode');
       qrDiv.innerHTML = '';
-      const baseUrl = window.location.origin + window.location.pathname.replace('teacher.html','');
-      const url = `${baseUrl}student.html?code=${testCode}`;
       new QRCode(qrDiv, {
         text: url,
         width: 200,
