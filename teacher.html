@@ -272,13 +272,9 @@
         </div>
       </div>
       <div class="flex items-center gap-4">
-        <div class="hidden md:flex items-center gap-2 bg-gradient-to-r from-indigo-50 to-purple-50 px-4 py-2 rounded-xl">
-          <span class="text-2xl">👨‍🏫</span>
-          <span id="teacherName" class="text-gray-700 text-sm font-medium"></span>
-        </div>
         <button onclick="showSection('profile')" class="hidden md:flex items-center gap-2 text-sm bg-gradient-to-r from-indigo-50 to-purple-50 hover:from-indigo-100 hover:to-purple-100 text-indigo-700 px-4 py-2 rounded-xl transition-all font-medium border border-indigo-100">
           <span id="teacherAvatarBtn" class="w-7 h-7 rounded-full bg-indigo-200 flex items-center justify-center text-sm font-bold overflow-hidden">👤</span>
-          <span class="hidden lg:inline">Hồ sơ</span>
+          <span id="teacherName" class="hidden lg:inline text-gray-700 text-sm font-medium"></span>
         </button>
         <button onclick="logout()" class="text-sm bg-gradient-to-r from-red-500 to-pink-500 text-white hover:from-red-600 hover:to-pink-600 px-4 py-2 rounded-xl transition-all font-medium shadow-md hover:shadow-lg">
           Đăng xuất 🚪
@@ -310,7 +306,7 @@
           <span class="text-xl">⚡</span>
           <span>Battle Realtime</span>
         </a>
-        <a href="#" onclick="showSection('profile')" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 font-medium text-sm" data-section="profile">
+        <a href="#" onclick="showSection('profile')" class="sidebar-link hidden flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 font-medium text-sm" data-section="profile">
           <span class="text-xl">👤</span>
           <span>Hồ sơ cá nhân</span>
         </a>
