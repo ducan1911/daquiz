@@ -162,18 +162,94 @@ CREATE INDEX idx_sub_test ON submissions(test_id);
 CREATE INDEX idx_sub_student ON submissions(student_id);
 CREATE INDEX idx_sub_class ON submissions(class_id);
 
--- Thêm cột test_code vào bảng tests
+-- ============================================
+-- CẬP NHẬT TÍNH NĂNG: LÀM BÀI BẰNG MÃ (TEST CODE)
+-- ============================================
+
+-- 1. Thêm cột test_code vào bảng tests (hỗ trợ mã tham gia giống Kahoot)
 ALTER TABLE tests ADD COLUMN IF NOT EXISTS test_code TEXT UNIQUE;
 
--- Tạo index cho test_code
+-- 2. Tạo index cho test_code để tăng tốc độ tìm kiếm bài thi của học sinh
 CREATE INDEX IF NOT EXISTS idx_tests_code ON tests(test_code);
 
--- Cập nhật bảng submissions: thêm cột student_name (học sinh tự nhập tên)
+-- 3. Cập nhật bảng submissions để hỗ trợ học sinh vãng lai (Guest)
 ALTER TABLE submissions ADD COLUMN IF NOT EXISTS student_name TEXT;
 
--- Cho phép đọc tests theo test_code
-CREATE POLICY IF NOT EXISTS "tests_select_by_code" ON tests FOR SELECT TO anon USING (true);
-
--- Cho phép submissions không cần student_id
+-- Bỏ bắt buộc (NOT NULL) đối với student_id và class_id
 ALTER TABLE submissions ALTER COLUMN student_id DROP NOT NULL;
 ALTER TABLE submissions ALTER COLUMN class_id DROP NOT NULL;
+
+-- (Ghi chú: Đã bỏ qua lệnh tạo Policy "tests_select_by_code" vì 
+-- Policy "tests_select_anon" ở script trước đã cho phép quyền này).
+
+-- ============================================
+-- FIX LỖI 403 Forbidden khi học sinh nộp bài
+-- Chạy file này trong Supabase SQL Editor
+-- ============================================
+
+-- Bước 1: Đảm bảo student_id và class_id không bắt buộc
+-- (học sinh không cần đăng nhập)
+ALTER TABLE submissions ALTER COLUMN student_id DROP NOT NULL;
+ALTER TABLE submissions ALTER COLUMN class_id DROP NOT NULL;
+
+-- Bước 2: Xóa policies cũ liên quan submissions (nếu tồn tại)
+DROP POLICY IF EXISTS "sub_insert_anon" ON submissions;
+DROP POLICY IF EXISTS "sub_update_anon" ON submissions;
+DROP POLICY IF EXISTS "sub_select_anon" ON submissions;
+DROP POLICY IF EXISTS "sub_select_teacher" ON submissions;
+
+-- Bước 3: Tạo lại policies cho anon (học sinh không đăng nhập)
+CREATE POLICY "sub_insert_anon" ON submissions
+  FOR INSERT TO anon WITH CHECK (true);
+
+CREATE POLICY "sub_update_anon" ON submissions
+  FOR UPDATE TO anon USING (true) WITH CHECK (true);
+
+CREATE POLICY "sub_select_anon" ON submissions
+  FOR SELECT TO anon USING (true);
+
+-- Bước 4: Policy cho giáo viên (authenticated)
+CREATE POLICY "sub_select_teacher" ON submissions
+  FOR SELECT TO authenticated
+  USING (test_id IN (SELECT id FROM tests WHERE teacher_id = auth.uid()));
+
+CREATE POLICY "sub_all_teacher" ON submissions
+  FOR ALL TO authenticated
+  USING (test_id IN (SELECT id FROM tests WHERE teacher_id = auth.uid()));
+
+-- Xác nhận RLS đang bật
+ALTER TABLE submissions ENABLE ROW LEVEL SECURITY;
+
+-- Xem tất cả bài kiểm tra
+SELECT * FROM tests;
+
+-- Xem kết quả của 1 bài kiểm tra cụ thể
+SELECT 
+  s.student_name,
+  s.score,
+  s.total_points,
+  s.submitted_at,
+  t.title as test_title
+FROM submissions s
+JOIN tests t ON s.test_id = t.id
+WHERE t.test_code = 'ABC123'
+ORDER BY s.score DESC;
+
+-- Xem câu hỏi của 1 giáo viên
+SELECT * FROM questions 
+WHERE teacher_id = 'your-teacher-id';
+
+ALTER TABLE questions ADD COLUMN IF NOT EXISTS image_url TEXT;
+
+-- Cho phép giáo viên upload
+CREATE POLICY "Teachers upload" ON storage.objects
+  FOR INSERT TO authenticated
+  WITH CHECK (bucket_id = 'question-images');
+
+-- Cho phép mọi người xem
+CREATE POLICY "Public view" ON storage.objects
+  FOR SELECT TO public
+  USING (bucket_id = 'question-images');
+ALTER TABLE questions ADD COLUMN IF NOT EXISTS image_url TEXT;
+-- Thêm cột avatar_url cho giáo viên
+ALTER TABLE teachers ADD COLUMN IF NOT EXISTS avatar_url TEXT;
