@@ -1096,9 +1096,9 @@
       tabSwitchCount = 0;
 
       // Phát hiện chuyển tab / ẩn trang
-      document.addEventListener('visibilitychange', handleVisibilityChange);
+      // document.addEventListener('visibilitychange', handleVisibilityChange);
       // Phát hiện mất focus cửa sổ
-      window.addEventListener('blur', handleWindowBlur);
+      // window.addEventListener('blur', handleWindowBlur);
       // Chặn copy/paste
       document.addEventListener('copy', e => { if (antiCheatActive) e.preventDefault(); });
       document.addEventListener('cut', e => { if (antiCheatActive) e.preventDefault(); });
