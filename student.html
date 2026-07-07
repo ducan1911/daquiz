@@ -1052,7 +1052,7 @@
               ${pct>=80?'🌟 Xuất sắc! Tiếp tục phát huy!':pct>=60?'👍 Tốt lắm! Cố gắng thêm nhé!':pct>=40?'📚 Cần cố gắng nhiều hơn!':'💪 Đừng nản chí, hãy ôn tập lại nhé!'}
             </p>
             <p class="text-sm opacity-70 mt-4">Học sinh: ${escapeHtml(studentName)}</p>
-            ${tabSwitchCount > 0 ? `
+            ${tabSwitchCount > 0 && strictConfig.track_violations ? `
               <p class="text-sm mt-3 bg-white bg-opacity-20 inline-block px-4 py-1.5 rounded-full">
                 🚫 Số lần vi phạm quy chế thi (chuyển tab/thu nhỏ cửa sổ): <strong>${tabSwitchCount}</strong>
               </p>` : ''}
@@ -1113,6 +1113,7 @@
         enabled: !!sm.enabled,
         block_tab_switch: sm.block_tab_switch !== false,
         max_violations: parseInt(sm.max_violations) || 3,
+        track_violations: sm.track_violations !== false, // mặc định bật nếu không có giá trị
         block_copy_paste: sm.block_copy_paste !== false,
         block_right_click: sm.block_right_click !== false,
         block_devtools: sm.block_devtools !== false,
@@ -1125,6 +1126,7 @@
       if (!sm.enabled) return '';
       const items = [];
       if (sm.block_tab_switch) items.push(`Không chuyển tab / thu nhỏ cửa sổ (tối đa ${sm.max_violations} lần vi phạm)`);
+      if (sm.track_violations !== false) items.push('Số lần vi phạm sẽ được ghi lại trong kết quả');
       if (sm.block_copy_paste) items.push('Không sao chép / cắt nội dung');
       if (sm.block_right_click) items.push('Không dùng chuột phải');
       if (sm.block_devtools) items.push('Không mở công cụ lập trình (DevTools)');
@@ -1152,10 +1154,14 @@
       tabSwitchCount = 0;
 
       if (strictConfig.block_tab_switch) {
-        // Phát hiện chuyển tab / ẩn trang
+        // Phát hiện chuyển tab / ẩn trang — có cảnh báo và tự nộp bài
         document.addEventListener('visibilitychange', handleVisibilityChange);
         // Phát hiện mất focus cửa sổ
         window.addEventListener('blur', handleWindowBlur);
+      } else if (strictConfig.track_violations) {
+        // Chỉ ghi nhận vi phạm âm thầm (không cảnh báo, không tự nộp bài)
+        document.addEventListener('visibilitychange', handleVisibilityChangeSilent);
+        window.addEventListener('blur', handleWindowBlurSilent);
       }
       if (strictConfig.block_copy_paste) {
         // Chặn copy/cut
@@ -1181,7 +1187,9 @@
     function deactivateAntiCheat() {
       antiCheatActive = false;
       document.removeEventListener('visibilitychange', handleVisibilityChange);
+      document.removeEventListener('visibilitychange', handleVisibilityChangeSilent);
       window.removeEventListener('blur', handleWindowBlur);
+      window.removeEventListener('blur', handleWindowBlurSilent);
       document.removeEventListener('copy', handleCopyPasteBlock);
       document.removeEventListener('cut', handleCopyPasteBlock);
       document.removeEventListener('contextmenu', handleRightClickBlock);
@@ -1239,21 +1247,37 @@
         <div style="display:flex;align-items:center;gap:8px;">
           <span style="color:#4ade80">🛡️</span> Nghiêm túc: ${icons.join(' · ') || 'đang bật'}
         </div>
-        ${strictConfig.block_tab_switch ? `<div id="antiCheatBannerCount" style="font-size:11px;opacity:0.85;">🚫 Vi phạm: 0/${strictConfig.max_violations}</div>` : ''}
+        ${strictConfig.block_tab_switch ? `<div id="antiCheatBannerCount" style="font-size:11px;opacity:0.85;">🚫 Vi phạm: 0/${strictConfig.max_violations}${strictConfig.track_violations ? ' · 📊 Ghi lại' : ''}</div>` : ''}
       `;
       document.body.appendChild(banner);
     }
 
-    // Lưu số lần vi phạm (chuyển tab/thu nhỏ cửa sổ/thoát toàn màn hình) vào Supabase
-    // để giáo viên xem trong Bảng điểm chi tiết và có thể trừ điểm.
+    // Lưu số lần vi phạm vào Supabase — chỉ khi giáo viên bật tính năng ghi nhận vi phạm
     async function saveViolationCount(count) {
       if (!submissionId) return;
+      if (!strictConfig.track_violations) return; // Giáo viên tắt ghi nhận vi phạm
       try {
         await supabase.from('submissions').update({ tab_switch_count: count }).eq('id', submissionId);
       } catch (e) {
         console.error('Lỗi lưu số lần vi phạm:', e);
       }
     }
+
+    // ---- Ghi nhận vi phạm âm thầm (track_violations bật, block_tab_switch tắt) ----
+    function handleVisibilityChangeSilent() {
+      if (!antiCheatActive || currentScreen !== 'taking') return;
+      if (document.hidden) {
+        tabSwitchCount++;
+        saveViolationCount(tabSwitchCount); // chỉ ghi DB, không cảnh báo
+      }
+    }
+
+    function handleWindowBlurSilent() {
+      if (!antiCheatActive || currentScreen !== 'taking') return;
+      tabSwitchCount++;
+      saveViolationCount(tabSwitchCount);
+    }
+    // ---- Kết thúc silent listeners ----
 
     function handleVisibilityChange() {
       if (!antiCheatActive || currentScreen !== 'taking' || !strictConfig.block_tab_switch) return;
