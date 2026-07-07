@@ -486,6 +486,17 @@
         showCodeInput();
         return;
       }
+
+      // Khi học sinh đóng/reload trang giữa chừng → đánh dấu "đã thoát" để xử lý khi vào lại
+      window.addEventListener('beforeunload', () => {
+        if (currentScreen !== 'taking' || !submissionId) return;
+        // Lưu vào sessionStorage: sẽ được đọc khi học sinh vào lại cùng trình duyệt
+        sessionStorage.setItem('exitedSubmission', JSON.stringify({
+          submissionId,
+          exitViolations: tabSwitchCount + 1 // +1 cho lần thoát này
+        }));
+      });
+
       await askName();
     }
 
@@ -628,7 +639,6 @@
                 optionMappings: inProgressSub.option_mappings
               };
             } else {
-              // Nếu chưa có mapping (trường hợp cũ), tạo mới
               questionMapping = buildQuestionMapping(testData);
               await supabase.from('submissions').update({
                 question_order: questionMapping.questionOrder,
@@ -636,9 +646,53 @@
               }).eq('id', submissionId);
             }
 
+            // Khôi phục số vi phạm cũ từ DB
+            tabSwitchCount = inProgressSub.tab_switch_count || 0;
+
+            // Kiểm tra sessionStorage xem có lần thoát trang nào chưa được ghi không
+            const exitedData = sessionStorage.getItem('exitedSubmission');
+            if (exitedData) {
+              try {
+                const { submissionId: exitId, exitViolations } = JSON.parse(exitedData);
+                if (exitId === submissionId && exitViolations > tabSwitchCount) {
+                  tabSwitchCount = exitViolations;
+                  // Ghi lên DB ngay
+                  await supabase.from('submissions').update({ tab_switch_count: tabSwitchCount }).eq('id', submissionId);
+                }
+              } catch(e) {}
+              sessionStorage.removeItem('exitedSubmission');
+            }
+
             // Tính thời gian kết thúc dựa trên thời gian bắt đầu ban đầu
             const startedAt = new Date(inProgressSub.started_at);
             const endTime = new Date(startedAt.getTime() + testData.duration * 60000);
+
+            // Lấy strict config để kiểm tra vi phạm
+            const sm = getStrictConfig(testData);
+
+            // Nếu đã vượt max_violations → tự nộp bài ngay, không cho làm tiếp
+            if (sm.enabled && sm.block_tab_switch && tabSwitchCount >= sm.max_violations) {
+              currentScreen = 'taking'; // cần set để submitTest chạy được
+              submissionData.answers = inProgressSub.answers || [];
+              // Render nhanh rồi nộp
+              document.getElementById('mainContent').innerHTML = `
+                <div class="text-center py-20">
+                  <div class="text-6xl mb-4">🚫</div>
+                  <p class="text-red-600 font-bold text-xl mb-2">Vi phạm quy định thi!</p>
+                  <p class="text-gray-500">Bài thi đang được nộp tự động...</p>
+                </div>`;
+              await supabase.from('submissions').update({
+                status: 'submitted',
+                submitted_at: new Date().toISOString(),
+                answers: inProgressSub.answers || [],
+                tab_switch_count: tabSwitchCount
+              }).eq('id', submissionId);
+              const score = await gradeTest(testData, inProgressSub.answers || [], questionMapping);
+              const totalPoints = (questionMapping.questionOrder||[]).reduce((sum, q) => sum + (q.points||1), 0);
+              await supabase.from('submissions').update({ score, total_points: totalPoints }).eq('id', submissionId);
+              await showResult(score, inProgressSub.answers || []);
+              return;
+            }
 
             currentScreen = 'taking';
             document.getElementById('studentInfo').innerHTML = `
@@ -651,6 +705,26 @@
             await renderTestTaking(endTime);
             startAutoSave();
             activateAntiCheat();
+
+            // Hiện cảnh báo nếu đã có vi phạm từ trước
+            if (sm.enabled && sm.block_tab_switch && tabSwitchCount > 0) {
+              const remaining = sm.max_violations - tabSwitchCount;
+              const warn = document.createElement('div');
+              warn.style.cssText = `
+                position: fixed; top: 80px; left: 50%; transform: translateX(-50%);
+                z-index: 9999; background: linear-gradient(135deg, #dc2626, #b91c1c);
+                color: white; padding: 16px 24px; border-radius: 16px;
+                box-shadow: 0 16px 48px rgba(220,38,38,0.4);
+                font-weight: 700; text-align: center; max-width: 380px; width: 90%;
+              `;
+              warn.innerHTML = `
+                <div style="font-size:22px;margin-bottom:6px">⚠️ Bạn đã thoát khỏi bài thi!</div>
+                <p style="font-size:13px;font-weight:600">Vi phạm hiện tại: ${tabSwitchCount}/${sm.max_violations}</p>
+                <p style="font-size:12px;opacity:0.9;margin-top:4px">Còn ${remaining} lần trước khi bài thi bị nộp tự động</p>
+              `;
+              document.body.appendChild(warn);
+              setTimeout(() => warn.remove(), 5000);
+            }
             return;
           } else {
             // Xóa bài cũ và tạo bài mới
