@@ -253,3 +253,24 @@ CREATE POLICY "Public view" ON storage.objects
 ALTER TABLE questions ADD COLUMN IF NOT EXISTS image_url TEXT;
 -- Thêm cột avatar_url cho giáo viên
 ALTER TABLE teachers ADD COLUMN IF NOT EXISTS avatar_url TEXT;
+
+-- ============================================================
+-- CẬP NHẬT: CHẾ ĐỘ THI NGHIÊM TÚC (STRICT MODE) - BẬT/TẮT TỪNG TÍNH NĂNG
+-- ============================================================
+-- Lưu cấu hình nghiêm túc dạng JSON để giáo viên bật/tắt riêng từng phần:
+--   enabled            : bật/tắt tổng chế độ nghiêm túc
+--   block_tab_switch    : phát hiện chuyển tab / thu nhỏ cửa sổ
+--   max_violations      : số lần vi phạm tối đa trước khi tự nộp bài
+--   block_copy_paste    : chặn sao chép / cắt
+--   block_right_click   : chặn chuột phải
+--   block_devtools      : chặn phím tắt mở DevTools / xem mã nguồn
+--   require_fullscreen  : bắt buộc toàn màn hình khi làm bài
+ALTER TABLE tests ADD COLUMN IF NOT EXISTS strict_mode JSONB DEFAULT '{
+  "enabled": false,
+  "block_tab_switch": true,
+  "max_violations": 3,
+  "block_copy_paste": true,
+  "block_right_click": true,
+  "block_devtools": true,
+  "require_fullscreen": false
+}'::jsonb;
