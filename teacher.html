@@ -1082,11 +1082,17 @@
               <button onclick="viewTestDetails('${t.id}')" class="flex-1 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 px-4 py-2 rounded-lg text-sm font-medium transition-all">
                 👁️ Xem chi tiết
               </button>
+              <button onclick="duplicateTest('${t.id}')" class="bg-teal-50 text-teal-600 hover:bg-teal-100 px-4 py-2 rounded-lg text-sm font-medium transition-all" title="Nhân bản bài thi">
+                📋
+              </button>
               <button onclick="openEditTimeModal('${t.id}')" class="bg-yellow-50 text-yellow-600 hover:bg-yellow-100 px-4 py-2 rounded-lg text-sm font-medium transition-all" title="Chỉnh thời gian">
                 🕐
               </button>
               <button onclick="showQRModal('${t.test_code}', '${t.title}')" class="bg-blue-50 text-blue-600 hover:bg-blue-100 px-4 py-2 rounded-lg text-sm font-medium transition-all" title="QR Code">
                 📱
+              </button>
+              <button onclick="exportExamPDF('${t.id}')" class="bg-purple-50 text-purple-600 hover:bg-purple-100 px-4 py-2 rounded-lg text-sm font-medium transition-all" title="Xuất đề thi PDF">
+                📄
               </button>
               <button onclick="deleteTest('${t.id}')" class="bg-red-50 text-red-600 hover:bg-red-100 px-4 py-2 rounded-lg text-sm font-medium transition-all">
                 🗑️
@@ -1101,6 +1107,55 @@
       if (!confirm('Xóa bài kiểm tra này?')) return;
       await supabase.from('tests').delete().eq('id', id);
       await loadTests();
+    }
+
+    async function duplicateTest(id) {
+      const src = allTests.find(t => t.id === id);
+      if (!src) return;
+
+      // Sinh mã thi mới 6 ký tự chưa trùng
+      const genCode = () => Math.random().toString(36).substring(2, 8).toUpperCase();
+      let newCode = genCode();
+      const existingCodes = new Set(allTests.map(t => t.test_code));
+      while (existingCodes.has(newCode)) newCode = genCode();
+
+      // Đặt thời gian mở mặc định là ngay bây giờ + 1 ngày
+      const now = new Date();
+      const start = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+      const end   = new Date(now.getTime() + 48 * 60 * 60 * 1000);
+
+      const { data, error } = await supabase.from('tests').insert({
+        teacher_id: src.teacher_id,
+        title: src.title + ' (Bản sao)',
+        duration: src.duration,
+        shuffle_questions: src.shuffle_questions,
+        shuffle_options: src.shuffle_options,
+        max_attempts: src.max_attempts,
+        show_answers: src.show_answers,
+        start_time: start.toISOString(),
+        end_time: end.toISOString(),
+        questions: src.questions,
+        test_code: newCode,
+        strict_mode: src.strict_mode
+      }).select().single();
+
+      if (error) return alert('Lỗi nhân bản: ' + error.message);
+
+      await loadTests();
+      // Cuộn lên đầu và highlight bài mới
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      setTimeout(() => {
+        const cards = document.querySelectorAll('.card');
+        cards.forEach(c => {
+          if (c.textContent.includes(newCode)) {
+            c.style.outline = '2px solid #14b8a6';
+            c.style.outlineOffset = '3px';
+            setTimeout(() => { c.style.outline = ''; c.style.outlineOffset = ''; }, 3000);
+          }
+        });
+      }, 500);
+
+      alert(`✅ Đã nhân bản thành công!\nMã thi mới: ${newCode}\nThời gian mở: ${start.toLocaleString('vi-VN')}`);
     }
 
     function openEditTimeModal(testId) {
@@ -1868,9 +1923,14 @@
         <div class="card p-6 mb-6">
           <div class="flex items-center justify-between mb-4">
             <h3 class="text-xl font-bold text-gray-800">📝 Kết quả chi tiết</h3>
-            <button onclick="exportToExcel('${testId}')" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all">
-              📥 Xuất Excel
-            </button>
+            <div class="flex gap-2">
+              <button onclick="exportToExcel('${testId}')" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all">
+                📥 Xuất Excel
+              </button>
+              <button onclick="exportResultsPDF('${testId}')" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all">
+                📄 Xuất PDF
+              </button>
+            </div>
           </div>
           <div class="overflow-x-auto">
             <table class="w-full text-sm">
@@ -3510,6 +3570,192 @@ D. 6</code></pre>
           </div>
           ${rows || '<div class="text-center py-12 text-gray-400"><div class="text-5xl mb-3">⏳</div><p>Chưa có học sinh nộp bài</p></div>'}
         </div>`;
+    }
+
+    // ================================================================
+    // XUẤT PDF — dùng thư viện jsPDF + jsPDF-AutoTable (CDN)
+    // ================================================================
+
+    function loadJsPDF() {
+      return new Promise((resolve) => {
+        if (window.jspdf) { resolve(); return; }
+        const s1 = document.createElement('script');
+        s1.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+        s1.onload = () => {
+          const s2 = document.createElement('script');
+          s2.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js';
+          s2.onload = resolve;
+          document.head.appendChild(s2);
+        };
+        document.head.appendChild(s1);
+      });
+    }
+
+    // --- Xuất BẢNG ĐIỂM sang PDF ---
+    async function exportResultsPDF(testId) {
+      const test = allTests.find(t => t.id === testId);
+      if (!test) return alert('Không tìm thấy bài kiểm tra');
+
+      const { data: submissions } = await supabase
+        .from('submissions').select('*').eq('test_id', testId)
+        .in('status', ['submitted', 'timed-out']).order('score', { ascending: false });
+
+      if (!submissions?.length) return alert('Chưa có dữ liệu để xuất');
+
+      await loadJsPDF();
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+
+      const totalPoints = test.questions
+        ? test.questions.reduce((s, q) => s + (q.points || 1), 0) : (test.total_points || 0);
+
+      // Tiêu đề
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(14);
+      doc.text('BANG DIEM KIEM TRA', 148, 16, { align: 'center' });
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Bai thi: ${test.title}`, 148, 23, { align: 'center' });
+      doc.text(`Ma thi: ${test.test_code}   |   So cau: ${test.questions?.length || 0}   |   Thoi gian: ${test.duration} phut   |   Ngay xuat: ${new Date().toLocaleDateString('vi-VN')}`, 148, 29, { align: 'center' });
+
+      const rows = submissions.map((sub, i) => {
+        const raw = roundScore(sub.score || 0, totalPoints);
+        const penalty = parseFloat(sub.penalty_points) || 0;
+        const final = Math.max(0, parseFloat((raw - penalty).toFixed(1)));
+        return [
+          i + 1,
+          sub.student_name || '',
+          sub.attempt_number || 1,
+          raw,
+          sub.tab_switch_count || 0,
+          penalty,
+          final,
+          `${((final / 10) * 100).toFixed(1)}%`,
+          calculateTimeSpent(sub),
+          sub.status === 'submitted' ? 'Da nop' : 'Het gio'
+        ];
+      });
+
+      doc.autoTable({
+        startY: 34,
+        head: [['STT', 'Ho ten', 'Lan thi', 'Diem goc', 'Vi pham', 'Tru diem', 'Diem cuoi', '%', 'TG lam', 'Trang thai']],
+        body: rows,
+        styles: { fontSize: 9, cellPadding: 3, halign: 'center' },
+        columnStyles: { 1: { halign: 'left', cellWidth: 52 } },
+        headStyles: { fillColor: [79, 70, 229], textColor: 255, fontStyle: 'bold' },
+        alternateRowStyles: { fillColor: [245, 245, 255] },
+        margin: { left: 10, right: 10 }
+      });
+
+      // Footer tổng kết
+      const avg = submissions.reduce((s, sub) => {
+        const raw = roundScore(sub.score || 0, totalPoints);
+        const penalty = parseFloat(sub.penalty_points) || 0;
+        return s + Math.max(0, raw - penalty);
+      }, 0) / submissions.length;
+      const finalY = doc.lastAutoTable.finalY + 6;
+      doc.setFontSize(9);
+      doc.text(`Tong so: ${submissions.length} hoc sinh   |   Diem trung binh: ${avg.toFixed(2)}/10`, 10, finalY);
+
+      doc.save(`BangDiem_${test.title}_${new Date().toISOString().split('T')[0]}.pdf`);
+    }
+
+    // --- Xuất ĐỀ THI sang PDF (không lộ đáp án) ---
+    async function exportExamPDF(testId) {
+      const test = allTests.find(t => t.id === testId);
+      if (!test) return alert('Không tìm thấy bài kiểm tra');
+      if (!test.questions?.length) return alert('Bài thi chưa có câu hỏi');
+
+      // Load chi tiết câu hỏi từ DB nếu cần
+      let questions = test.questions;
+      if (typeof questions[0] === 'string' || !questions[0].content) {
+        const ids = questions.map(q => typeof q === 'string' ? q : q.id);
+        const { data } = await supabase.from('questions').select('*').in('id', ids);
+        if (data) {
+          questions = ids.map(id => data.find(q => q.id === id)).filter(Boolean);
+        }
+      }
+
+      await loadJsPDF();
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+      const pageW = 210, margin = 15, contentW = pageW - margin * 2;
+      let y = 15;
+
+      const checkPage = (needed = 10) => {
+        if (y + needed > 280) { doc.addPage(); y = 15; }
+      };
+
+      // Header
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(13);
+      doc.text('DE KIEM TRA TRAC NGHIEM', pageW / 2, y, { align: 'center' }); y += 7;
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`${test.title}`, pageW / 2, y, { align: 'center' }); y += 5;
+      doc.text(`Thoi gian: ${test.duration} phut   |   So cau: ${questions.length}   |   Ma de: ${test.test_code}`, pageW / 2, y, { align: 'center' }); y += 5;
+
+      // Thông tin học sinh
+      doc.setDrawColor(180);
+      doc.line(margin, y, pageW - margin, y); y += 6;
+      doc.text('Ho va ten: ...........................................................................   Lop: ......................   Ngay thi: ...........................', margin, y); y += 8;
+      doc.line(margin, y, pageW - margin, y); y += 8;
+
+      // Câu hỏi
+      const optionLabels = ['A', 'B', 'C', 'D', 'E'];
+      questions.forEach((q, idx) => {
+        const content = q.content || '';
+        const options = Array.isArray(q.options) ? q.options : [];
+        const typeLabel = q.type === 'multiple' ? ' (Chon nhieu)' : q.type === 'truefalse' ? ' (Dung/Sai)' : '';
+
+        // Số điểm
+        const pts = q.points || 1;
+
+        checkPage(14);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(10);
+        const qHeader = `Cau ${idx + 1}${typeLabel}: (${pts} diem)`;
+        doc.text(qHeader, margin, y); y += 5;
+
+        // Nội dung câu hỏi — wrap text
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(10);
+        const lines = doc.splitTextToSize(content, contentW);
+        lines.forEach(line => { checkPage(6); doc.text(line, margin + 3, y); y += 5; });
+        y += 1;
+
+        // Đáp án (ẩn đáp án đúng — chỉ liệt kê)
+        const displayOptions = q.type === 'truefalse'
+          ? [{ text: 'Dung' }, { text: 'Sai' }]
+          : options.map(o => ({ text: typeof o === 'string' ? o : (o.text || '') }));
+
+        displayOptions.forEach((opt, oi) => {
+          checkPage(6);
+          const label = `${optionLabels[oi] || oi + 1}. ${opt.text}`;
+          const wrapped = doc.splitTextToSize(label, (contentW / 2) - 5);
+          // 2 cột nếu text ngắn, 1 cột nếu dài
+          if (oi % 2 === 0 && displayOptions.length > 2 && wrapped.length === 1 && opt.text.length < 45) {
+            doc.text(label, margin + 3, y);
+            // Cột phải sẽ được in ở lần oi tiếp theo
+          } else if (oi % 2 === 1 && displayOptions.length > 2 && doc.splitTextToSize(displayOptions[oi - 1]?.text || '', (contentW / 2) - 5).length === 1 && (displayOptions[oi - 1]?.text || '').length < 45) {
+            doc.text(label, margin + contentW / 2, y);
+            y += 5;
+          } else {
+            if (oi % 2 === 1 && displayOptions.length > 2) {} // đã in dòng trên
+            else { doc.text(label, margin + 3, y); y += 5; }
+          }
+        });
+        if (displayOptions.length <= 2 || displayOptions.length % 2 !== 0) y += 1;
+        else y += 2;
+      });
+
+      // Gợi ý đáp án đơn giản ở cuối (ô điền điểm)
+      checkPage(12);
+      doc.line(margin, y, pageW - margin, y); y += 6;
+      doc.setFont('helvetica', 'bold');
+      doc.text('Diem: ..........   Giao vien cham: .............................................', margin, y);
+
+      doc.save(`DeThi_${test.title}_${test.test_code}_${new Date().toISOString().split('T')[0]}.pdf`);
     }
 
   </script>
