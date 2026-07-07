@@ -274,3 +274,15 @@ ALTER TABLE tests ADD COLUMN IF NOT EXISTS strict_mode JSONB DEFAULT '{
   "block_devtools": true,
   "require_fullscreen": false
 }'::jsonb;
+
+-- ============================================================
+-- CẬP NHẬT: GHI NHẬN SỐ LẦN VI PHẠM (CHUYỂN TAB/THU NHỎ CỬA SỔ)
+-- VÀ CHO PHÉP GIÁO VIÊN TRỪ ĐIỂM THỦ CÔNG THEO SỐ LẦN VI PHẠM
+-- ============================================================
+-- tab_switch_count: số lần học sinh chuyển tab / thu nhỏ cửa sổ / thoát toàn màn hình
+--                    trong lúc làm bài (được học sinh tự ghi nhận trong lúc thi,
+--                    giáo viên xem trong Bảng điểm chi tiết)
+-- penalty_points   : số điểm giáo viên trừ thủ công (trên thang điểm 10) dựa trên
+--                    số lần vi phạm, mặc định 0 (không trừ)
+ALTER TABLE submissions ADD COLUMN IF NOT EXISTS tab_switch_count INTEGER DEFAULT 0;
+ALTER TABLE submissions ADD COLUMN IF NOT EXISTS penalty_points NUMERIC DEFAULT 0;
