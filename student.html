@@ -1018,7 +1018,7 @@
       }
     }
 
-    
+    function startTimer(endTime) {
       updateTimer(endTime);
       timerInterval = setInterval(() => { if (updateTimer(endTime)) submitTest(); }, 1000);
     }
