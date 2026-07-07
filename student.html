@@ -1237,30 +1237,21 @@
     }
 
     function showAntiCheatBanner() {
-      const icons = [];
-      if (strictConfig.block_tab_switch) icons.push('🚫 Tab');
-      if (strictConfig.block_copy_paste) icons.push('📋 Copy');
-      if (strictConfig.block_right_click) icons.push('🖱️ Chuột phải');
-      if (strictConfig.block_devtools) icons.push('⌨️ DevTools');
-      if (strictConfig.require_fullscreen) icons.push('🖥️ Toàn màn hình');
-
       const banner = document.createElement('div');
       banner.id = 'antiCheatBanner';
       banner.style.cssText = `
         position: fixed; bottom: 16px; right: 16px; z-index: 9999;
         background: linear-gradient(135deg, #1e293b, #334155);
-        color: white; padding: 10px 16px; border-radius: 12px;
-        font-size: 12px; font-weight: 600; letter-spacing: 0.3px;
+        color: white; padding: 8px 14px; border-radius: 10px;
+        font-size: 12px; font-weight: 600;
         box-shadow: 0 8px 24px rgba(0,0,0,0.3);
-        display: flex; flex-direction: column; gap: 4px;
+        display: flex; align-items: center; gap: 8px;
         border: 1px solid rgba(255,255,255,0.1);
-        max-width: 260px;
       `;
       banner.innerHTML = `
-        <div style="display:flex;align-items:center;gap:8px;">
-          <span style="color:#4ade80">🛡️</span> Nghiêm túc: ${icons.join(' · ') || 'đang bật'}
-        </div>
-        ${strictConfig.block_tab_switch ? `<div id="antiCheatBannerCount" style="font-size:11px;opacity:0.85;">🚫 Vi phạm: 0/${strictConfig.max_violations}${strictConfig.track_violations ? ' · 📊 Ghi lại' : ''}</div>` : ''}
+        <span style="color:#4ade80">🛡️</span>
+        <span>Chế độ nghiêm túc</span>
+        ${strictConfig.block_tab_switch ? `<span style="opacity:0.4">·</span><span id="antiCheatBannerCount">Vi phạm: 0/${strictConfig.max_violations}</span>` : ''}
       `;
       document.body.appendChild(banner);
     }
@@ -1329,7 +1320,7 @@
 
       // Cập nhật số đếm hiển thị liên tục trên banner cho học sinh thấy
       const counterEl = document.getElementById('antiCheatBannerCount');
-      if (counterEl) counterEl.textContent = `🚫 Vi phạm: ${count}/${max}`;
+      if (counterEl) counterEl.textContent = `Vi phạm: ${count}/${max}`;
       
       // Remove existing warning if any
       document.getElementById('antiCheatWarning')?.remove();
