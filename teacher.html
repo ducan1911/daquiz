@@ -1427,6 +1427,10 @@
                     <label class="text-xs text-gray-500">Số lần vi phạm tối đa trước khi tự nộp bài:</label>
                     <input type="number" id="strictMaxViolations" value="3" min="1" class="w-16 border-2 border-gray-200 rounded-lg px-2 py-1 text-sm text-center">
                   </div>
+                  <label class="flex items-center gap-3 cursor-pointer pl-7">
+                    <input type="checkbox" id="strictTrackViolations" checked class="w-4 h-4 text-orange-500 rounded">
+                    <span class="text-sm text-gray-600">📊 Ghi lại số lần vi phạm vào kết quả (để giáo viên xem &amp; trừ điểm thủ công)</span>
+                  </label>
                   <label class="flex items-center gap-3 cursor-pointer">
                     <input type="checkbox" id="strictBlockCopyPaste" checked class="w-4 h-4 text-red-600 rounded">
                     <span class="text-sm text-gray-700">📋 Chặn sao chép / cắt nội dung (copy, cut)</span>
@@ -1598,6 +1602,7 @@
         enabled: strictEnabled,
         block_tab_switch: document.getElementById('strictBlockTabSwitch').checked,
         max_violations: parseInt(document.getElementById('strictMaxViolations').value) || 3,
+        track_violations: document.getElementById('strictTrackViolations').checked,
         block_copy_paste: document.getElementById('strictBlockCopyPaste').checked,
         block_right_click: document.getElementById('strictBlockRightClick').checked,
         block_devtools: document.getElementById('strictBlockDevtools').checked,
@@ -1650,6 +1655,7 @@
       }
       const items = [];
       if (strictMode.block_tab_switch) items.push(`🚫 Chặn chuyển tab (tối đa ${strictMode.max_violations || 3} lần vi phạm)`);
+      if (strictMode.track_violations !== false) items.push('📊 Ghi lại số lần vi phạm vào kết quả');
       if (strictMode.block_copy_paste) items.push('📋 Chặn sao chép / cắt');
       if (strictMode.block_right_click) items.push('🖱️ Chặn chuột phải');
       if (strictMode.block_devtools) items.push('⌨️ Chặn DevTools / xem mã nguồn');
