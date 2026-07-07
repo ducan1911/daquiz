@@ -948,7 +948,7 @@
 
         const score = await gradeTest(testData, answers, questionMapping);
         const totalPoints = (questionMapping.questionOrder||[]).reduce((sum, q) => sum + (q.points||1), 0);
-        await supabase.from('submissions').update({ score, total_points: totalPoints }).eq('id', submissionId);
+        await supabase.from('submissions').update({ score, total_points: totalPoints, tab_switch_count: tabSwitchCount }).eq('id', submissionId);
         await showResult(score, answers);
       } catch (e) {
         document.getElementById('mainContent').innerHTML = `
@@ -1052,6 +1052,10 @@
               ${pct>=80?'🌟 Xuất sắc! Tiếp tục phát huy!':pct>=60?'👍 Tốt lắm! Cố gắng thêm nhé!':pct>=40?'📚 Cần cố gắng nhiều hơn!':'💪 Đừng nản chí, hãy ôn tập lại nhé!'}
             </p>
             <p class="text-sm opacity-70 mt-4">Học sinh: ${escapeHtml(studentName)}</p>
+            ${tabSwitchCount > 0 ? `
+              <p class="text-sm mt-3 bg-white bg-opacity-20 inline-block px-4 py-1.5 rounded-full">
+                🚫 Số lần vi phạm quy chế thi (chuyển tab/thu nhỏ cửa sổ): <strong>${tabSwitchCount}</strong>
+              </p>` : ''}
           </div>
         </div>
         
@@ -1227,12 +1231,28 @@
         color: white; padding: 10px 16px; border-radius: 12px;
         font-size: 12px; font-weight: 600; letter-spacing: 0.3px;
         box-shadow: 0 8px 24px rgba(0,0,0,0.3);
-        display: flex; align-items: center; gap: 8px;
+        display: flex; flex-direction: column; gap: 4px;
         border: 1px solid rgba(255,255,255,0.1);
         max-width: 260px;
       `;
-      banner.innerHTML = `<span style="color:#4ade80">🛡️</span> Nghiêm túc: ${icons.join(' · ') || 'đang bật'}`;
+      banner.innerHTML = `
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="color:#4ade80">🛡️</span> Nghiêm túc: ${icons.join(' · ') || 'đang bật'}
+        </div>
+        ${strictConfig.block_tab_switch ? `<div id="antiCheatBannerCount" style="font-size:11px;opacity:0.85;">🚫 Vi phạm: 0/${strictConfig.max_violations}</div>` : ''}
+      `;
       document.body.appendChild(banner);
+    }
+
+    // Lưu số lần vi phạm (chuyển tab/thu nhỏ cửa sổ/thoát toàn màn hình) vào Supabase
+    // để giáo viên xem trong Bảng điểm chi tiết và có thể trừ điểm.
+    async function saveViolationCount(count) {
+      if (!submissionId) return;
+      try {
+        await supabase.from('submissions').update({ tab_switch_count: count }).eq('id', submissionId);
+      } catch (e) {
+        console.error('Lỗi lưu số lần vi phạm:', e);
+      }
     }
 
     function handleVisibilityChange() {
@@ -1262,6 +1282,13 @@
     function showWarning(count) {
       const max = strictConfig.max_violations || 3;
       const remaining = max - count;
+
+      // Lưu số lần vi phạm vào Supabase để giáo viên xem/trừ điểm sau này
+      saveViolationCount(count);
+
+      // Cập nhật số đếm hiển thị liên tục trên banner cho học sinh thấy
+      const counterEl = document.getElementById('antiCheatBannerCount');
+      if (counterEl) counterEl.textContent = `🚫 Vi phạm: ${count}/${max}`;
       
       // Remove existing warning if any
       document.getElementById('antiCheatWarning')?.remove();
