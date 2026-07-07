@@ -573,6 +573,8 @@
               </div>
             </div>
           </div>
+
+          ${buildStrictModeNoticeHTML(test)}
           
           <input type="text" id="studentNameInput" placeholder="Nhập họ và tên của bạn" 
                  class="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-center mb-4 focus:border-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-100 transition-all" 
@@ -1085,27 +1087,89 @@
     }
 
     // ============================================================
-    // FEATURE 4: CHỐNG GIAN LẬN (ANTI-CHEAT)
+    // FEATURE 4: CHỐNG GIAN LẬN (ANTI-CHEAT) - CẤU HÌNH THEO TỪNG TÍNH NĂNG
+    // Giáo viên bật/tắt từng phần khi tạo bài kiểm tra (cột strict_mode),
+    // học sinh chỉ áp dụng đúng những tính năng giáo viên đã bật.
     // ============================================================
     let tabSwitchCount = 0;
     let antiCheatActive = false;
-    const MAX_TAB_SWITCHES = 3;
+    let strictConfig = {
+      enabled: false,
+      block_tab_switch: true,
+      max_violations: 3,
+      block_copy_paste: true,
+      block_right_click: true,
+      block_devtools: true,
+      require_fullscreen: false
+    };
+
+    function getStrictConfig(test) {
+      const sm = (test && test.strict_mode) || {};
+      return {
+        enabled: !!sm.enabled,
+        block_tab_switch: sm.block_tab_switch !== false,
+        max_violations: parseInt(sm.max_violations) || 3,
+        block_copy_paste: sm.block_copy_paste !== false,
+        block_right_click: sm.block_right_click !== false,
+        block_devtools: sm.block_devtools !== false,
+        require_fullscreen: !!sm.require_fullscreen
+      };
+    }
+
+    function buildStrictModeNoticeHTML(test) {
+      const sm = getStrictConfig(test);
+      if (!sm.enabled) return '';
+      const items = [];
+      if (sm.block_tab_switch) items.push(`Không chuyển tab / thu nhỏ cửa sổ (tối đa ${sm.max_violations} lần vi phạm)`);
+      if (sm.block_copy_paste) items.push('Không sao chép / cắt nội dung');
+      if (sm.block_right_click) items.push('Không dùng chuột phải');
+      if (sm.block_devtools) items.push('Không mở công cụ lập trình (DevTools)');
+      if (sm.require_fullscreen) items.push('Bắt buộc làm bài ở chế độ toàn màn hình');
+      if (!items.length) return '';
+      return `
+        <div class="bg-red-50 border border-red-200 rounded-xl p-4 mb-6 text-left">
+          <div class="flex gap-2 items-start">
+            <span class="text-red-600 text-lg flex-shrink-0">🛡️</span>
+            <div class="text-sm text-gray-700">
+              <p class="font-semibold text-red-700 mb-1">Bài thi áp dụng chế độ thi nghiêm túc:</p>
+              <ul class="space-y-1 text-xs">
+                ${items.map(i => `<li>• ${i}</li>`).join('')}
+              </ul>
+            </div>
+          </div>
+        </div>`;
+    }
 
     function activateAntiCheat() {
+      strictConfig = getStrictConfig(testData);
+      if (!strictConfig.enabled) return; // Giáo viên không bật chế độ nghiêm túc cho bài này
+
       antiCheatActive = true;
       tabSwitchCount = 0;
 
-      // Phát hiện chuyển tab / ẩn trang
-      document.addEventListener('visibilitychange', handleVisibilityChange);
-      // Phát hiện mất focus cửa sổ
-      window.addEventListener('blur', handleWindowBlur);
-      // Chặn copy/paste
-      document.addEventListener('copy', e => { if (antiCheatActive) e.preventDefault(); });
-      document.addEventListener('cut', e => { if (antiCheatActive) e.preventDefault(); });
-      // Chặn chuột phải
-      document.addEventListener('contextmenu', e => { if (antiCheatActive) e.preventDefault(); });
-      // Chặn F12, Ctrl+Shift+I, Ctrl+U
-      document.addEventListener('keydown', handleKeyDown);
+      if (strictConfig.block_tab_switch) {
+        // Phát hiện chuyển tab / ẩn trang
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+        // Phát hiện mất focus cửa sổ
+        window.addEventListener('blur', handleWindowBlur);
+      }
+      if (strictConfig.block_copy_paste) {
+        // Chặn copy/cut
+        document.addEventListener('copy', handleCopyPasteBlock);
+        document.addEventListener('cut', handleCopyPasteBlock);
+      }
+      if (strictConfig.block_right_click) {
+        // Chặn chuột phải
+        document.addEventListener('contextmenu', handleRightClickBlock);
+      }
+      if (strictConfig.block_devtools) {
+        // Chặn F12, Ctrl+Shift+I, Ctrl+U
+        document.addEventListener('keydown', handleKeyDown);
+      }
+      if (strictConfig.require_fullscreen) {
+        requestFullscreenMode();
+        document.addEventListener('fullscreenchange', handleFullscreenChange);
+      }
 
       showAntiCheatBanner();
     }
@@ -1114,9 +1178,47 @@
       antiCheatActive = false;
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('blur', handleWindowBlur);
+      document.removeEventListener('copy', handleCopyPasteBlock);
+      document.removeEventListener('cut', handleCopyPasteBlock);
+      document.removeEventListener('contextmenu', handleRightClickBlock);
+      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      if (document.fullscreenElement) {
+        (document.exitFullscreen ? document.exitFullscreen() : Promise.resolve()).catch(() => {});
+      }
+      document.getElementById('antiCheatBanner')?.remove();
+    }
+
+    function handleCopyPasteBlock(e) {
+      if (antiCheatActive && strictConfig.block_copy_paste) e.preventDefault();
+    }
+
+    function handleRightClickBlock(e) {
+      if (antiCheatActive && strictConfig.block_right_click) e.preventDefault();
+    }
+
+    function requestFullscreenMode() {
+      const el = document.documentElement;
+      const req = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen;
+      if (req) req.call(el).catch(() => {});
+    }
+
+    function handleFullscreenChange() {
+      if (!antiCheatActive || currentScreen !== 'taking' || !strictConfig.require_fullscreen) return;
+      if (!document.fullscreenElement) {
+        tabSwitchCount++;
+        showWarning(tabSwitchCount);
+      }
     }
 
     function showAntiCheatBanner() {
+      const icons = [];
+      if (strictConfig.block_tab_switch) icons.push('🚫 Tab');
+      if (strictConfig.block_copy_paste) icons.push('📋 Copy');
+      if (strictConfig.block_right_click) icons.push('🖱️ Chuột phải');
+      if (strictConfig.block_devtools) icons.push('⌨️ DevTools');
+      if (strictConfig.require_fullscreen) icons.push('🖥️ Toàn màn hình');
+
       const banner = document.createElement('div');
       banner.id = 'antiCheatBanner';
       banner.style.cssText = `
@@ -1127,13 +1229,14 @@
         box-shadow: 0 8px 24px rgba(0,0,0,0.3);
         display: flex; align-items: center; gap: 8px;
         border: 1px solid rgba(255,255,255,0.1);
+        max-width: 260px;
       `;
-      banner.innerHTML = `<span style="color:#4ade80">🛡️</span> Chế độ thi nghiêm túc đang bật`;
+      banner.innerHTML = `<span style="color:#4ade80">🛡️</span> Nghiêm túc: ${icons.join(' · ') || 'đang bật'}`;
       document.body.appendChild(banner);
     }
 
     function handleVisibilityChange() {
-      if (!antiCheatActive || currentScreen !== 'taking') return;
+      if (!antiCheatActive || currentScreen !== 'taking' || !strictConfig.block_tab_switch) return;
       if (document.hidden) {
         tabSwitchCount++;
         showWarning(tabSwitchCount);
@@ -1141,13 +1244,13 @@
     }
 
     function handleWindowBlur() {
-      if (!antiCheatActive || currentScreen !== 'taking') return;
+      if (!antiCheatActive || currentScreen !== 'taking' || !strictConfig.block_tab_switch) return;
       tabSwitchCount++;
       showWarning(tabSwitchCount);
     }
 
     function handleKeyDown(e) {
-      if (!antiCheatActive) return;
+      if (!antiCheatActive || !strictConfig.block_devtools) return;
       // F12
       if (e.key === 'F12') { e.preventDefault(); return; }
       // Ctrl+Shift+I (DevTools)
@@ -1157,12 +1260,13 @@
     }
 
     function showWarning(count) {
-      const remaining = MAX_TAB_SWITCHES - count;
+      const max = strictConfig.max_violations || 3;
+      const remaining = max - count;
       
       // Remove existing warning if any
       document.getElementById('antiCheatWarning')?.remove();
       
-      if (count >= MAX_TAB_SWITCHES) {
+      if (count >= max) {
         // Auto-submit
         const overlay = document.createElement('div');
         overlay.style.cssText = `
@@ -1174,7 +1278,7 @@
         overlay.innerHTML = `
           <div style="font-size:64px;margin-bottom:16px">🚫</div>
           <h2 style="font-size:24px;font-weight:800;margin-bottom:8px">Vi phạm quy định thi!</h2>
-          <p style="font-size:14px;opacity:0.9;margin-bottom:20px">Bài thi sẽ được nộp tự động do chuyển tab quá ${MAX_TAB_SWITCHES} lần.</p>
+          <p style="font-size:14px;opacity:0.9;margin-bottom:20px">Bài thi sẽ được nộp tự động do vi phạm quá ${max} lần.</p>
           <div style="font-size:12px;opacity:0.7">Đang nộp bài...</div>
         `;
         document.body.appendChild(overlay);
@@ -1194,7 +1298,7 @@
       `;
       warning.innerHTML = `
         <div style="font-size:24px;margin-bottom:6px">⚠️ Cảnh báo vi phạm!</div>
-        <p style="font-size:13px;font-weight:600">Phát hiện chuyển tab/cửa sổ lần ${count}/${MAX_TAB_SWITCHES}</p>
+        <p style="font-size:13px;font-weight:600">Phát hiện vi phạm lần ${count}/${max}</p>
         ${remaining > 0 
           ? `<p style="font-size:12px;opacity:0.9;margin-top:4px">Còn ${remaining} lần trước khi bài thi bị nộp tự động</p>` 
           : ''}
