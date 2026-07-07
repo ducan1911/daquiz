@@ -356,6 +356,19 @@
       border-color: transparent;
     }
 
+    .question-nav-btn.flagged {
+      background: #fef3c7;
+      border-color: #f59e0b;
+      color: #92400e;
+    }
+
+    .question-nav-btn.answered.flagged {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border: 2px solid #f59e0b;
+      box-shadow: 0 0 0 2px #fef3c7;
+      color: white;
+    }
+
     .question-nav-btn.current {
       border-color: #667eea;
       box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
@@ -812,7 +825,12 @@
           <div class="flex gap-4 mb-4">
             <div class="question-number">${displayIdx+1}</div>
             <div class="flex-1">
-              <p class="text-gray-800 font-semibold text-lg mb-2">${escapeHtml(q.content||'')}</p>
+              <div class="flex items-start justify-between gap-2 mb-2">
+                <p class="text-gray-800 font-semibold text-lg flex-1">${escapeHtml(q.content||'')}</p>
+                <button id="flag-btn-${displayIdx}" onclick="toggleFlag('${qo.questionId}', ${displayIdx})"
+                  class="flag-btn text-lg px-2 py-1 rounded-lg transition-all bg-gray-100 text-gray-400 hover:bg-amber-50 hover:text-amber-500 flex-shrink-0"
+                  title="Đánh dấu xem lại">🏳️</button>
+              </div>
               ${q.image_url ? `<div class="mb-3"><img src="${q.image_url}" alt="Hình minh họa" class="max-w-full rounded-xl border border-gray-200 shadow-sm" style="max-height:320px; object-fit:contain;"></div>` : ''}
               <div class="flex items-center gap-3 text-xs text-gray-500">
                 <span class="flex items-center gap-1">
@@ -880,12 +898,23 @@
         
         <!-- Question Navigation -->
         <div class="glass-card rounded-2xl p-6 mb-8">
-          <h3 class="text-sm font-bold text-gray-700 mb-3 flex items-center gap-2">
-            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"></path>
-            </svg>
-            Danh sách câu hỏi
-          </h3>
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="text-sm font-bold text-gray-700 flex items-center gap-2">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"></path>
+              </svg>
+              Danh sách câu hỏi
+            </h3>
+            <button id="flagFilterBtn" onclick="toggleFlagFilter()"
+              class="text-xs px-3 py-1.5 rounded-lg font-semibold transition-all bg-gray-100 text-gray-500 hover:bg-gray-200">
+              🏳️ Xem lại
+            </button>
+          </div>
+          <div class="flex gap-3 text-xs text-gray-500 mb-3">
+            <span class="flex items-center gap-1"><span class="inline-block w-4 h-4 rounded bg-gradient-to-br from-indigo-500 to-purple-600"></span> Đã trả lời</span>
+            <span class="flex items-center gap-1"><span class="inline-block w-4 h-4 rounded border-2 border-amber-400 bg-amber-50"></span> Cần xem lại</span>
+            <span class="flex items-center gap-1"><span class="inline-block w-4 h-4 rounded border-2 border-gray-200 bg-white"></span> Chưa làm</span>
+          </div>
           <div class="question-nav">${navButtons}</div>
         </div>
         
@@ -918,7 +947,64 @@
       }
     }
 
-    function startTimer(endTime) {
+    function toggleFlag(questionId, displayIdx) {
+      if (flaggedQuestions.has(questionId)) {
+        flaggedQuestions.delete(questionId);
+      } else {
+        flaggedQuestions.add(questionId);
+      }
+      updateFlagUI(questionId, displayIdx);
+      updateNavFlagFilter();
+    }
+
+    function updateFlagUI(questionId, displayIdx) {
+      const isFlagged = flaggedQuestions.has(questionId);
+      // Cập nhật nút cờ trong card
+      const flagBtn = document.getElementById(`flag-btn-${displayIdx}`);
+      if (flagBtn) {
+        flagBtn.innerHTML = isFlagged ? '🚩' : '🏳️';
+        flagBtn.title = isFlagged ? 'Bỏ đánh dấu' : 'Đánh dấu xem lại';
+        flagBtn.className = `flag-btn text-lg px-2 py-1 rounded-lg transition-all ${isFlagged ? 'bg-amber-100 text-amber-600' : 'bg-gray-100 text-gray-400 hover:bg-amber-50 hover:text-amber-500'}`;
+      }
+      // Cập nhật nav button
+      const navBtn = document.getElementById(`nav-${displayIdx}`);
+      if (navBtn) {
+        if (isFlagged) navBtn.classList.add('flagged');
+        else navBtn.classList.remove('flagged');
+      }
+    }
+
+    function updateNavFlagFilter() {
+      const filterBtn = document.getElementById('flagFilterBtn');
+      if (!filterBtn) return;
+      const count = flaggedQuestions.size;
+      filterBtn.textContent = count > 0 ? `🚩 Xem lại (${count})` : '🏳️ Xem lại';
+      filterBtn.className = `text-xs px-3 py-1.5 rounded-lg font-semibold transition-all ${count > 0 ? 'bg-amber-100 text-amber-700 hover:bg-amber-200' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`;
+    }
+
+    let showingFlaggedOnly = false;
+    function toggleFlagFilter() {
+      showingFlaggedOnly = !showingFlaggedOnly;
+      const filterBtn = document.getElementById('flagFilterBtn');
+      questionMapping.questionOrder.forEach((qo, idx) => {
+        const card = document.getElementById(`q-card-${idx}`);
+        if (!card) return;
+        if (showingFlaggedOnly && !flaggedQuestions.has(qo.questionId)) {
+          card.style.display = 'none';
+        } else {
+          card.style.display = '';
+        }
+      });
+      if (filterBtn) {
+        if (showingFlaggedOnly) {
+          filterBtn.classList.add('ring-2', 'ring-amber-400');
+        } else {
+          filterBtn.classList.remove('ring-2', 'ring-amber-400');
+        }
+      }
+    }
+
+    
       updateTimer(endTime);
       timerInterval = setInterval(() => { if (updateTimer(endTime)) submitTest(); }, 1000);
     }
@@ -997,6 +1083,8 @@
       let confirmed;
       if (answered < total) {
         confirmed = confirm(`⚠️ Bạn mới trả lời ${answered}/${total} câu.\n\nBạn có chắc chắn muốn nộp bài?`);
+      } else if (flaggedQuestions.size > 0) {
+        confirmed = confirm(`🚩 Bạn còn ${flaggedQuestions.size} câu đã đánh dấu xem lại chưa kiểm tra lại.\n\nBạn có chắc chắn muốn nộp bài?`);
       } else {
         confirmed = confirm('✅ Bạn có chắc chắn muốn nộp bài?');
       }
@@ -1182,8 +1270,9 @@
     // ============================================================
     let tabSwitchCount = 0;
     let antiCheatActive = false;
-    let isDialogOpen = false; // Flag tạm tắt anti-cheat khi đang hiện dialog confirm/alert
-    let violationDebounceTimer = null; // Debounce tránh đếm 2 lần từ cùng 1 hành động
+    let isDialogOpen = false;
+    let violationDebounceTimer = null;
+    let flaggedQuestions = new Set(); // Tập hợp questionId đã đánh dấu xem lại
     let strictConfig = {
       enabled: false,
       block_tab_switch: true,
