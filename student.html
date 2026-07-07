@@ -430,6 +430,7 @@
     let testCode = null, testData = null, studentName = null;
     let currentScreen = 'name', submissionId = null, submissionData = null;
     let questionMapping = null, timerInterval = null, autoSaveInterval = null;
+    let flaggedQuestions = new Set();
 
     // ========================
     //  HÀM GOM ĐÁP ÁN CHUNG
@@ -808,6 +809,7 @@
     }
 
     async function renderTestTaking(endTime) {
+      flaggedQuestions = new Set();
       const main = document.getElementById('mainContent');
       const qIds = questionMapping.questionOrder.map(q => q.questionId);
       const { data: qData } = await supabase.from('questions').select('*').in('id', qIds);
@@ -828,8 +830,8 @@
               <div class="flex items-start justify-between gap-2 mb-2">
                 <p class="text-gray-800 font-semibold text-lg flex-1">${escapeHtml(q.content||'')}</p>
                 <button id="flag-btn-${displayIdx}" onclick="toggleFlag('${qo.questionId}', ${displayIdx})"
-                  class="flag-btn text-lg px-2 py-1 rounded-lg transition-all bg-gray-100 text-gray-400 hover:bg-amber-50 hover:text-amber-500 flex-shrink-0"
-                  title="Đánh dấu xem lại">🏳️</button>
+                  class="flag-btn px-2 py-1 rounded-lg transition-all bg-gray-100 text-gray-400 hover:bg-amber-50 hover:text-amber-500 flex-shrink-0"
+                  title="Danh dau xem lai" data-flagged="0">__FLAG_ICON_OUTLINE__</button>
               </div>
               ${q.image_url ? `<div class="mb-3"><img src="${q.image_url}" alt="Hình minh họa" class="max-w-full rounded-xl border border-gray-200 shadow-sm" style="max-height:320px; object-fit:contain;"></div>` : ''}
               <div class="flex items-center gap-3 text-xs text-gray-500">
@@ -907,13 +909,13 @@
             </h3>
             <button id="flagFilterBtn" onclick="toggleFlagFilter()"
               class="text-xs px-3 py-1.5 rounded-lg font-semibold transition-all bg-gray-100 text-gray-500 hover:bg-gray-200">
-              🏳️ Xem lại
+              Xem lai
             </button>
           </div>
           <div class="flex gap-3 text-xs text-gray-500 mb-3">
-            <span class="flex items-center gap-1"><span class="inline-block w-4 h-4 rounded bg-gradient-to-br from-indigo-500 to-purple-600"></span> Đã trả lời</span>
-            <span class="flex items-center gap-1"><span class="inline-block w-4 h-4 rounded border-2 border-amber-400 bg-amber-50"></span> Cần xem lại</span>
-            <span class="flex items-center gap-1"><span class="inline-block w-4 h-4 rounded border-2 border-gray-200 bg-white"></span> Chưa làm</span>
+            <span class="flex items-center gap-1"><span class="inline-block w-4 h-4 rounded bg-gradient-to-br from-indigo-500 to-purple-600"></span> Da tra loi</span>
+            <span class="flex items-center gap-1"><span class="inline-block w-4 h-4 rounded border-2 border-amber-400 bg-amber-50"></span> Can xem lai</span>
+            <span class="flex items-center gap-1"><span class="inline-block w-4 h-4 rounded border-2 border-gray-200 bg-white"></span> Chua lam</span>
           </div>
           <div class="question-nav">${navButtons}</div>
         </div>
@@ -930,6 +932,12 @@
 
       startTimer(endTime);
       updateProgress();
+
+      // Thay placeholder icon cờ (tránh lỗi parser HTML với </svg> trong template literal)
+      const svgO = '<svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 21V4m0 0l18-9-6 5 6 5L3 4z"/' + '></path></svg' + '>';
+      document.querySelectorAll('.flag-btn').forEach(btn => {
+        if (btn.textContent.includes('__FLAG_ICON_OUTLINE__')) btn.innerHTML = svgO;
+      });
     }
 
     function scrollToQuestion(index) {
@@ -959,15 +967,21 @@
 
     function updateFlagUI(questionId, displayIdx) {
       const isFlagged = flaggedQuestions.has(questionId);
-      // Cập nhật nút cờ trong card
-      const flagBtn = document.getElementById(`flag-btn-${displayIdx}`);
+      const flagBtn = document.getElementById('flag-btn-' + displayIdx);
+      const svgFilled = '<svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M3 21V4m0 0l18-9-6 5 6 5L3 4z"/><' + '/svg>';
+      const svgOutline = '<svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 21V4m0 0l18-9-6 5 6 5L3 4z"/><' + '/svg>';
       if (flagBtn) {
-        flagBtn.innerHTML = isFlagged ? '🚩' : '🏳️';
-        flagBtn.title = isFlagged ? 'Bỏ đánh dấu' : 'Đánh dấu xem lại';
-        flagBtn.className = `flag-btn text-lg px-2 py-1 rounded-lg transition-all ${isFlagged ? 'bg-amber-100 text-amber-600' : 'bg-gray-100 text-gray-400 hover:bg-amber-50 hover:text-amber-500'}`;
+        flagBtn.dataset.flagged = isFlagged ? '1' : '0';
+        flagBtn.title = isFlagged ? 'Bo danh dau' : 'Danh dau xem lai';
+        if (isFlagged) {
+          flagBtn.className = 'flag-btn px-2 py-1 rounded-lg transition-all bg-amber-100 text-amber-500 flex-shrink-0';
+          flagBtn.innerHTML = svgFilled;
+        } else {
+          flagBtn.className = 'flag-btn px-2 py-1 rounded-lg transition-all bg-gray-100 text-gray-400 hover:bg-amber-50 hover:text-amber-500 flex-shrink-0';
+          flagBtn.innerHTML = svgOutline;
+        }
       }
-      // Cập nhật nav button
-      const navBtn = document.getElementById(`nav-${displayIdx}`);
+      const navBtn = document.getElementById('nav-' + displayIdx);
       if (navBtn) {
         if (isFlagged) navBtn.classList.add('flagged');
         else navBtn.classList.remove('flagged');
@@ -978,7 +992,7 @@
       const filterBtn = document.getElementById('flagFilterBtn');
       if (!filterBtn) return;
       const count = flaggedQuestions.size;
-      filterBtn.textContent = count > 0 ? `🚩 Xem lại (${count})` : '🏳️ Xem lại';
+      filterBtn.textContent = count > 0 ? `Xem lai (${count})` : 'Xem lai';
       filterBtn.className = `text-xs px-3 py-1.5 rounded-lg font-semibold transition-all ${count > 0 ? 'bg-amber-100 text-amber-700 hover:bg-amber-200' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`;
     }
 
@@ -1272,7 +1286,6 @@
     let antiCheatActive = false;
     let isDialogOpen = false;
     let violationDebounceTimer = null;
-    let flaggedQuestions = new Set(); // Tập hợp questionId đã đánh dấu xem lại
     let strictConfig = {
       enabled: false,
       block_tab_switch: true,
