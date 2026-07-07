@@ -1104,6 +1104,7 @@
     let tabSwitchCount = 0;
     let antiCheatActive = false;
     let isDialogOpen = false; // Flag tạm tắt anti-cheat khi đang hiện dialog confirm/alert
+    let violationDebounceTimer = null; // Debounce tránh đếm 2 lần từ cùng 1 hành động
     let strictConfig = {
       enabled: false,
       block_tab_switch: true,
@@ -1270,33 +1271,38 @@
       }
     }
 
+    // Hàm ghi nhận vi phạm dùng chung — debounce 500ms để visibilitychange + blur
+    // xảy ra cùng lúc (mở tab mới, chuyển cửa sổ...) chỉ tính 1 lần duy nhất
+    function recordViolation(silent = false) {
+      if (violationDebounceTimer) return; // Đang trong cửa sổ debounce → bỏ qua
+      violationDebounceTimer = setTimeout(() => { violationDebounceTimer = null; }, 500);
+      tabSwitchCount++;
+      if (silent) {
+        saveViolationCount(tabSwitchCount);
+      } else {
+        showWarning(tabSwitchCount);
+      }
+    }
+
     function handleVisibilityChangeSilent() {
       if (!antiCheatActive || currentScreen !== 'taking' || isDialogOpen) return;
-      if (document.hidden) {
-        tabSwitchCount++;
-        saveViolationCount(tabSwitchCount);
-      }
+      if (document.hidden) recordViolation(true);
     }
 
     function handleWindowBlurSilent() {
       if (!antiCheatActive || currentScreen !== 'taking' || isDialogOpen) return;
-      tabSwitchCount++;
-      saveViolationCount(tabSwitchCount);
+      recordViolation(true);
     }
     // ---- Kết thúc silent listeners ----
 
     function handleVisibilityChange() {
       if (!antiCheatActive || currentScreen !== 'taking' || !strictConfig.block_tab_switch || isDialogOpen) return;
-      if (document.hidden) {
-        tabSwitchCount++;
-        showWarning(tabSwitchCount);
-      }
+      if (document.hidden) recordViolation(false);
     }
 
     function handleWindowBlur() {
       if (!antiCheatActive || currentScreen !== 'taking' || !strictConfig.block_tab_switch || isDialogOpen) return;
-      tabSwitchCount++;
-      showWarning(tabSwitchCount);
+      recordViolation(false);
     }
 
     function handleKeyDown(e) {
