@@ -926,7 +926,12 @@
       } else {
         confirmed = confirm('✅ Bạn có chắc chắn muốn nộp bài?');
       }
-      isDialogOpen = false;
+      // Giữ flag thêm 600ms sau khi dialog đóng — trình duyệt vẫn có thể bắn
+      // blur/visibilitychange trong khoảng này khi focus trả về trang
+      // Đồng thời reset debounce để không có vi phạm tồn đọng từ lúc mở dialog
+      if (violationDebounceTimer) clearTimeout(violationDebounceTimer);
+      violationDebounceTimer = setTimeout(() => { violationDebounceTimer = null; }, 600);
+      setTimeout(() => { isDialogOpen = false; }, 600);
       if (!confirmed) return;
 
       clearTimers();
@@ -1275,7 +1280,7 @@
     // xảy ra cùng lúc (mở tab mới, chuyển cửa sổ...) chỉ tính 1 lần duy nhất
     function recordViolation(silent = false) {
       if (violationDebounceTimer) return; // Đang trong cửa sổ debounce → bỏ qua
-      violationDebounceTimer = setTimeout(() => { violationDebounceTimer = null; }, 500);
+      violationDebounceTimer = setTimeout(() => { violationDebounceTimer = null; }, 800);
       tabSwitchCount++;
       if (silent) {
         saveViolationCount(tabSwitchCount);
