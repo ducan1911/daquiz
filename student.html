@@ -918,15 +918,21 @@
       const answered = countAnswered();
       const total = questionMapping.questionOrder.length;
 
+      // Tạm tắt anti-cheat khi hiện dialog để không bị tính vi phạm oan
+      isDialogOpen = true;
+      let confirmed;
       if (answered < total) {
-        if (!confirm(`⚠️ Bạn mới trả lời ${answered}/${total} câu.\n\nBạn có chắc chắn muốn nộp bài?`)) return;
+        confirmed = confirm(`⚠️ Bạn mới trả lời ${answered}/${total} câu.\n\nBạn có chắc chắn muốn nộp bài?`);
       } else {
-        if (!confirm('✅ Bạn có chắc chắn muốn nộp bài?')) return;
+        confirmed = confirm('✅ Bạn có chắc chắn muốn nộp bài?');
       }
+      isDialogOpen = false;
+      if (!confirmed) return;
 
       clearTimers();
       currentScreen = 'submitting';
       deactivateAntiCheat();
+      document.getElementById('violationOverlay')?.remove(); // Xóa overlay đỏ nếu còn
 
       const answers = collectAnswers();
 
@@ -1097,6 +1103,7 @@
     // ============================================================
     let tabSwitchCount = 0;
     let antiCheatActive = false;
+    let isDialogOpen = false; // Flag tạm tắt anti-cheat khi đang hiện dialog confirm/alert
     let strictConfig = {
       enabled: false,
       block_tab_switch: true,
@@ -1263,24 +1270,23 @@
       }
     }
 
-    // ---- Ghi nhận vi phạm âm thầm (track_violations bật, block_tab_switch tắt) ----
     function handleVisibilityChangeSilent() {
-      if (!antiCheatActive || currentScreen !== 'taking') return;
+      if (!antiCheatActive || currentScreen !== 'taking' || isDialogOpen) return;
       if (document.hidden) {
         tabSwitchCount++;
-        saveViolationCount(tabSwitchCount); // chỉ ghi DB, không cảnh báo
+        saveViolationCount(tabSwitchCount);
       }
     }
 
     function handleWindowBlurSilent() {
-      if (!antiCheatActive || currentScreen !== 'taking') return;
+      if (!antiCheatActive || currentScreen !== 'taking' || isDialogOpen) return;
       tabSwitchCount++;
       saveViolationCount(tabSwitchCount);
     }
     // ---- Kết thúc silent listeners ----
 
     function handleVisibilityChange() {
-      if (!antiCheatActive || currentScreen !== 'taking' || !strictConfig.block_tab_switch) return;
+      if (!antiCheatActive || currentScreen !== 'taking' || !strictConfig.block_tab_switch || isDialogOpen) return;
       if (document.hidden) {
         tabSwitchCount++;
         showWarning(tabSwitchCount);
@@ -1288,7 +1294,7 @@
     }
 
     function handleWindowBlur() {
-      if (!antiCheatActive || currentScreen !== 'taking' || !strictConfig.block_tab_switch) return;
+      if (!antiCheatActive || currentScreen !== 'taking' || !strictConfig.block_tab_switch || isDialogOpen) return;
       tabSwitchCount++;
       showWarning(tabSwitchCount);
     }
@@ -1320,6 +1326,7 @@
       if (count >= max) {
         // Auto-submit
         const overlay = document.createElement('div');
+        overlay.id = 'violationOverlay';
         overlay.style.cssText = `
           position: fixed; inset: 0; z-index: 99999;
           background: rgba(239,68,68,0.95);
