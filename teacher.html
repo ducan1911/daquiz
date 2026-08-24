@@ -13,199 +13,246 @@
   <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
   <script src="supabase-config.js"></script>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
-    * { font-family: 'Inter', sans-serif; }
-    html, body { overflow-x: hidden; max-width: 100vw; }
-    
+    :root {
+      --color-iris-bolt: #4255ff;
+      --color-ink-charcoal: #282e3e;
+      --color-deep-indigo: #2e3856;
+      --color-slate-veil: #586380;
+      --color-fog-mist: #939bb4;
+      --color-chalk-canvas: #f6f7fb;
+      --color-paper-white: #ffffff;
+      --color-lilac-wash: #edefff;
+      --color-mist-border: #d9dde8;
+    }
+
+    * {
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      box-sizing: border-box;
+    }
+
+    html, body { overflow-x: hidden; max-width: 100vw; margin: 0; }
+    body { background-color: var(--color-chalk-canvas); min-height: 100vh; }
+
+    /* ===== SECTIONS ===== */
     .section { display: none; }
     .section.active { display: block; }
-    
-    .sidebar-link { 
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      position: relative;
+
+    /* ===== FADE IN ===== */
+    .fade-in { animation: fadeIn 0.25s ease-out; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
     }
-    .sidebar-link::before {
-      content: '';
-      position: absolute;
-      left: 0;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 4px;
-      height: 0;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      border-radius: 0 4px 4px 0;
-      transition: height 0.3s ease;
-    }
-    .sidebar-link:hover, .sidebar-link.active { 
-      background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
-      color: #667eea;
-      transform: translateX(4px);
-    }
-    .sidebar-link.active::before {
-      height: 70%;
-    }
-    
-    .modal { display: none; }
-    .modal.show { display: flex; }
-    
+
+    /* ===== SPINNER ===== */
     .spinner {
-      border: 3px solid #e5e7eb; 
-      border-top: 3px solid #667eea;
-      border-radius: 50%; 
-      width: 24px; 
-      height: 24px; 
-      animation: spin 0.8s linear infinite;
+      border: 2px solid var(--color-mist-border);
+      border-top: 2px solid var(--color-iris-bolt);
+      border-radius: 50%;
+      width: 20px; height: 20px;
+      animation: spin 0.7s linear infinite;
+      display: inline-block;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
-    
-    .bar-chart { 
-      display: flex; 
-      align-items: flex-end; 
-      gap: 6px; 
-      height: 140px; 
-      padding: 10px;
-      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-      border-radius: 12px;
+
+    /* ===== SIDEBAR ===== */
+    .sidebar-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--color-slate-veil);
+      text-decoration: none;
+      transition: background 0.18s, color 0.18s;
+      position: relative;
     }
-    .bar-item { 
-      flex: 1; 
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      border-radius: 6px 6px 0 0; 
-      transition: all 0.3s ease; 
-      min-height: 6px;
-      box-shadow: 0 4px 6px rgba(102, 126, 234, 0.3);
+    .sidebar-link:hover {
+      background: var(--color-lilac-wash);
+      color: var(--color-iris-bolt);
     }
-    .bar-item:hover { 
-      background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
-      transform: translateY(-4px);
-      box-shadow: 0 8px 12px rgba(102, 126, 234, 0.5);
+    .sidebar-link.active {
+      background: var(--color-lilac-wash);
+      color: var(--color-iris-bolt);
+      font-weight: 600;
     }
-    
+    .sidebar-link.active::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 20%; bottom: 20%;
+      width: 3px;
+      background: var(--color-iris-bolt);
+      border-radius: 0 3px 3px 0;
+    }
+
+    /* ===== CARD ===== */
     .card {
-      background: white;
+      background: var(--color-paper-white);
+      border: 1px solid var(--color-mist-border);
       border-radius: 16px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-      transition: all 0.3s ease;
-      border: 1px solid rgba(0, 0, 0, 0.05);
     }
-    .card:hover {
-      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
-      transform: translateY(-2px);
+
+    /* ===== STAT CARD ===== */
+    .stat-card {
+      background: var(--color-deep-indigo);
+      color: white;
+      border-radius: 16px;
+      padding: 20px 24px;
     }
-    
+
+    /* ===== BUTTONS ===== */
     .btn-primary {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      transition: all 0.3s ease;
+      background: var(--color-iris-bolt);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.18s, transform 0.15s;
     }
-    .btn-primary:hover {
-      box-shadow: 0 8px 16px rgba(102, 126, 234, 0.4);
-      transform: translateY(-2px);
+    .btn-primary:hover { background: #3346e0; transform: translateY(-1px); }
+    .btn-primary:active { transform: translateY(0); }
+
+    .btn-secondary {
+      background: var(--color-paper-white);
+      color: var(--color-deep-indigo);
+      border: 2px solid var(--color-deep-indigo);
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.18s, color 0.18s;
     }
-    
+    .btn-secondary:hover { background: var(--color-deep-indigo); color: white; }
+
     .btn-danger {
-      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-      transition: all 0.3s ease;
+      background: #dc2626;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.18s, transform 0.15s;
     }
-    .btn-danger:hover {
-      box-shadow: 0 8px 16px rgba(245, 87, 108, 0.4);
-      transform: translateY(-2px);
-    }
-    
+    .btn-danger:hover { background: #b91c1c; transform: translateY(-1px); }
+
     .btn-success {
-      background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-      transition: all 0.3s ease;
+      background: #16a34a;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.18s, transform 0.15s;
     }
-    .btn-success:hover {
-      box-shadow: 0 8px 16px rgba(79, 172, 254, 0.4);
-      transform: translateY(-2px);
-    }
-    
+    .btn-success:hover { background: #15803d; transform: translateY(-1px); }
+
+    /* ===== BADGE ===== */
     .badge {
       display: inline-flex;
       align-items: center;
       gap: 4px;
-      padding: 4px 12px;
-      border-radius: 20px;
+      padding: 3px 10px;
+      border-radius: 100px;
       font-size: 12px;
       font-weight: 600;
-      letter-spacing: 0.5px;
     }
-    
-    input[type="checkbox"].question-check:checked + span { 
-      color: #667eea; 
-      font-weight: 600; 
+
+    /* ===== FORM ELEMENTS ===== */
+    .form-input, .form-select {
+      height: 42px;
+      border: 2px solid var(--color-mist-border);
+      border-radius: 10px;
+      padding: 0 14px;
+      font-size: 14px;
+      color: var(--color-ink-charcoal);
+      background: var(--color-paper-white);
+      outline: none;
+      transition: border-color 0.18s, box-shadow 0.18s;
     }
-    
-    .fade-in {
-      animation: fadeIn 0.3s ease-in;
+    .form-input:focus, .form-select:focus {
+      border-color: var(--color-iris-bolt);
+      box-shadow: 0 0 0 3px rgba(66,85,255,0.1);
     }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
+    .form-input::placeholder { color: var(--color-fog-mist); }
+
+    /* ===== MODAL ===== */
+    .modal { display: none; }
+    .modal.show { display: flex; }
+    .modal-card {
+      background: var(--color-paper-white);
+      border-radius: 20px;
+      box-shadow: 0 24px 48px rgba(0,0,0,0.15);
+      overflow: hidden;
     }
-    
-    .stat-card {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    .modal-header {
+      background: var(--color-deep-indigo);
       color: white;
-      border-radius: 16px;
-      padding: 24px;
-      box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3);
+      padding: 20px 24px;
+      font-size: 18px;
+      font-weight: 700;
     }
-    
-    /* NEW: Image preview styles */
+    .modal-body { padding: 24px; }
+
+    /* ===== BAR CHART ===== */
+    .bar-chart {
+      display: flex;
+      align-items: flex-end;
+      gap: 6px;
+      height: 140px;
+      padding: 10px;
+      background: var(--color-chalk-canvas);
+      border-radius: 12px;
+      border: 1px solid var(--color-mist-border);
+    }
+    .bar-item {
+      flex: 1;
+      background: var(--color-iris-bolt);
+      border-radius: 5px 5px 0 0;
+      transition: background 0.18s, transform 0.18s;
+      min-height: 4px;
+      opacity: 0.85;
+    }
+    .bar-item:hover { background: var(--color-deep-indigo); transform: translateY(-3px); opacity: 1; }
+
+    /* ===== IMAGE UPLOAD ===== */
     .image-preview {
       position: relative;
       max-width: 200px;
       border-radius: 12px;
       overflow: hidden;
-      border: 2px solid #e5e7eb;
+      border: 2px solid var(--color-mist-border);
     }
-    .image-preview img {
-      width: 100%;
-      height: auto;
-      display: block;
-    }
+    .image-preview img { width: 100%; height: auto; display: block; }
     .image-preview-remove {
       position: absolute;
-      top: 8px;
-      right: 8px;
-      background: rgba(239, 68, 68, 0.9);
+      top: 8px; right: 8px;
+      background: rgba(220,38,38,0.9);
       color: white;
       border-radius: 50%;
-      width: 28px;
-      height: 28px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      font-size: 16px;
-      transition: all 0.2s;
+      width: 28px; height: 28px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; font-size: 16px;
+      transition: background 0.18s, transform 0.15s;
     }
-    .image-preview-remove:hover {
-      background: rgba(220, 38, 38, 1);
-      transform: scale(1.1);
-    }
-    
-    /* NEW: Upload area styles */
+    .image-preview-remove:hover { background: #b91c1c; transform: scale(1.1); }
+
     .upload-area {
-      border: 2px dashed #d1d5db;
+      border: 2px dashed var(--color-mist-border);
       border-radius: 12px;
       padding: 20px;
       text-align: center;
       cursor: pointer;
-      transition: all 0.3s;
-      background: #f9fafb;
+      transition: border-color 0.18s, background 0.18s;
+      background: var(--color-chalk-canvas);
     }
-    .upload-area:hover {
-      border-color: #667eea;
-      background: #f0f4ff;
-    }
-    .upload-area.dragging {
-      border-color: #667eea;
-      background: #e0e7ff;
+    .upload-area:hover, .upload-area.dragging {
+      border-color: var(--color-iris-bolt);
+      background: var(--color-lilac-wash);
     }
 
-    /* Folder Tree Styles */
+    /* ===== FOLDER TREE ===== */
     .folder-item {
       cursor: pointer;
       padding: 6px 10px;
@@ -213,301 +260,300 @@
       display: flex;
       align-items: center;
       gap: 8px;
-      transition: all 0.2s;
+      transition: background 0.18s;
       font-size: 13px;
+      color: var(--color-slate-veil);
     }
-    .folder-item:hover { background: #f0f4ff; }
-    .folder-item.active { background: linear-gradient(135deg, rgba(102,126,234,0.15) 0%, rgba(118,75,162,0.15) 100%); color: #667eea; font-weight: 600; }
-    .folder-children { padding-left: 16px; border-left: 2px solid #e5e7eb; margin-left: 8px; }
+    .folder-item:hover { background: var(--color-lilac-wash); color: var(--color-iris-bolt); }
+    .folder-item.active { background: var(--color-lilac-wash); color: var(--color-iris-bolt); font-weight: 600; }
+    .folder-children { padding-left: 16px; border-left: 2px solid var(--color-mist-border); margin-left: 8px; }
 
-    /* Leaderboard Styles */
+    /* ===== LEADERBOARD ===== */
     .leaderboard-row {
       display: flex;
       align-items: center;
       padding: 12px 16px;
       border-radius: 12px;
       margin-bottom: 8px;
-      transition: all 0.3s;
-      animation: slideIn 0.4s ease-out;
+      border: 2px solid var(--color-mist-border);
+      background: var(--color-paper-white);
+      transition: transform 0.18s;
+      animation: slideIn 0.3s ease-out;
     }
     @keyframes slideIn {
-      from { opacity: 0; transform: translateX(-20px); }
-      to { opacity: 1; transform: translateX(0); }
+      from { opacity: 0; transform: translateX(-16px); }
+      to   { opacity: 1; transform: translateX(0); }
     }
-    .leaderboard-row:nth-child(1) { background: linear-gradient(135deg, #fef3c7, #fde68a); border: 2px solid #f59e0b; }
-    .leaderboard-row:nth-child(2) { background: linear-gradient(135deg, #f1f5f9, #e2e8f0); border: 2px solid #94a3b8; }
-    .leaderboard-row:nth-child(3) { background: linear-gradient(135deg, #fef3ee, #fed7aa); border: 2px solid #f97316; }
-    .leaderboard-row:nth-child(n+4) { background: white; border: 2px solid #e5e7eb; }
-    .leaderboard-row:hover { transform: translateX(4px); }
+    .leaderboard-row:nth-child(1) { background: #fffbeb; border-color: #f59e0b; }
+    .leaderboard-row:nth-child(2) { background: #f8fafc; border-color: #94a3b8; }
+    .leaderboard-row:nth-child(3) { background: #fff7ed; border-color: #f97316; }
+    .leaderboard-row:hover { transform: translateX(3px); }
 
-    /* AI Generate animation */
-    .ai-thinking {
-      display: inline-flex;
-      gap: 4px;
-      align-items: center;
-    }
+    /* ===== AI THINKING ===== */
+    .ai-thinking { display: inline-flex; gap: 4px; align-items: center; }
     .ai-thinking span {
-      width: 8px; height: 8px;
-      background: #667eea;
+      width: 7px; height: 7px;
+      background: var(--color-iris-bolt);
       border-radius: 50%;
-      animation: bounce 1.4s infinite ease-in-out;
+      animation: aiDot 1.4s infinite ease-in-out;
     }
     .ai-thinking span:nth-child(1) { animation-delay: 0s; }
     .ai-thinking span:nth-child(2) { animation-delay: 0.16s; }
     .ai-thinking span:nth-child(3) { animation-delay: 0.32s; }
-    @keyframes bounce {
+    @keyframes aiDot {
       0%, 80%, 100% { transform: scale(0); opacity: 0.4; }
       40% { transform: scale(1); opacity: 1; }
     }
+
+    /* ===== CHECKBOX ===== */
+    input[type="checkbox"].question-check:checked + span {
+      color: var(--color-iris-bolt);
+      font-weight: 600;
+    }
+
+    /* Sidebar responsive */
+    @media (min-width: 768px) {
+      .md-sidebar { display: block !important; }
+    }
+
+    /* Compatibility styles for dynamic templates */
+    .text-gray-800 { color: var(--color-ink-charcoal) !important; }
+    .text-gray-700, .text-gray-600 { color: var(--color-deep-indigo) !important; }
+    .text-gray-500 { color: var(--color-slate-veil) !important; }
+    .text-gray-400 { color: var(--color-fog-mist) !important; }
+    .text-indigo-500, .text-indigo-600, .text-indigo-700 { color: var(--color-iris-bolt) !important; }
+    .border-gray-200, .border-gray-300 { border-color: var(--color-mist-border) !important; }
+    .bg-gray-50, .bg-gray-100 { background-color: var(--color-chalk-canvas) !important; }
+    .bg-white { background-color: var(--color-paper-white) !important; }
+    .bg-indigo-50 { background-color: var(--color-lilac-wash) !important; }
+    .bg-indigo-600, .bg-indigo-700 { background-color: var(--color-iris-bolt) !important; }
+    .bg-gradient-to-r, .bg-gradient-to-br { background-image: none !important; }
+    .shadow-md, .shadow-lg, .shadow-xl, .shadow-2xl { box-shadow: 0 4px 14px rgba(40,46,62,0.08) !important; }
+    .rounded-xl { border-radius: 12px !important; }
+    .rounded-2xl { border-radius: 16px !important; }
+    .hover\\:shadow-xl:hover, .hover\\:shadow-2xl:hover { box-shadow: 0 6px 18px rgba(40,46,62,0.12) !important; }
+    .focus\\:border-indigo-500:focus { border-color: var(--color-iris-bolt) !important; }
+    .focus\\:ring-indigo-200:focus { box-shadow: 0 0 0 3px rgba(66,85,255,0.1) !important; }
   </style>
 </head>
-<body class="bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
-  <header class="bg-white shadow-lg border-b sticky top-0 z-30 backdrop-blur-sm bg-opacity-95">
-    <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <img src="https://www.tcktktct.edu.vn/assets_site/images/logo.webp" alt="Logo" class="h-10 object-contain" onerror="this.style.display='none'">
+<body>
+  <!-- ===== HEADER ===== -->
+  <header style="background:var(--color-paper-white);border-bottom:1px solid var(--color-mist-border);height:60px;display:flex;align-items:center;padding:0 1.5rem;position:sticky;top:0;z-index:40;">
+    <div style="max-width:1280px;width:100%;margin:0 auto;display:flex;align-items:center;justify-content:space-between;">
+      <!-- Logo -->
+      <div style="display:flex;align-items:center;gap:10px;">
+        <img src="https://www.tcktktct.edu.vn/assets_site/images/logo.webp" alt="Logo" style="height:32px;object-fit:contain;" onerror="this.style.display='none'">
         <div>
-          <h1 class="text-lg font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent leading-tight">TC Kinh tế Kỹ thuật TP Cần Thơ</h1>
-          <p class="text-xs text-gray-400">Hệ thống thi trắc nghiệm</p>
+          <div style="font-size:15px;font-weight:700;color:var(--color-ink-charcoal);line-height:1.2;">TC Kinh tế Kỹ thuật TP Cần Thơ</div>
+          <div style="font-size:11px;color:var(--color-fog-mist);">Hệ thống thi trắc nghiệm</div>
         </div>
       </div>
-      <div class="flex items-center gap-4">
-        <button onclick="showSection('profile')" class="hidden md:flex items-center gap-2 text-sm bg-gradient-to-r from-indigo-50 to-purple-50 hover:from-indigo-100 hover:to-purple-100 text-indigo-700 px-4 py-2 rounded-xl transition-all font-medium border border-indigo-100">
-          <span id="teacherAvatarBtn" class="w-7 h-7 rounded-full bg-indigo-200 flex items-center justify-center text-sm font-bold overflow-hidden">👤</span>
-          <span id="teacherName" class="hidden lg:inline text-gray-700 text-sm font-medium"></span>
+      <!-- Right -->
+      <div style="display:flex;align-items:center;gap:10px;">
+        <button onclick="showSection('profile')" style="display:flex;align-items:center;gap:8px;background:var(--color-chalk-canvas);border:1px solid var(--color-mist-border);border-radius:10px;padding:6px 14px;cursor:pointer;font-size:13px;font-weight:600;color:var(--color-slate-veil);transition:background 0.18s;" onmouseover="this.style.background='var(--color-lilac-wash)'" onmouseout="this.style.background='var(--color-chalk-canvas)'">
+          <span id="teacherAvatarBtn" style="width:28px;height:28px;border-radius:50%;background:var(--color-lilac-wash);display:flex;align-items:center;justify-content:center;font-size:14px;overflow:hidden;">👤</span>
+          <span id="teacherName" style="color:var(--color-ink-charcoal);"></span>
         </button>
-        <button onclick="logout()" class="text-sm bg-gradient-to-r from-red-500 to-pink-500 text-white hover:from-red-600 hover:to-pink-600 px-4 py-2 rounded-xl transition-all font-medium shadow-md hover:shadow-lg">
-          Đăng xuất 🚪
+        <button onclick="logout()" style="background:#dc2626;color:white;border:none;border-radius:10px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;transition:background 0.18s;" onmouseover="this.style.background='#b91c1c'" onmouseout="this.style.background='#dc2626'">
+          Đăng xuất
         </button>
       </div>
     </div>
   </header>
 
-  <div class="flex max-w-7xl mx-auto">
-    <aside id="sidebar" class="hidden md:block md:w-64 bg-white shadow-xl min-h-screen flex-shrink-0 border-r">
-      <nav class="p-4 space-y-2">
-        <a href="#" onclick="showSection('questions')" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 font-medium text-sm" data-section="questions">
-          <span class="text-xl">📚</span>
-          <span>Ngân hàng câu hỏi</span>
+  <!-- ===== LAYOUT ===== -->
+  <div style="display:flex;max-width:1280px;margin:0 auto;">
+
+    <!-- SIDEBAR -->
+    <aside id="sidebar" style="width:220px;flex-shrink:0;background:var(--color-paper-white);border-right:1px solid var(--color-mist-border);min-height:calc(100vh - 60px);display:none;" class="md-sidebar">
+      <nav style="padding:16px 12px;display:flex;flex-direction:column;gap:4px;">
+        <a href="#" onclick="showSection('questions')" class="sidebar-link" data-section="questions">
+          <span>📚</span><span>Ngân hàng câu hỏi</span>
         </a>
-        <a href="#" onclick="showSection('tests')" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 font-medium text-sm" data-section="tests">
-          <span class="text-xl">📋</span>
-          <span>Bài kiểm tra</span>
+        <a href="#" onclick="showSection('tests')" class="sidebar-link" data-section="tests">
+          <span>📋</span><span>Bài kiểm tra</span>
         </a>
-        <a href="#" onclick="showSection('results')" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 font-medium text-sm" data-section="results">
-          <span class="text-xl">📊</span>
-          <span>Kết quả & Thống kê</span>
+        <a href="#" onclick="showSection('results')" class="sidebar-link" data-section="results">
+          <span>📊</span><span>Kết quả & Thống kê</span>
         </a>
-        <a href="#" onclick="showSection('leaderboard')" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 font-medium text-sm" data-section="leaderboard">
-          <span class="text-xl">🏆</span>
-          <span>Bảng xếp hạng Live</span>
+        <a href="#" onclick="showSection('leaderboard')" class="sidebar-link" data-section="leaderboard">
+          <span>🏆</span><span>Bảng xếp hạng Live</span>
         </a>
-        <a href="#" onclick="showSection('battle')" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 font-medium text-sm" data-section="battle">
-          <span class="text-xl">⚡</span>
-          <span>Battle Realtime</span>
+        <a href="#" onclick="showSection('battle')" class="sidebar-link" data-section="battle">
+          <span>⚡</span><span>Battle Realtime</span>
         </a>
-        <a href="#" onclick="showSection('profile')" class="sidebar-link hidden flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 font-medium text-sm" data-section="profile">
-          <span class="text-xl">👤</span>
-          <span>Hồ sơ cá nhân</span>
+        <a href="#" onclick="showSection('profile')" class="sidebar-link" data-section="profile" style="display:none;">
+          <span>👤</span><span>Hồ sơ cá nhân</span>
         </a>
       </nav>
     </aside>
 
-    <main class="flex-1 p-6 min-w-0 overflow-hidden" id="mainContent">
-      <div id="loadingOverlay" class="flex items-center justify-center py-20">
-        <div class="text-center">
-          <div class="spinner mx-auto mb-3"></div>
-          <p class="text-gray-500 text-sm">Đang tải...</p>
+    <!-- MAIN -->
+    <main style="flex:1;padding:24px;min-width:0;overflow:hidden;" id="mainContent">
+      <!-- Loading -->
+      <div id="loadingOverlay" style="display:flex;align-items:center;justify-content:center;padding:80px 0;">
+        <div style="text-align:center;">
+          <div style="width:36px;height:36px;border:3px solid var(--color-mist-border);border-top-color:var(--color-iris-bolt);border-radius:50%;animation:spin 0.7s linear infinite;margin:0 auto 14px;"></div>
+          <p style="color:var(--color-slate-veil);font-size:14px;">Đang tải...</p>
         </div>
       </div>
 
-      <!-- Section: Ngân hàng câu hỏi -->
+      <!-- ===== SECTION: Ngân hàng câu hỏi ===== -->
       <div id="section-questions" class="section fade-in">
-        <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+        <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;margin-bottom:24px;">
           <div>
-            <h2 class="text-3xl font-bold text-gray-800 mb-1">📚 Ngân hàng câu hỏi</h2>
-            <p class="text-gray-500 text-sm">Quản lý tất cả câu hỏi của bạn</p>
+            <h2 style="font-size:24px;font-weight:700;color:var(--color-ink-charcoal);margin:0 0 4px;">Ngân hàng câu hỏi</h2>
+            <p style="font-size:14px;color:var(--color-slate-veil);margin:0;">Quản lý tất cả câu hỏi của bạn</p>
           </div>
-          <div class="flex gap-2">
-            <button onclick="openFolderManagerModal()" class="bg-amber-500 hover:bg-amber-600 text-white px-5 py-2.5 rounded-xl font-medium shadow-md text-sm transition-all">
-              📁 Thư mục
-            </button>
-            <button onclick="openAiGenerateModal()" class="bg-violet-600 hover:bg-violet-700 text-white px-5 py-2.5 rounded-xl font-medium shadow-md text-sm transition-all">
-              🤖 AI tạo câu hỏi
-            </button>
-            <button onclick="openExportPdfModal()" class="bg-red-500 hover:bg-red-600 text-white px-5 py-2.5 rounded-xl font-medium shadow-md text-sm transition-all">
-              📄 Xuất PDF
-            </button>
-            <button onclick="openOmrModal()" class="bg-orange-500 hover:bg-orange-600 text-white px-5 py-2.5 rounded-xl font-medium shadow-md text-sm transition-all">
-              🖨️ In phiếu OMR
-            </button>
-            <button onclick="openBulkImportModal()" class="btn-success text-white px-5 py-2.5 rounded-xl font-medium shadow-md text-sm">
-              📄 Nhập từ Word
-            </button>
-            <button onclick="openAddQuestionModal()" class="btn-primary text-white px-5 py-2.5 rounded-xl font-medium shadow-md text-sm">
-              ➕ Thêm câu hỏi
-            </button>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;">
+            <button onclick="openFolderManagerModal()" style="background:#f59e0b;color:white;border:none;border-radius:10px;padding:9px 16px;font-size:13px;font-weight:600;cursor:pointer;">📁 Thư mục</button>
+            <button onclick="openAiGenerateModal()" style="background:#7c3aed;color:white;border:none;border-radius:10px;padding:9px 16px;font-size:13px;font-weight:600;cursor:pointer;">🤖 AI tạo câu hỏi</button>
+            <button onclick="openExportPdfModal()" style="background:#dc2626;color:white;border:none;border-radius:10px;padding:9px 16px;font-size:13px;font-weight:600;cursor:pointer;">📄 Xuất PDF</button>
+            <button onclick="openOmrModal()" style="background:#ea580c;color:white;border:none;border-radius:10px;padding:9px 16px;font-size:13px;font-weight:600;cursor:pointer;">🖨️ In phiếu OMR</button>
+            <button onclick="openBulkImportModal()" class="btn-success" style="padding:9px 16px;font-size:13px;">📄 Nhập từ Word</button>
+            <button onclick="openAddQuestionModal()" class="btn-primary" style="padding:9px 16px;font-size:13px;">➕ Thêm câu hỏi</button>
           </div>
         </div>
-        
-        <div class="card p-4 mb-4">
-          <div class="flex flex-wrap gap-3">
-            <select id="qFilterType" class="border-2 border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all" onchange="loadQuestions()">
-              <option value="">🎯 Tất cả loại</option>
+
+        <div class="card" style="padding:16px;margin-bottom:16px;">
+          <div style="display:flex;flex-wrap:wrap;gap:10px;">
+            <select id="qFilterType" class="form-select" style="width:auto;" onchange="loadQuestions()">
+              <option value="">Tất cả loại</option>
               <option value="single">Single choice</option>
               <option value="multiple">Multiple choice</option>
               <option value="truefalse">True/False</option>
             </select>
-            <select id="qFilterCategory" class="border-2 border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all" onchange="loadQuestions()">
+            <select id="qFilterCategory" class="form-select" style="width:auto;" onchange="loadQuestions()">
               <option value="">📁 Tất cả chủ đề</option>
             </select>
-            <input type="text" id="qFilterSearch" placeholder="🔍 Tìm kiếm câu hỏi..." class="border-2 border-gray-200 rounded-xl px-4 py-2.5 text-sm flex-1 min-w-[200px] focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all" oninput="debounce(loadQuestions, 300)()">
+            <input type="text" id="qFilterSearch" placeholder="🔍 Tìm kiếm câu hỏi..." class="form-input" style="flex:1;min-width:200px;" oninput="debounce(loadQuestions, 300)()">
           </div>
         </div>
-        
-        <div id="questionList" class="space-y-3"></div>
+
+        <div id="questionList" style="display:flex;flex-direction:column;gap:10px;"></div>
       </div>
 
-      <!-- Section: Bài kiểm tra -->
+      <!-- ===== SECTION: Bài kiểm tra ===== -->
       <div id="section-tests" class="section fade-in">
-        <div class="flex items-center justify-between mb-6">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;gap:16px;flex-wrap:wrap;">
           <div>
-            <h2 class="text-3xl font-bold text-gray-800 mb-1">📋 Bài kiểm tra</h2>
-            <p class="text-gray-500 text-sm">Tạo và quản lý bài kiểm tra</p>
+            <h2 style="font-size:24px;font-weight:700;color:var(--color-ink-charcoal);margin:0 0 4px;">Bài kiểm tra</h2>
+            <p style="font-size:14px;color:var(--color-slate-veil);margin:0;">Tạo và quản lý bài kiểm tra</p>
           </div>
-          <button onclick="openCreateTestModal()" class="btn-primary text-white px-5 py-2.5 rounded-xl font-medium shadow-md text-sm">
-            ➕ Tạo bài kiểm tra
-          </button>
+          <button onclick="openCreateTestModal()" class="btn-primary" style="padding:10px 20px;font-size:14px;">➕ Tạo bài kiểm tra</button>
         </div>
-        <div id="testList" class="grid grid-cols-1 lg:grid-cols-2 gap-4"></div>
+        <div id="testList" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px;"></div>
       </div>
 
-      <!-- Section: Kết quả & Thống kê -->
+      <!-- ===== SECTION: Kết quả & Thống kê ===== -->
       <div id="section-results" class="section fade-in">
-        <div class="mb-6">
-          <h2 class="text-3xl font-bold text-gray-800 mb-1">📊 Kết quả & Thống kê nâng cao</h2>
-          <p class="text-gray-500 text-sm">Phân tích chi tiết kết quả học sinh</p>
+        <div style="margin-bottom:24px;">
+          <h2 style="font-size:24px;font-weight:700;color:var(--color-ink-charcoal);margin:0 0 4px;">Kết quả & Thống kê</h2>
+          <p style="font-size:14px;color:var(--color-slate-veil);margin:0;">Phân tích chi tiết kết quả học sinh</p>
         </div>
-        
-        <div class="card p-4 mb-6">
-          <label class="text-sm font-semibold text-gray-700 block mb-2">Chọn bài kiểm tra:</label>
-          <select id="resultTestSelect" class="w-full md:w-auto border-2 border-gray-200 rounded-xl px-4 py-2.5 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all" onchange="loadResults()">
+        <div class="card" style="padding:16px;margin-bottom:20px;">
+          <label style="font-size:13px;font-weight:600;color:var(--color-ink-charcoal);display:block;margin-bottom:8px;">Chọn bài kiểm tra:</label>
+          <select id="resultTestSelect" class="form-select" style="width:100%;max-width:400px;" onchange="loadResults()">
             <option value="">-- Chọn bài kiểm tra --</option>
           </select>
         </div>
-        
         <div id="resultContent"></div>
       </div>
 
-      <!-- Section: Leaderboard Live -->
+      <!-- ===== SECTION: Leaderboard ===== -->
       <div id="section-leaderboard" class="section fade-in">
-        <div class="mb-6">
-          <h2 class="text-3xl font-bold text-gray-800 mb-1">🏆 Bảng xếp hạng trực tiếp</h2>
-          <p class="text-gray-500 text-sm">Cập nhật tự động mỗi 10 giây</p>
+        <div style="margin-bottom:24px;">
+          <h2 style="font-size:24px;font-weight:700;color:var(--color-ink-charcoal);margin:0 0 4px;">Bảng xếp hạng trực tiếp</h2>
+          <p style="font-size:14px;color:var(--color-slate-veil);margin:0;">Cập nhật tự động mỗi 10 giây</p>
         </div>
-        <div class="card p-4 mb-6">
-          <div class="flex flex-wrap gap-3 items-center">
-            <select id="lbTestSelect" class="border-2 border-gray-200 rounded-xl px-4 py-2.5 flex-1 min-w-[200px] focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all" onchange="startLeaderboard()">
+        <div class="card" style="padding:16px;margin-bottom:20px;">
+          <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;">
+            <select id="lbTestSelect" class="form-select" style="flex:1;min-width:220px;" onchange="startLeaderboard()">
               <option value="">-- Chọn bài kiểm tra --</option>
             </select>
-            <div id="lbStatus" class="flex items-center gap-2 text-sm text-gray-500"></div>
+            <div id="lbStatus" style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--color-slate-veil);"></div>
           </div>
         </div>
         <div id="leaderboardContent">
-          <div class="card p-12 text-center text-gray-400">
-            <div class="text-5xl mb-3">🏆</div>
-            <p>Chọn bài kiểm tra để xem bảng xếp hạng trực tiếp</p>
+          <div class="card" style="padding:48px;text-align:center;">
+            <img src="empty-state.svg" alt="Chưa có dữ liệu" style="width:140px;height:auto;margin:0 auto 16px;display:block;opacity:0.7;">
+            <p style="color:var(--color-slate-veil);font-size:15px;font-weight:500;margin:0;">Chọn bài kiểm tra để xem bảng xếp hạng trực tiếp</p>
           </div>
         </div>
       </div>
 
-      <!-- SECTION PROFILE -->
+      <!-- ===== SECTION: Profile ===== -->
       <div id="section-profile" class="section fade-in">
-        <div class="mb-6">
-          <h2 class="text-3xl font-bold text-gray-800 mb-1">👤 Hồ sơ cá nhân</h2>
-          <p class="text-gray-500 text-sm">Cập nhật thông tin và mật khẩu của bạn</p>
+        <div style="margin-bottom:24px;">
+          <h2 style="font-size:24px;font-weight:700;color:var(--color-ink-charcoal);margin:0 0 4px;">Hồ sơ cá nhân</h2>
+          <p style="font-size:14px;color:var(--color-slate-veil);margin:0;">Cập nhật thông tin và mật khẩu của bạn</p>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <!-- Thông tin cá nhân -->
-          <div class="card p-6">
-            <h3 class="text-lg font-bold text-gray-800 mb-4">📋 Thông tin cơ bản</h3>
-            <div class="flex flex-col items-center mb-6">
-              <div id="avatarPreview" class="w-24 h-24 rounded-full bg-indigo-100 flex items-center justify-center text-4xl mb-3 overflow-hidden border-4 border-indigo-200 cursor-pointer hover:opacity-80 transition-all" onclick="document.getElementById('avatarInput').click()" title="Nhấn để đổi ảnh">
-                👤
-              </div>
-              <input type="file" id="avatarInput" accept="image/*" class="hidden" onchange="previewAvatar(this)">
-              <button onclick="document.getElementById('avatarInput').click()" class="text-xs text-indigo-600 hover:underline">📷 Đổi ảnh đại diện</button>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:20px;">
+          <!-- Thông tin -->
+          <div class="card" style="padding:24px;">
+            <h3 style="font-size:16px;font-weight:700;color:var(--color-ink-charcoal);margin:0 0 20px;">Thông tin cơ bản</h3>
+            <div style="display:flex;flex-direction:column;align-items:center;margin-bottom:20px;">
+              <div id="avatarPreview" onclick="document.getElementById('avatarInput').click()" title="Nhấn để đổi ảnh" style="width:88px;height:88px;border-radius:50%;background:var(--color-lilac-wash);display:flex;align-items:center;justify-content:center;font-size:36px;margin-bottom:10px;cursor:pointer;border:3px solid var(--color-mist-border);overflow:hidden;">👤</div>
+              <input type="file" id="avatarInput" accept="image/*" style="display:none;" onchange="previewAvatar(this)">
+              <button onclick="document.getElementById('avatarInput').click()" style="background:none;border:none;color:var(--color-iris-bolt);font-size:13px;cursor:pointer;font-weight:500;">📷 Đổi ảnh đại diện</button>
             </div>
-            <div class="space-y-4">
+            <div style="display:flex;flex-direction:column;gap:14px;">
               <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1">Họ và tên</label>
-                <input type="text" id="profileName" placeholder="Nhập họ và tên"
-                  class="w-full border-2 border-gray-200 rounded-xl px-4 py-2.5 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all">
+                <label style="display:block;font-size:13px;font-weight:600;color:var(--color-ink-charcoal);margin-bottom:6px;">Họ và tên</label>
+                <input type="text" id="profileName" placeholder="Nhập họ và tên" class="form-input" style="width:100%;">
               </div>
               <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1">Email</label>
-                <input type="email" id="profileEmail" disabled
-                  class="w-full border-2 border-gray-100 rounded-xl px-4 py-2.5 bg-gray-50 text-gray-400 cursor-not-allowed">
-                <p class="text-xs text-gray-400 mt-1">Email không thể thay đổi</p>
+                <label style="display:block;font-size:13px;font-weight:600;color:var(--color-ink-charcoal);margin-bottom:6px;">Email</label>
+                <input type="email" id="profileEmail" disabled style="width:100%;height:42px;border:2px solid var(--color-mist-border);border-radius:10px;padding:0 14px;font-size:14px;color:var(--color-fog-mist);background:var(--color-chalk-canvas);">
+                <p style="font-size:12px;color:var(--color-fog-mist);margin:4px 0 0;">Email không thể thay đổi</p>
               </div>
-              <button onclick="updateProfile()" class="w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white py-3 rounded-xl font-medium hover:opacity-90 transition-all shadow-md">
-                💾 Lưu thông tin
-              </button>
+              <button onclick="updateProfile()" class="btn-primary" style="width:100%;height:44px;font-size:14px;">💾 Lưu thông tin</button>
             </div>
           </div>
-          <!-- Đổi mật khẩu -->
-          <div class="card p-6">
-            <h3 class="text-lg font-bold text-gray-800 mb-4">🔒 Đổi mật khẩu</h3>
-            <div class="space-y-4">
+          <!-- Mật khẩu -->
+          <div class="card" style="padding:24px;">
+            <h3 style="font-size:16px;font-weight:700;color:var(--color-ink-charcoal);margin:0 0 20px;">Đổi mật khẩu</h3>
+            <div style="display:flex;flex-direction:column;gap:14px;">
               <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1">Mật khẩu mới</label>
-                <input type="password" id="newPassword" placeholder="Ít nhất 6 ký tự"
-                  class="w-full border-2 border-gray-200 rounded-xl px-4 py-2.5 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all">
+                <label style="display:block;font-size:13px;font-weight:600;color:var(--color-ink-charcoal);margin-bottom:6px;">Mật khẩu mới</label>
+                <input type="password" id="newPassword" placeholder="Ít nhất 6 ký tự" class="form-input" style="width:100%;">
               </div>
               <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1">Xác nhận mật khẩu</label>
-                <input type="password" id="confirmPassword" placeholder="Nhập lại mật khẩu mới"
-                  class="w-full border-2 border-gray-200 rounded-xl px-4 py-2.5 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all">
+                <label style="display:block;font-size:13px;font-weight:600;color:var(--color-ink-charcoal);margin-bottom:6px;">Xác nhận mật khẩu</label>
+                <input type="password" id="confirmPassword" placeholder="Nhập lại mật khẩu mới" class="form-input" style="width:100%;">
               </div>
-              <button onclick="updatePassword()" class="w-full bg-gradient-to-r from-green-500 to-teal-600 text-white py-3 rounded-xl font-medium hover:opacity-90 transition-all shadow-md">
-                🔑 Cập nhật mật khẩu
-              </button>
+              <button onclick="updatePassword()" class="btn-success" style="width:100%;height:44px;font-size:14px;">🔑 Cập nhật mật khẩu</button>
             </div>
-            <div class="mt-6 p-4 bg-blue-50 rounded-xl border border-blue-100">
-              <p class="text-sm font-semibold text-blue-800 mb-1">ℹ️ Về hệ thống</p>
-              <p class="text-xs text-blue-600">Hệ thống thi trắc nghiệm trực tuyến</p>
-              <p class="text-xs text-blue-600">Trường TC Kinh tế Kỹ thuật TP Cần Thơ</p>
-              <p class="text-xs text-blue-500 mt-1">Thực hiện bởi: <strong>Nguyễn Văn Đức An</strong> — Khoa CNTT</p>
+            <div style="margin-top:20px;padding:14px;background:var(--color-chalk-canvas);border-radius:12px;border:1px solid var(--color-mist-border);">
+              <p style="font-size:13px;font-weight:600;color:var(--color-ink-charcoal);margin:0 0 4px;">Về hệ thống</p>
+              <p style="font-size:12px;color:var(--color-slate-veil);margin:0 0 2px;">Hệ thống thi trắc nghiệm trực tuyến</p>
+              <p style="font-size:12px;color:var(--color-slate-veil);margin:0 0 2px;">Trường TC Kinh tế Kỹ thuật TP Cần Thơ</p>
+              <p style="font-size:12px;color:var(--color-fog-mist);margin:0;">Thực hiện bởi: <strong style="color:var(--color-slate-veil);">Nguyễn Văn Đức An</strong> — Khoa CNTT</p>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- SECTION BATTLE REALTIME -->
+      <!-- ===== SECTION: Battle Realtime ===== -->
       <div id="section-battle" class="section fade-in">
-        <div class="mb-6">
-          <h2 class="text-3xl font-bold text-gray-800 mb-1">⚡ Battle Realtime</h2>
-          <p class="text-gray-500 text-sm">Học sinh thi đua trả lời nhanh — điểm tính theo độ chính xác và tốc độ</p>
+        <div style="margin-bottom:24px;">
+          <h2 style="font-size:24px;font-weight:700;color:var(--color-ink-charcoal);margin:0 0 4px;">Battle Realtime</h2>
+          <p style="font-size:14px;color:var(--color-slate-veil);margin:0;">Học sinh thi đua trả lời nhanh — điểm tính theo độ chính xác và tốc độ</p>
         </div>
-        <div class="card p-4 mb-6">
-          <div class="flex flex-wrap gap-3 items-center">
-            <select id="battleTestSelect" class="border-2 border-gray-200 rounded-xl px-4 py-2.5 flex-1 min-w-[200px] focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all">
+        <div class="card" style="padding:16px;margin-bottom:20px;">
+          <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;">
+            <select id="battleTestSelect" class="form-select" style="flex:1;min-width:220px;">
               <option value="">-- Chọn bài kiểm tra --</option>
             </select>
-            <button onclick="startBattle()" class="bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-6 py-2.5 rounded-xl font-bold hover:opacity-90 transition-all shadow-lg">
-              ⚡ Bắt đầu Battle
-            </button>
-            <button onclick="stopBattle()" class="bg-red-50 text-red-600 hover:bg-red-100 px-4 py-2.5 rounded-xl font-medium transition-all hidden" id="stopBattleBtn">
-              ⏹ Dừng
-            </button>
+            <button onclick="startBattle()" style="background:var(--color-deep-indigo);color:white;border:none;border-radius:10px;padding:10px 20px;font-size:14px;font-weight:600;cursor:pointer;">⚡ Bắt đầu Battle</button>
+            <button onclick="stopBattle()" id="stopBattleBtn" style="background:var(--color-chalk-canvas);color:#dc2626;border:2px solid #dc2626;border-radius:10px;padding:10px 16px;font-size:14px;font-weight:600;cursor:pointer;display:none;">⏹ Dừng</button>
           </div>
         </div>
-
         <div id="battleContent">
-          <div class="card p-12 text-center text-gray-400">
-            <div class="text-6xl mb-4">⚡</div>
-            <p class="text-lg font-medium">Chọn bài thi và nhấn "Bắt đầu Battle"</p>
-            <p class="text-sm mt-2">Bảng xếp hạng sẽ cập nhật realtime sau mỗi câu trả lời</p>
+          <div class="card" style="padding:48px;text-align:center;">
+            <div style="font-size:48px;margin-bottom:14px;">⚡</div>
+            <p style="font-size:15px;font-weight:500;color:var(--color-ink-charcoal);margin:0 0 6px;">Chọn bài thi và nhấn "Bắt đầu Battle"</p>
+            <p style="font-size:13px;color:var(--color-fog-mist);margin:0;">Bảng xếp hạng sẽ cập nhật realtime sau mỗi câu trả lời</p>
           </div>
         </div>
       </div>
@@ -516,24 +562,22 @@
   </div>
 
   <!-- MODAL QR CODE -->
-  <div id="qrModal" class="modal fixed inset-0 bg-black bg-opacity-50 z-50 items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-sm w-full text-center">
-      <div class="text-4xl mb-3">📱</div>
-      <h3 class="text-xl font-bold text-gray-800 mb-1" id="qrTitle">QR Code bài thi</h3>
-      <p class="text-sm text-gray-500 mb-5">Học sinh dùng điện thoại quét để vào thi ngay</p>
-      <div id="qrcode" class="flex justify-center mb-4"></div>
-      <div class="bg-indigo-50 rounded-xl px-4 py-3 mb-5">
-        <p class="text-xs text-gray-500 mb-1">Hoặc nhập mã thi</p>
-        <p class="text-3xl font-black tracking-widest text-indigo-600" id="qrCodeText"></p>
-      </div>
-      <p class="text-xs text-gray-400 mb-4" id="qrUrlText"></p>
-      <div class="flex gap-3">
-        <button onclick="downloadQR()" class="flex-1 bg-indigo-600 text-white py-2.5 rounded-xl font-medium hover:bg-indigo-700 transition-all">
-          📥 Tải QR về
-        </button>
-        <button onclick="closeQRModal()" class="flex-1 bg-gray-100 text-gray-700 py-2.5 rounded-xl font-medium hover:bg-gray-200 transition-all">
-          Đóng
-        </button>
+  <div id="qrModal" class="modal" style="position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:50;align-items:center;justify-content:center;padding:16px;">
+    <div class="modal-card" style="width:100%;max-width:360px;text-align:center;">
+      <div class="modal-header" style="text-align:center;">📱 QR Code bài thi</div>
+      <div style="padding:24px;">
+        <p style="font-size:13px;color:var(--color-slate-veil);margin:0 0 16px;">Học sinh dùng điện thoại quét để vào thi ngay</p>
+        <div id="qrcode" style="display:flex;justify-content:center;margin-bottom:16px;"></div>
+        <h3 id="qrTitle" style="font-size:14px;font-weight:600;color:var(--color-ink-charcoal);margin:0 0 12px;"></h3>
+        <div style="background:var(--color-lilac-wash);border-radius:12px;padding:12px 16px;margin-bottom:12px;">
+          <p style="font-size:12px;color:var(--color-fog-mist);margin:0 0 4px;">Hoặc nhập mã thi</p>
+          <p id="qrCodeText" style="font-size:28px;font-weight:800;letter-spacing:6px;color:var(--color-iris-bolt);margin:0;"></p>
+        </div>
+        <p id="qrUrlText" style="font-size:11px;color:var(--color-fog-mist);margin:0 0 16px;word-break:break-all;"></p>
+        <div style="display:flex;gap:10px;">
+          <button onclick="downloadQR()" class="btn-primary" style="flex:1;height:42px;font-size:14px;">📥 Tải QR về</button>
+          <button onclick="closeQRModal()" style="flex:1;height:42px;background:var(--color-chalk-canvas);border:1px solid var(--color-mist-border);border-radius:10px;font-size:14px;font-weight:600;color:var(--color-slate-veil);cursor:pointer;">Đóng</button>
+        </div>
       </div>
     </div>
   </div>
@@ -690,48 +734,40 @@
       
       const list = document.getElementById('questionList');
       if (!filtered.length) {
-        list.innerHTML = '<div class="card p-8 text-center"><p class="text-gray-400">Chưa có câu hỏi nào</p></div>';
+        list.innerHTML = `<div class="card" style="padding:40px;text-align:center;">
+          <img src="empty-state.svg" alt="Chưa có câu hỏi" style="width:130px;display:block;margin:0 auto 12px;opacity:0.7;">
+          <p style="color:var(--color-slate-veil);font-size:14px;margin:0;">Chưa có câu hỏi nào</p>
+        </div>`;
         return;
       }
-      
+
       list.innerHTML = filtered.map(q => {
-        const typeLabels = { single: '📌 Single', multiple: '☑️ Multiple', truefalse: '✓✗ True/False' };
-        const typeColors = { single: 'bg-blue-100 text-blue-700', multiple: 'bg-green-100 text-green-700', truefalse: 'bg-purple-100 text-purple-700' };
+        const typeLabels = { single: 'Single', multiple: 'Multiple', truefalse: 'True/False' };
+        const typeColors = { single: 'background:var(--color-lilac-wash);color:var(--color-iris-bolt);', multiple: 'background:#f0fdf4;color:#15803d;', truefalse: 'background:#fff7ed;color:#c2410c;' };
         return `
-          <div class="card p-5 hover:shadow-xl transition-all">
-            <div class="flex items-start justify-between gap-4">
-              <div class="flex-1">
-                <div class="flex items-center gap-2 mb-2">
-                  <span class="badge ${typeColors[q.type]}">${typeLabels[q.type]}</span>
-                  ${q.category ? `<span class="badge bg-gray-100 text-gray-700">📁 ${q.category}</span>` : ''}
-                  <span class="badge bg-orange-100 text-orange-700">⭐ ${q.points} điểm</span>
-                  ${q.image_url ? '<span class="badge bg-pink-100 text-pink-700">🖼️ Có hình ảnh</span>' : ''}
+          <div class="card" style="padding:20px;">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;">
+              <div style="flex:1;min-width:0;">
+                <div style="display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:10px;">
+                  <span class="badge" style="${typeColors[q.type]}">${typeLabels[q.type]}</span>
+                  ${q.category ? `<span class="badge" style="background:var(--color-chalk-canvas);color:var(--color-slate-veil);">📁 ${q.category}</span>` : ''}
+                  <span class="badge" style="background:#fffbeb;color:#b45309;">⭐ ${q.points} điểm</span>
+                  ${q.image_url ? '<span class="badge" style="background:#fdf2f8;color:#be185d;">🖼️ Có hình ảnh</span>' : ''}
                 </div>
-                <p class="text-gray-800 font-medium mb-3">${q.content || 'N/A'}</p>
-                ${q.image_url ? `
-                  <div class="mb-3">
-                    <img src="${q.image_url}" alt="Hình minh họa" 
-                         class="max-w-sm rounded-xl border-2 border-gray-200 shadow-sm cursor-pointer hover:opacity-90 transition-opacity"
-                         style="max-height:200px; object-fit:contain;"
-                         onclick="window.open('${q.image_url}','_blank')"
-                         title="Click để xem ảnh đầy đủ">
-                  </div>` : ''}
-                <div class="space-y-1">
+                <p style="color:var(--color-ink-charcoal);font-size:15px;font-weight:600;line-height:1.5;margin:0 0 12px;">${q.content || 'N/A'}</p>
+                ${q.image_url ? `<div style="margin-bottom:12px;"><img src="${q.image_url}" alt="Hình minh họa" style="max-width:360px;max-height:200px;object-fit:contain;border:1px solid var(--color-mist-border);border-radius:10px;cursor:pointer;display:block;" onclick="window.open('${q.image_url}','_blank')" title="Click để xem ảnh đầy đủ"></div>` : ''}
+                <div style="display:flex;flex-direction:column;gap:5px;">
                   ${(q.options || []).map((opt, i) => {
                     const isCorrect = (q.correct_answers || []).includes(i);
-                    return `<div class="flex items-center gap-2 text-sm ${isCorrect ? 'text-green-600 font-semibold' : 'text-gray-600'}">
-                      ${isCorrect ? '✅' : '⚪'} ${opt}
+                    return `<div style="display:flex;align-items:center;gap:8px;font-size:13px;color:${isCorrect ? '#15803d' : 'var(--color-slate-veil)'};font-weight:${isCorrect ? '600' : '400'};">
+                      <span>${isCorrect ? '✓' : '○'}</span><span>${opt}</span>
                     </div>`;
                   }).join('')}
                 </div>
               </div>
-              <div class="flex flex-col gap-2">
-                <button onclick="openEditQuestionModal('${q.id}')" class="text-indigo-500 hover:text-indigo-700 hover:bg-indigo-50 p-2 rounded-lg transition-all" title="Sửa">
-                  ✏️
-                </button>
-                <button onclick="deleteQuestion('${q.id}')" class="text-red-500 hover:text-red-700 hover:bg-red-50 p-2 rounded-lg transition-all" title="Xóa">
-                  🗑️
-                </button>
+              <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0;">
+                <button onclick="openEditQuestionModal('${q.id}')" style="width:36px;height:36px;border:1px solid var(--color-mist-border);background:var(--color-paper-white);border-radius:9px;color:var(--color-iris-bolt);cursor:pointer;" title="Sửa">✏️</button>
+                <button onclick="deleteQuestion('${q.id}')" style="width:36px;height:36px;border:1px solid #fecaca;background:#fff5f5;border-radius:9px;color:#dc2626;cursor:pointer;" title="Xóa">🗑️</button>
               </div>
             </div>
           </div>
@@ -783,10 +819,8 @@
 
       const modal = `
         <div class="modal show fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" onclick="if(event.target===this) closeModal()">
-          <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <div class="sticky top-0 bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-6 rounded-t-2xl">
-              <h3 class="text-2xl font-bold">✏️ Sửa câu hỏi</h3>
-            </div>
+          <div class="modal-card" style="width:100%;max-width:640px;max-height:90vh;overflow-y:auto;">
+            <div class="modal-header">✏️ Sửa câu hỏi</div>
             <div class="p-6 space-y-4">
               <input type="hidden" id="editQuestionId" value="${id}">
               <div>
@@ -891,10 +925,8 @@
       questionImageFile = null; // Reset image
       const modal = `
         <div class="modal show fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" onclick="if(event.target===this) closeModal()">
-          <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <div class="sticky top-0 bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-6 rounded-t-2xl">
-              <h3 class="text-2xl font-bold">➕ Thêm câu hỏi mới</h3>
-            </div>
+          <div class="modal-card" style="width:100%;max-width:640px;max-height:90vh;overflow-y:auto;">
+            <div class="modal-header">➕ Thêm câu hỏi mới</div>
             <div class="p-6 space-y-4">
               <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-2">Loại câu hỏi</label>
@@ -1038,7 +1070,10 @@
       
       const list = document.getElementById('testList');
       if (!allTests.length) {
-        list.innerHTML = '<div class="col-span-full card p-8 text-center"><p class="text-gray-400">Chưa có bài kiểm tra nào</p></div>';
+        list.innerHTML = `<div style="grid-column:1/-1;" class="card" style="padding:40px;text-align:center;">
+          <img src="empty-state.svg" alt="Chưa có bài kiểm tra" style="width:140px;display:block;margin:0 auto 12px;opacity:0.7;">
+          <p style="color:var(--color-slate-veil);font-size:14px;margin:0;">Chưa có bài kiểm tra nào</p>
+        </div>`;
         return;
       }
       
@@ -1061,42 +1096,28 @@
         }
         
         return `
-          <div class="card p-6">
-            <div class="flex items-start justify-between mb-4">
-              <div class="flex-1">
-                <h3 class="text-xl font-bold text-gray-800 mb-2">${t.title || 'Untitled'}</h3>
-                <div class="flex flex-wrap gap-2 mb-3">
-                  <span class="badge ${statusColor}">${statusBadge}</span>
-                  <span class="badge bg-blue-100 text-blue-700">📝 ${t.questions?.length || 0} câu</span>
-                  <span class="badge bg-purple-100 text-purple-700">⏱️ ${t.duration} phút</span>
-                  <span class="badge bg-orange-100 text-orange-700">🔑 ${t.test_code}</span>
-                  ${t.strict_mode?.enabled ? '<span class="badge bg-red-100 text-red-700">🛡️ Nghiêm túc</span>' : ''}
-                </div>
+          <div class="card" style="padding:20px;">
+            <div style="margin-bottom:14px;">
+              <h3 style="font-size:17px;font-weight:700;color:var(--color-ink-charcoal);margin:0 0 10px;">${t.title || 'Untitled'}</h3>
+              <div style="display:flex;flex-wrap:wrap;gap:6px;">
+                <span class="badge" style="${statusBadge.includes('Đang') ? 'background:#f0fdf4;color:#15803d;' : statusBadge.includes('Chưa') ? 'background:#fffbeb;color:#b45309;' : 'background:#fff5f5;color:#b91c1c;'}">${statusBadge}</span>
+                <span class="badge" style="background:var(--color-lilac-wash);color:var(--color-iris-bolt);">📝 ${t.questions?.length || 0} câu</span>
+                <span class="badge" style="background:var(--color-chalk-canvas);color:var(--color-slate-veil);">⏱️ ${t.duration} phút</span>
+                <span class="badge" style="background:#fffbeb;color:#b45309;">🔑 ${t.test_code}</span>
+                ${t.strict_mode?.enabled ? '<span class="badge" style="background:#fff5f5;color:#b91c1c;">🛡️ Nghiêm túc</span>' : ''}
               </div>
             </div>
-            <div class="text-xs text-gray-500 mb-4">
+            <div style="font-size:12px;color:var(--color-slate-veil);line-height:1.8;margin-bottom:16px;">
               <div>📅 Mở: ${start.toLocaleString('vi-VN')}</div>
               <div>📅 Đóng: ${end.toLocaleString('vi-VN')}</div>
             </div>
-            <div class="flex gap-2">
-              <button onclick="viewTestDetails('${t.id}')" class="flex-1 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 px-4 py-2 rounded-lg text-sm font-medium transition-all">
-                👁️ Xem chi tiết
-              </button>
-              <button onclick="duplicateTest('${t.id}')" class="bg-teal-50 text-teal-600 hover:bg-teal-100 px-4 py-2 rounded-lg text-sm font-medium transition-all" title="Nhân bản bài thi">
-                📋
-              </button>
-              <button onclick="openEditTimeModal('${t.id}')" class="bg-yellow-50 text-yellow-600 hover:bg-yellow-100 px-4 py-2 rounded-lg text-sm font-medium transition-all" title="Chỉnh thời gian">
-                🕐
-              </button>
-              <button onclick="showQRModal('${t.test_code}', '${t.title}')" class="bg-blue-50 text-blue-600 hover:bg-blue-100 px-4 py-2 rounded-lg text-sm font-medium transition-all" title="QR Code">
-                📱
-              </button>
-              <button onclick="exportExamPDF('${t.id}')" class="bg-purple-50 text-purple-600 hover:bg-purple-100 px-4 py-2 rounded-lg text-sm font-medium transition-all" title="Xuất đề thi PDF">
-                📄
-              </button>
-              <button onclick="deleteTest('${t.id}')" class="bg-red-50 text-red-600 hover:bg-red-100 px-4 py-2 rounded-lg text-sm font-medium transition-all">
-                🗑️
-              </button>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+              <button onclick="viewTestDetails('${t.id}')" style="flex:1;min-width:120px;height:38px;background:var(--color-lilac-wash);color:var(--color-iris-bolt);border:none;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;">👁️ Xem chi tiết</button>
+              <button onclick="duplicateTest('${t.id}')" style="width:38px;height:38px;background:#f0fdf4;color:#15803d;border:none;border-radius:9px;cursor:pointer;" title="Nhân bản bài thi">📋</button>
+              <button onclick="openEditTimeModal('${t.id}')" style="width:38px;height:38px;background:#fffbeb;color:#b45309;border:none;border-radius:9px;cursor:pointer;" title="Chỉnh thời gian">🕐</button>
+              <button onclick="showQRModal('${t.test_code}', '${t.title}')" style="width:38px;height:38px;background:#eff6ff;color:#2563eb;border:none;border-radius:9px;cursor:pointer;" title="QR Code">📱</button>
+              <button onclick="exportExamPDF('${t.id}')" style="width:38px;height:38px;background:#f5f3ff;color:#6d28d9;border:none;border-radius:9px;cursor:pointer;" title="Xuất đề thi PDF">📄</button>
+              <button onclick="deleteTest('${t.id}')" style="width:38px;height:38px;background:#fff5f5;color:#dc2626;border:none;border-radius:9px;cursor:pointer;" title="Xóa">🗑️</button>
             </div>
           </div>
         `;
@@ -1181,10 +1202,10 @@
 
       const modal = `
         <div class="modal show fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" onclick="if(event.target===this) closeModal()">
-          <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md">
-            <div class="sticky top-0 bg-gradient-to-r from-yellow-500 to-orange-500 text-white p-6 rounded-t-2xl">
-              <h3 class="text-xl font-bold">🕐 Chỉnh thời gian bài kiểm tra</h3>
-              <p class="text-sm opacity-90 mt-1 truncate">${test.title}</p>
+          <div class="modal-card" style="width:100%;max-width:480px;">
+            <div class="modal-header">
+              <div>🕐 Chỉnh thời gian bài kiểm tra</div>
+              <p style="font-size:13px;font-weight:400;opacity:0.75;margin:5px 0 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${test.title}</p>
             </div>
             <div class="p-6 space-y-4">
               
@@ -1205,8 +1226,8 @@
               </div>
 
               <!-- Nút tắt/mở nhanh -->
-              <div class="bg-blue-50 rounded-xl p-4 space-y-2">
-                <p class="text-xs font-semibold text-blue-700 mb-3">⚡ Tắt/Mở nhanh:</p>
+              <div style="background:var(--color-lilac-wash);border:1px solid var(--color-mist-border);border-radius:12px;padding:16px;">
+                <p style="font-size:12px;font-weight:700;color:var(--color-deep-indigo);margin:0 0 12px;">⚡ Tắt/Mở nhanh:</p>
                 <div class="grid grid-cols-2 gap-2">
                   <button type="button" onclick="quickOpenNow('${testId}')"
                     class="bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded-lg text-xs font-medium transition-all">
@@ -1229,7 +1250,7 @@
 
               <div class="flex gap-3 pt-2">
                 <button onclick="closeModal()" class="flex-1 border-2 border-gray-300 text-gray-700 px-6 py-3 rounded-xl font-medium hover:bg-gray-50 transition-all">Hủy</button>
-                <button onclick="saveTestTime('${testId}')" class="flex-1 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white px-6 py-3 rounded-xl font-medium shadow-md transition-all">
+                <button onclick="saveTestTime('${testId}')" class="flex-1 btn-primary text-white px-6 py-3 rounded-xl font-medium transition-all">
                   💾 Lưu thay đổi
                 </button>
               </div>
@@ -1329,9 +1350,10 @@
       // Fetch TOÀN BỘ câu hỏi (không bị ảnh hưởng bởi filter hiện tại)
       document.getElementById('modalContainer').innerHTML = `
         <div class="modal show fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div class="bg-white rounded-2xl shadow-2xl p-10 text-center">
-            <div class="spinner mx-auto mb-3"></div>
-            <p class="text-gray-500 text-sm">Đang tải câu hỏi...</p>
+          <div class="modal-card" style="padding:40px;text-align:center;">
+            <img src="empty-state.svg" alt="Đang tải câu hỏi" style="width:120px;display:block;margin:0 auto 12px;opacity:0.65;">
+            <div class="spinner" style="margin:0 auto 12px;"></div>
+            <p style="color:var(--color-slate-veil);font-size:14px;margin:0;">Đang tải câu hỏi...</p>
           </div>
         </div>
       `;
@@ -1399,15 +1421,13 @@
 
       const modal = `
         <div class="modal show fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" onclick="if(event.target===this) closeModal()">
-          <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-            <div class="sticky top-0 bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-6 rounded-t-2xl">
-              <h3 class="text-2xl font-bold">📋 Tạo bài kiểm tra mới</h3>
-            </div>
+          <div class="modal-card" style="width:100%;max-width:860px;max-height:90vh;overflow-y:auto;">
+            <div class="modal-header">📋 Tạo bài kiểm tra mới</div>
             <div class="p-6 space-y-4">
 
               <!-- Mã bài thi tự động -->
-              <div class="bg-indigo-50 border-2 border-indigo-200 rounded-xl p-4">
-                <label class="block text-sm font-semibold text-indigo-700 mb-2">🔑 Mã bài thi (học sinh dùng để vào thi)</label>
+              <div style="background:var(--color-lilac-wash);border:2px solid var(--color-iris-bolt);border-radius:12px;padding:16px;">
+                <label style="display:block;font-size:13px;font-weight:700;color:var(--color-deep-indigo);margin-bottom:8px;">🔑 Mã bài thi (học sinh dùng để vào thi)</label>
                 <div class="flex items-center gap-3">
                   <input type="text" id="testCodeInput" value="${autoCode}"
                     class="flex-1 border-2 border-indigo-300 rounded-xl px-4 py-2.5 text-2xl font-bold tracking-widest text-center text-indigo-700 uppercase focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all"
@@ -1731,8 +1751,8 @@
       // Hiển thị modal với loading trước
       document.getElementById('modalContainer').innerHTML = `
         <div class="modal show fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-            <div class="sticky top-0 bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-6 rounded-t-2xl">
+          <div class="modal-card" style="width:100%;max-width:860px;max-height:90vh;overflow-y:auto;">
+            <div class="modal-header">
               <h3 class="text-2xl font-bold">${test.title}</h3>
               <p class="text-sm opacity-90 mt-1">Mã: ${test.test_code} • ${test.questions.length} câu • ${test.duration} phút</p>
             </div>
@@ -1798,8 +1818,8 @@
 
       const modal = `
         <div class="modal show fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" onclick="if(event.target===this) closeModal()">
-          <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-            <div class="sticky top-0 bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-6 rounded-t-2xl">
+          <div class="modal-card" style="width:100%;max-width:860px;max-height:90vh;overflow-y:auto;">
+            <div class="modal-header">
               <h3 class="text-2xl font-bold">${test.title}</h3>
               <p class="text-sm opacity-90 mt-1">Mã: ${test.test_code} • ${test.questions.length} câu • ${test.duration} phút</p>
             </div>
@@ -2338,8 +2358,8 @@
       
       const modal = `
         <div class="modal show fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" onclick="if(event.target===this) closeModal()">
-          <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <div class="sticky top-0 bg-gradient-to-r from-red-500 to-pink-600 text-white p-6 rounded-t-2xl">
+          <div class="modal-card" style="width:100%;max-width:640px;max-height:90vh;overflow-y:auto;">
+            <div class="modal-header">
               <h3 class="text-2xl font-bold">📄 Xuất đề thi ra PDF</h3>
               <p class="text-sm opacity-80 mt-1">Tạo file đề thi và đáp án riêng biệt</p>
             </div>
@@ -2611,8 +2631,8 @@
     function openAiGenerateModal() {
       const modal = `
         <div class="modal show fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" onclick="if(event.target===this) closeModal()">
-          <div class="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
-            <div class="sticky top-0 bg-gradient-to-r from-violet-600 to-purple-700 text-white p-6 rounded-t-2xl">
+          <div class="modal-card" style="width:100%;max-width:720px;max-height:90vh;overflow-y:auto;">
+            <div class="modal-header">
               <h3 class="text-2xl font-bold">🤖 Tạo câu hỏi bằng AI</h3>
               <p class="text-sm opacity-80 mt-1">Dán đoạn văn bản, AI sẽ tự động tạo câu hỏi trắc nghiệm</p>
             </div>
@@ -2659,7 +2679,7 @@
               </div>
               
               <div id="aiGenerateBtn">
-                <button onclick="generateAiQuestions()" class="w-full bg-gradient-to-r from-violet-600 to-purple-700 hover:from-violet-700 hover:to-purple-800 text-white px-6 py-3 rounded-xl font-medium shadow-md transition-all flex items-center justify-center gap-2">
+                <button onclick="generateAiQuestions()" class="w-full btn-primary px-6 py-3 rounded-xl font-medium transition-all flex items-center justify-center gap-2">
                   <span class="text-xl">✨</span>
                   <span>Tạo câu hỏi với AI</span>
                 </button>
@@ -2781,12 +2801,12 @@ YÊU CẦU:
         `).join('');
         
         document.getElementById('aiResultContainer').classList.remove('hidden');
-        btn.innerHTML = `<button onclick="generateAiQuestions()" class="w-full bg-gradient-to-r from-violet-600 to-purple-700 text-white px-6 py-3 rounded-xl font-medium shadow-md transition-all flex items-center justify-center gap-2">
+        btn.innerHTML = `<button onclick="generateAiQuestions()" class="w-full btn-primary px-6 py-3 rounded-xl font-medium transition-all flex items-center justify-center gap-2">
           <span>🔄</span><span>Tạo lại</span>
         </button>`;
 
       } catch (err) {
-        btn.innerHTML = `<button onclick="generateAiQuestions()" class="w-full bg-gradient-to-r from-violet-600 to-purple-700 text-white px-6 py-3 rounded-xl font-medium shadow-md transition-all flex items-center justify-center gap-2">
+        btn.innerHTML = `<button onclick="generateAiQuestions()" class="w-full btn-primary px-6 py-3 rounded-xl font-medium transition-all flex items-center justify-center gap-2">
           <span class="text-xl">✨</span><span>Tạo câu hỏi với AI</span>
         </button>`;
         alert('Lỗi AI: ' + err.message + '\n\nVui lòng thử lại.');
@@ -2843,8 +2863,8 @@ YÊU CẦU:
 
       const modal = `
         <div class="modal show fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" onclick="if(event.target===this) closeModal()">
-          <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <div class="sticky top-0 bg-gradient-to-r from-amber-500 to-orange-500 text-white p-6 rounded-t-2xl">
+          <div class="modal-card" style="width:100%;max-width:640px;max-height:90vh;overflow-y:auto;">
+            <div class="modal-header">
               <h3 class="text-2xl font-bold">📁 Quản lý thư mục</h3>
               <p class="text-sm opacity-80 mt-1">Tổ chức câu hỏi theo chủ đề / thư mục</p>
             </div>
@@ -3007,8 +3027,8 @@ YÊU CẦU:
     function openBulkImportModal() {
       const modal = `
         <div class="modal show fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" onclick="if(event.target===this) closeModal()">
-          <div class="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
-            <div class="sticky top-0 bg-gradient-to-r from-green-600 to-teal-600 text-white p-6 rounded-t-2xl">
+          <div class="modal-card" style="width:100%;max-width:720px;max-height:90vh;overflow-y:auto;">
+            <div class="modal-header">
               <h3 class="text-2xl font-bold">📄 Nhập câu hỏi từ Word</h3>
             </div>
             <div class="p-6">
@@ -3256,7 +3276,7 @@ D. 6</code></pre>
       const cats = [...new Set(allQuestions.map(q => q.category).filter(Boolean))];
       const modal = `
         <div class="modal show fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-          <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full max-h-[90vh] overflow-y-auto">
+          <div class="modal-card" style="width:100%;max-width:440px;max-height:90vh;overflow-y:auto;">
             <div class="flex justify-between items-center mb-6">
               <div>
                 <h3 class="text-xl font-bold text-gray-800">🖨️ In phiếu trả lời OMR</h3>
@@ -3299,7 +3319,7 @@ D. 6</code></pre>
                 </div>
               </div>
               <div class="flex gap-3 pt-2">
-                <button onclick="generateOmrSheet()" class="flex-1 bg-gradient-to-r from-orange-500 to-amber-600 text-white py-3 rounded-xl font-bold hover:opacity-90 transition-all shadow-md">
+                <button onclick="generateOmrSheet()" class="flex-1 btn-primary text-white py-3 rounded-xl font-bold transition-all">
                   🖨️ Tạo & In phiếu
                 </button>
                 <button onclick="closeModal()" class="flex-1 bg-gray-100 text-gray-700 py-3 rounded-xl font-medium hover:bg-gray-200 transition-all">
