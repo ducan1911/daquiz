@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 760" role="img" aria-labelledby="title desc">
+  <title id="title">Trạng thái chưa có dữ liệu</title>
+  <desc id="desc">Học sinh Việt Nam dùng kính lúp tìm kiếm bên hộp dữ liệu trống.</desc>
+  <path d="M128 173C50 291 82 507 219 617c138 110 369 84 478-51 108-135 47-342-89-426-137-84-396-94-480 33Z" fill="#edefff"/>
+  <!-- empty document stack -->
+  <g transform="translate(460 142)">
+    <rect x="42" y="0" width="292" height="350" rx="30" fill="#fff" stroke="#d9dde8" stroke-width="5"/>
+    <rect x="80" y="48" width="142" height="18" rx="9" fill="#282e3e"/>
+    <rect x="80" y="86" width="214" height="13" rx="7" fill="#939bb4"/>
+    <rect x="80" y="139" width="214" height="54" rx="15" fill="#f6f7fb" stroke="#d9dde8" stroke-width="3"/>
+    <rect x="80" y="211" width="214" height="54" rx="15" fill="#f6f7fb" stroke="#d9dde8" stroke-width="3"/>
+    <rect x="80" y="283" width="152" height="16" rx="8" fill="#d9dde8"/>
+    <path d="M0 326h374l-35 126H35L0 326Z" fill="#fff" stroke="#d9dde8" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M35 386h304" stroke="#d9dde8" stroke-width="5"/>
+    <circle cx="187" cy="386" r="15" fill="#edefff" stroke="#4255ff" stroke-width="5"/>
+  </g>
+  <!-- searching student -->
+  <g transform="translate(82 189)">
+    <ellipse cx="241" cy="459" rx="174" ry="30" fill="#2e3856" opacity=".10"/>
+    <!-- crouched legs -->
+    <path d="M185 353c-50 27-74 67-73 107" fill="none" stroke="#282e3e" stroke-width="46" stroke-linecap="round"/>
+    <path d="M257 356c40 22 73 55 97 94" fill="none" stroke="#282e3e" stroke-width="46" stroke-linecap="round"/>
+    <path d="M75 451h74c8 15 1 29-19 37H70c-8-13-6-26 5-37ZM337 441h77c11 13 9 28-5 41h-61c-20-7-24-23-11-41Z" fill="#4255ff"/>
+    <!-- torso -->
+    <path d="M139 213c44-33 126-30 171 5 17 50 19 104 5 156-56 30-122 29-184-4-15-57-12-108 8-157Z" fill="#4255ff"/>
+    <path d="M150 235c-39 31-64 68-79 111" fill="none" stroke="#4255ff" stroke-width="39" stroke-linecap="round"/>
+    <circle cx="66" cy="354" r="22" fill="#d99369"/>
+    <path d="M300 235c42 23 75 56 100 96" fill="none" stroke="#4255ff" stroke-width="39" stroke-linecap="round"/>
+    <circle cx="406" cy="338" r="22" fill="#d99369"/>
+    <!-- head -->
+    <circle cx="222" cy="115" r="92" fill="#d99369"/>
+    <path d="M132 120c-2-63 32-107 85-112 56-5 97 34 98 94-30-7-61-27-78-56-23 37-57 62-105 68Z" fill="#282e3e"/>
+    <ellipse cx="190" cy="118" rx="10" ry="13" fill="#282e3e"/><ellipse cx="253" cy="115" rx="10" ry="13" fill="#282e3e"/>
+    <circle cx="193" cy="114" r="4" fill="#fff"/><circle cx="256" cy="111" r="4" fill="#fff"/>
+    <path d="M195 157c18 10 37 9 53-3" fill="none" stroke="#fff" stroke-width="8" stroke-linecap="round"/>
+    <path d="M174 88c12-8 25-10 38-6M241 82c14-2 27 2 37 11" fill="none" stroke="#282e3e" stroke-width="8" stroke-linecap="round"/>
+    <!-- magnifier -->
+    <g transform="translate(327 193) rotate(-14 69 106)">
+      <circle cx="69" cy="69" r="57" fill="#fff" fill-opacity=".82" stroke="#2e3856" stroke-width="16"/>
+      <path d="m111 111 78 78" stroke="#2e3856" stroke-width="24" stroke-linecap="round"/>
+      <path d="M37 53c12-20 31-30 53-28" fill="none" stroke="#fff" stroke-width="9" stroke-linecap="round" opacity=".9"/>
+    </g>
+  </g>
+  <g>
+    <path d="m762 104 10 22 24 3-18 16 5 24-21-12-21 12 5-24-18-16 24-3Z" fill="#ffb647"/>
+    <circle cx="785" cy="592" r="18" fill="#4255ff"/>
+    <path d="M720 555h63M752 523v63" stroke="#ff9f45" stroke-width="12" stroke-linecap="round"/>
+  </g>
+</svg>

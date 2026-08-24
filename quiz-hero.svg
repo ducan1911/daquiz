@@ -1,0 +1,127 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" role="img" aria-labelledby="title desc">
+  <title id="title">Nhóm giáo viên và học sinh tương tác với bài thi DAQUIZ</title>
+  <desc id="desc">Minh họa vector ba nhân vật Việt Nam bên cạnh màn hình trắc nghiệm, điện thoại, dấu tích và đồng hồ.</desc>
+  <!-- Decorative field -->
+  <path d="M188 210C90 301 94 491 187 605c93 114 245 98 330 2 84-96 70-264-34-356-105-92-217-114-295-41Z" fill="#edefff"/>
+  <circle cx="1042" cy="190" r="74" fill="#f6f7fb"/>
+  <circle cx="1080" cy="662" r="92" fill="#edefff"/>
+  <circle cx="104" cy="665" r="36" fill="#f6f7fb"/>
+
+  <!-- Central quiz card -->
+  <g>
+    <rect x="348" y="177" width="520" height="480" rx="36" fill="#fff" stroke="#d9dde8" stroke-width="4"/>
+    <rect x="388" y="217" width="152" height="20" rx="10" fill="#939bb4" opacity=".55"/>
+    <rect x="388" y="259" width="368" height="28" rx="14" fill="#282e3e"/>
+    <rect x="388" y="303" width="298" height="18" rx="9" fill="#586380" opacity=".72"/>
+    <g>
+      <rect x="388" y="360" width="440" height="66" rx="16" fill="#f6f7fb" stroke="#d9dde8" stroke-width="3"/>
+      <circle cx="426" cy="393" r="14" fill="#fff" stroke="#939bb4" stroke-width="3"/>
+      <rect x="460" y="383" width="248" height="18" rx="9" fill="#586380" opacity=".72"/>
+    </g>
+    <g>
+      <rect x="388" y="442" width="440" height="66" rx="16" fill="#edefff" stroke="#4255ff" stroke-width="4"/>
+      <circle cx="426" cy="475" r="15" fill="#4255ff"/>
+      <path d="m419 475 5 5 10-12" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+      <rect x="460" y="465" width="286" height="18" rx="9" fill="#4255ff" opacity=".72"/>
+    </g>
+    <g>
+      <rect x="388" y="524" width="440" height="66" rx="16" fill="#f6f7fb" stroke="#d9dde8" stroke-width="3"/>
+      <circle cx="426" cy="557" r="14" fill="#fff" stroke="#939bb4" stroke-width="3"/>
+      <rect x="460" y="547" width="214" height="18" rx="9" fill="#586380" opacity=".72"/>
+    </g>
+    <rect x="388" y="614" width="260" height="12" rx="6" fill="#d9dde8"/>
+    <rect x="388" y="614" width="192" height="12" rx="6" fill="#4255ff"/>
+  </g>
+
+  <!-- Floating timer -->
+  <g transform="translate(815 110)">
+    <circle cx="72" cy="72" r="64" fill="#fff" stroke="#d9dde8" stroke-width="4"/>
+    <circle cx="72" cy="72" r="43" fill="#f6f7fb"/>
+    <path d="M72 42v32l22 13" fill="none" stroke="#2e3856" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+    <rect x="55" y="0" width="34" height="18" rx="8" fill="#4255ff"/>
+  </g>
+
+  <!-- Student left -->
+  <g transform="translate(80 318)">
+    <ellipse cx="190" cy="436" rx="118" ry="27" fill="#2e3856" opacity=".10"/>
+    <!-- legs -->
+    <path d="M153 331c-4 48-8 86-30 126" fill="none" stroke="#2e3856" stroke-width="38" stroke-linecap="round"/>
+    <path d="M208 330c14 46 30 82 66 110" fill="none" stroke="#4255ff" stroke-width="38" stroke-linecap="round"/>
+    <path d="M103 462c21-7 42-5 58 8-19 24-56 26-76 11 2-8 8-14 18-19Z" fill="#282e3e"/>
+    <path d="M268 432c19 8 35 22 42 42-27 13-59-2-72-24 6-9 15-15 30-18Z" fill="#282e3e"/>
+    <!-- body -->
+    <path d="M112 191c30-22 99-22 132 3 20 41 24 98 4 159-46 25-101 24-145-2-13-66-8-119 9-160Z" fill="#4255ff"/>
+    <path d="M114 204c-34 27-55 62-69 103" fill="none" stroke="#4255ff" stroke-width="35" stroke-linecap="round"/>
+    <circle cx="42" cy="314" r="20" fill="#d99369"/>
+    <path d="M231 210c41 20 70 46 96 82" fill="none" stroke="#4255ff" stroke-width="35" stroke-linecap="round"/>
+    <circle cx="333" cy="299" r="20" fill="#d99369"/>
+    <!-- head -->
+    <circle cx="176" cy="124" r="82" fill="#d99369"/>
+    <path d="M98 121c0-66 34-104 85-104 47 0 78 37 77 91-28-15-57-24-98-22-26 1-45 12-64 35Z" fill="#282e3e"/>
+    <path d="M98 120c-18 2-25 18-19 36 6 17 21 24 36 17" fill="#d99369"/>
+    <path d="M255 113c18 1 27 17 22 35-5 17-19 25-35 19" fill="#d99369"/>
+    <ellipse cx="148" cy="129" rx="9" ry="12" fill="#282e3e"/>
+    <ellipse cx="208" cy="126" rx="9" ry="12" fill="#282e3e"/>
+    <circle cx="151" cy="125" r="3" fill="#fff"/>
+    <circle cx="211" cy="122" r="3" fill="#fff"/>
+    <path d="M153 163c17 15 38 15 55-2" fill="none" stroke="#fff" stroke-width="8" stroke-linecap="round"/>
+    <path d="M133 103c10-8 21-10 32-7M196 95c12-2 23 1 32 8" fill="none" stroke="#282e3e" stroke-width="7" stroke-linecap="round"/>
+  </g>
+
+  <!-- Teacher right -->
+  <g transform="translate(828 296)">
+    <ellipse cx="158" cy="454" rx="120" ry="27" fill="#2e3856" opacity=".10"/>
+    <!-- legs -->
+    <path d="M114 345c0 44-3 78-17 115" fill="none" stroke="#282e3e" stroke-width="40" stroke-linecap="round"/>
+    <path d="M188 343c7 47 15 81 31 116" fill="none" stroke="#282e3e" stroke-width="40" stroke-linecap="round"/>
+    <path d="M74 460h58c6 14 0 29-17 33H72c-8-10-7-21 2-33Z" fill="#4255ff"/>
+    <path d="M196 458h58c8 11 7 24-4 34h-45c-15-4-19-18-9-34Z" fill="#4255ff"/>
+    <!-- body and arms -->
+    <path d="M76 206c38-30 113-27 151 7 11 44 10 93-5 144-46 28-101 27-151-3-14-53-11-103 5-148Z" fill="#ff9f45"/>
+    <path d="M82 221c-35 25-57 58-73 99" fill="none" stroke="#ff9f45" stroke-width="36" stroke-linecap="round"/>
+    <circle cx="8" cy="327" r="20" fill="#b86f4f"/>
+    <path d="M217 224c30 24 46 54 62 87" fill="none" stroke="#ff9f45" stroke-width="36" stroke-linecap="round"/>
+    <circle cx="283" cy="318" r="20" fill="#b86f4f"/>
+    <!-- tablet -->
+    <g transform="translate(22 269) rotate(-7 129 70)">
+      <rect x="0" y="0" width="258" height="145" rx="18" fill="#2e3856"/>
+      <rect x="14" y="14" width="230" height="110" rx="10" fill="#fff"/>
+      <rect x="34" y="36" width="104" height="12" rx="6" fill="#939bb4"/>
+      <rect x="34" y="62" width="172" height="16" rx="8" fill="#4255ff" opacity=".85"/>
+      <rect x="34" y="88" width="124" height="12" rx="6" fill="#d9dde8"/>
+      <circle cx="129" cy="135" r="5" fill="#939bb4"/>
+    </g>
+    <!-- head -->
+    <circle cx="148" cy="125" r="81" fill="#b86f4f"/>
+    <path d="M69 131c-5-57 23-104 73-112 50-8 89 27 92 80-24-13-42-28-53-47-20 31-63 49-112 49Z" fill="#282e3e"/>
+    <circle cx="206" cy="41" r="37" fill="#282e3e"/>
+    <ellipse cx="120" cy="127" rx="9" ry="12" fill="#282e3e"/>
+    <ellipse cx="176" cy="122" rx="9" ry="12" fill="#282e3e"/>
+    <circle cx="123" cy="123" r="3" fill="#fff"/>
+    <circle cx="179" cy="118" r="3" fill="#fff"/>
+    <path d="M125 162c17 13 36 12 51-3" fill="none" stroke="#fff" stroke-width="8" stroke-linecap="round"/>
+    <path d="M104 101c9-8 20-11 31-8M164 92c12-2 23 2 31 10" fill="none" stroke="#282e3e" stroke-width="7" stroke-linecap="round"/>
+  </g>
+
+  <!-- Floating phone -->
+  <g transform="translate(190 122) rotate(-13 69 112)">
+    <rect width="138" height="224" rx="27" fill="#2e3856"/>
+    <rect x="10" y="12" width="118" height="190" rx="20" fill="#fff"/>
+    <rect x="40" y="25" width="58" height="8" rx="4" fill="#d9dde8"/>
+    <rect x="26" y="60" width="86" height="16" rx="8" fill="#4255ff"/>
+    <rect x="26" y="91" width="65" height="11" rx="6" fill="#d9dde8"/>
+    <rect x="26" y="116" width="86" height="30" rx="10" fill="#edefff"/>
+    <path d="m62 131 8 8 16-19" fill="none" stroke="#4255ff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="69" cy="213" r="6" fill="#939bb4"/>
+  </g>
+
+  <!-- Decorative checks and stars -->
+  <g>
+    <circle cx="1025" cy="145" r="34" fill="#4255ff"/>
+    <path d="m1009 145 11 11 22-27" fill="none" stroke="#fff" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="m302 99 10 23 25 3-19 17 6 25-22-13-22 13 6-25-19-17 25-3Z" fill="#ffb647"/>
+    <path d="m1051 520 8 18 20 2-15 14 4 20-17-10-18 10 5-20-15-14 20-2Z" fill="#ffb647"/>
+    <circle cx="934" cy="86" r="11" fill="#ff9f45"/>
+    <circle cx="303" cy="724" r="13" fill="#4255ff"/>
+  </g>
+</svg>

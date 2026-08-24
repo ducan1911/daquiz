@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 760" role="img" aria-labelledby="title desc">
+  <title id="title">Giáo viên quản lý bài thi</title>
+  <desc id="desc">Giáo viên Việt Nam cầm laptop bên cạnh ngân hàng câu hỏi, biểu đồ và bảng kết quả.</desc>
+  <path d="M128 225C65 324 96 516 213 616c116 99 328 72 408-57 80-129 25-323-95-399-120-76-328-44-398 65Z" fill="#edefff"/>
+  <!-- dashboard cards -->
+  <g>
+    <rect x="448" y="116" width="332" height="198" rx="28" fill="#fff" stroke="#d9dde8" stroke-width="4"/>
+    <rect x="482" y="151" width="126" height="16" rx="8" fill="#282e3e"/>
+    <rect x="482" y="187" width="92" height="12" rx="6" fill="#939bb4"/>
+    <path d="M493 266v-31M543 266v-60M593 266v-42M643 266v-86M693 266v-68M743 266v-103" stroke="#4255ff" stroke-width="24" stroke-linecap="round"/>
+    <path d="M482 272h270" stroke="#d9dde8" stroke-width="4" stroke-linecap="round"/>
+  </g>
+  <g>
+    <rect x="520" y="352" width="270" height="232" rx="28" fill="#fff" stroke="#d9dde8" stroke-width="4"/>
+    <rect x="550" y="386" width="114" height="16" rx="8" fill="#282e3e"/>
+    <g transform="translate(550 428)">
+      <circle cx="18" cy="18" r="18" fill="#edefff"/>
+      <path d="m9 18 6 6 13-16" fill="none" stroke="#4255ff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+      <rect x="50" y="8" width="120" height="13" rx="7" fill="#586380"/>
+      <rect x="50" y="30" width="78" height="9" rx="5" fill="#d9dde8"/>
+    </g>
+    <g transform="translate(550 492)">
+      <circle cx="18" cy="18" r="18" fill="#edefff"/>
+      <path d="m9 18 6 6 13-16" fill="none" stroke="#4255ff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+      <rect x="50" y="8" width="150" height="13" rx="7" fill="#586380"/>
+      <rect x="50" y="30" width="98" height="9" rx="5" fill="#d9dde8"/>
+    </g>
+  </g>
+  <!-- teacher -->
+  <g transform="translate(75 100)">
+    <ellipse cx="278" cy="574" rx="185" ry="30" fill="#2e3856" opacity=".10"/>
+    <path d="M241 443c0 57-8 100-27 139" fill="none" stroke="#282e3e" stroke-width="48" stroke-linecap="round"/>
+    <path d="M320 443c9 53 20 97 42 136" fill="none" stroke="#282e3e" stroke-width="48" stroke-linecap="round"/>
+    <path d="M183 575h76c6 18-5 34-27 38h-57c-8-14-5-27 8-38Z" fill="#4255ff"/>
+    <path d="M338 575h76c8 14 5 27-8 38h-57c-20-5-25-20-11-38Z" fill="#4255ff"/>
+    <path d="M179 251c47-35 141-33 189 4 16 59 15 128-3 195-60 30-130 29-194-3-17-72-14-137 8-196Z" fill="#4255ff"/>
+    <path d="M187 273c-40 28-72 72-94 121" fill="none" stroke="#4255ff" stroke-width="42" stroke-linecap="round"/>
+    <circle cx="89" cy="404" r="24" fill="#c67e59"/>
+    <path d="M360 274c42 27 72 62 92 106" fill="none" stroke="#4255ff" stroke-width="42" stroke-linecap="round"/>
+    <circle cx="457" cy="390" r="24" fill="#c67e59"/>
+    <circle cx="273" cy="155" r="101" fill="#c67e59"/>
+    <path d="M175 159c-5-70 33-123 95-128 59-5 105 39 108 106-40-10-76-35-95-70-25 42-60 69-108 79Z" fill="#282e3e"/>
+    <circle cx="350" cy="66" r="45" fill="#282e3e"/>
+    <ellipse cx="238" cy="159" rx="11" ry="14" fill="#282e3e"/>
+    <ellipse cx="308" cy="155" rx="11" ry="14" fill="#282e3e"/>
+    <circle cx="241" cy="155" r="4" fill="#fff"/>
+    <circle cx="311" cy="151" r="4" fill="#fff"/>
+    <path d="M242 202c20 17 43 16 62-3" fill="none" stroke="#fff" stroke-width="10" stroke-linecap="round"/>
+    <path d="M220 128c12-9 25-11 38-7M295 121c13-2 26 2 37 11" fill="none" stroke="#282e3e" stroke-width="8" stroke-linecap="round"/>
+    <!-- laptop -->
+    <g transform="translate(112 340)">
+      <rect x="0" width="326" height="191" rx="20" fill="#2e3856"/>
+      <rect x="18" y="17" width="290" height="150" rx="11" fill="#fff"/>
+      <circle cx="163" cy="87" r="35" fill="#edefff"/>
+      <path d="m143 88 14 14 29-37" fill="none" stroke="#4255ff" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M-25 191h376c-3 21-17 32-42 34H17c-25-2-39-13-42-34Z" fill="#586380"/>
+    </g>
+  </g>
+  <circle cx="792" cy="104" r="24" fill="#ffb647"/>
+  <path d="m774 610 9 21 23 2-17 16 5 23-20-12-21 12 6-23-18-16 24-2Z" fill="#ff9f45"/>
+</svg>
