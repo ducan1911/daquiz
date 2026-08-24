@@ -18,6 +18,12 @@
       --color-paper-white: #ffffff;
       --color-lilac-wash: #edefff;
       --color-mist-border: #d9dde8;
+      --color-success: #2f855a;
+      --color-success-soft: #e8f7ef;
+      --color-danger: #d64545;
+      --color-danger-soft: #fff0f0;
+      --color-warning: #d97706;
+      --color-warning-soft: #fff7e6;
     }
 
     * {
@@ -366,6 +372,130 @@
       .question-card { border-radius: 12px; }
       .test-header { top: 60px; }
     }
+
+    /* ===== EXAM LAYOUT ===== */
+    .exam-shell {
+      max-width: 1180px;
+      margin: 24px auto 0;
+      background: var(--color-paper-white);
+      border: 1px solid var(--color-mist-border);
+      border-radius: 20px;
+      padding: 28px;
+    }
+    .exam-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--color-mist-border);
+    }
+    .exam-timer-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--color-slate-veil);
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .exam-body {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 250px;
+      gap: 28px;
+      padding-top: 24px;
+    }
+    .question-card {
+      padding: 24px !important;
+      margin-bottom: 0 !important;
+      box-shadow: none !important;
+    }
+    .question-card p.text-gray-800 {
+      font-size: 19px !important;
+      line-height: 1.55 !important;
+      font-weight: 600 !important;
+    }
+    .option-label {
+      min-height: 54px;
+      padding: 14px 16px !important;
+    }
+    .exam-progress-card {
+      height: fit-content;
+      position: sticky;
+      top: 84px;
+      border: 1px solid var(--color-mist-border);
+      border-radius: 16px;
+      padding: 20px;
+      background: var(--color-chalk-canvas);
+    }
+    .progress-ring {
+      width: 132px;
+      height: 132px;
+      margin: 0 auto 16px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: conic-gradient(var(--color-iris-bolt) var(--progress, 0%), var(--color-mist-border) 0);
+      position: relative;
+    }
+    .progress-ring::after {
+      content: '';
+      position: absolute;
+      inset: 10px;
+      background: var(--color-chalk-canvas);
+      border-radius: 50%;
+    }
+    .progress-ring-content { position: relative; z-index: 1; text-align: center; }
+    .exam-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid var(--color-mist-border);
+    }
+    .exam-nav-button {
+      min-height: 44px;
+      border: 1px solid var(--color-mist-border);
+      background: var(--color-paper-white);
+      color: var(--color-deep-indigo);
+      border-radius: 10px;
+      padding: 0 16px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .exam-nav-button:hover, .exam-nav-button:focus-visible {
+      border-color: var(--color-iris-bolt);
+      background: var(--color-lilac-wash);
+      outline: none;
+    }
+    .exam-question-list {
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+    .exam-question-list .question-nav { display: flex; flex-wrap: wrap; min-width: max-content; }
+    .question-nav-btn { flex: 0 0 44px; }
+    .flag-btn { min-width: 44px; min-height: 44px; }
+    .btn-icon { width: 20px; height: 20px; flex: 0 0 auto; pointer-events: none; }
+
+    @media (max-width: 767px) {
+      .exam-shell { margin: 12px 0 0; padding: 16px; border-radius: 14px; border-left: 0; border-right: 0; }
+      .exam-toolbar { gap: 10px; padding-bottom: 14px; }
+      .exam-toolbar h2 { max-width: 42vw; }
+      .exam-body { display: flex; flex-direction: column; gap: 14px; padding-top: 14px; }
+      .exam-progress-card { order: -1; position: static; padding: 12px; }
+      .progress-ring { width: 78px; height: 78px; margin: 0 auto 8px; }
+      .progress-ring::after { inset: 7px; }
+      .question-card p.text-gray-800 { font-size: 17px !important; }
+      .question-card { padding: 18px 14px !important; }
+      .exam-nav { position: sticky; bottom: 0; background: var(--color-paper-white); margin-left: -14px; margin-right: -14px; padding: 12px 14px; z-index: 10; }
+      .exam-nav-button { padding: 0 10px; }
+      .exam-final-submit { display: none !important; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+    }
   </style>
 </head>
 <body class="min-h-screen">
@@ -391,7 +521,7 @@
 
     <!-- Error Message -->
     <div id="errorMsg" class="glass-card" style="display:none;padding:40px;text-align:center;">
-      <div style="font-size:48px;margin-bottom:16px;">⚠️</div>
+      <img src="empty-state.svg" alt="Không tìm thấy dữ liệu" style="width:150px;display:block;margin:0 auto 16px;opacity:0.75;">
       <p style="color:#dc2626;font-weight:600;font-size:16px;margin:0 0 16px;"></p>
       <a href="index.html" style="display:inline-flex;align-items:center;gap:8px;background:var(--color-deep-indigo);color:white;padding:12px 24px;border-radius:12px;font-weight:600;text-decoration:none;font-size:14px;">
         ← Về trang chủ
@@ -446,6 +576,12 @@
       const text = document.getElementById('progressText');
       if (bar) bar.style.width = pct + '%';
       if (text) text.textContent = `${answered}/${total}`;
+      const ring = document.getElementById('progressRing');
+      const ringPercent = document.getElementById('progressRingPercent');
+      const ringText = document.getElementById('progressTextSide');
+      if (ring) ring.style.setProperty('--progress', `${pct}%`);
+      if (ringPercent) ringPercent.textContent = `${pct}%`;
+      if (ringText) ringText.textContent = `${answered}/${total}`;
 
       // Update question cards visual state
       questionMapping.questionOrder.forEach((qo, idx) => {
@@ -492,7 +628,7 @@
       document.getElementById('loading').style.display = 'none';
       document.getElementById('mainContent').innerHTML = `
         <div class="glass-card fade-in" style="max-width:440px;margin:48px auto;padding:40px;text-align:center;">
-          <div style="font-size:48px;margin-bottom:16px;">🔑</div>
+          <img src="student-code.svg" alt="Nhập mã bài kiểm tra" width="210" style="display:block;margin:0 auto 16px;height:auto;">
           <h2 style="font-size:22px;font-weight:700;color:var(--color-ink-charcoal);margin:0 0 8px;">Nhập mã bài kiểm tra</h2>
           <p style="color:var(--color-slate-veil);font-size:14px;margin:0 0 24px;">Mã 4–6 ký tự từ giáo viên</p>
           <input type="text" id="codeInput" placeholder="VD: ABC123"
@@ -546,8 +682,8 @@
             >
             <h2 style="font-size:20px;font-weight:700;color:var(--color-ink-charcoal);margin:0 0 6px;">${escapeHtml(test.title)}</h2>
             <div style="display:flex;align-items:center;justify-content:center;gap:16px;font-size:13px;color:var(--color-slate-veil);margin-bottom:10px;">
-              <span>📋 ${test.questions?.length || 0} câu hỏi</span>
-              <span>⏱ ${test.duration} phút</span>
+              <span style="display:inline-flex;align-items:center;gap:5px;"><svg class="btn-icon" aria-hidden="true" style="width:16px;height:16px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 11h8M8 15h5"/></svg>${test.questions?.length || 0} câu hỏi</span>
+              <span style="display:inline-flex;align-items:center;gap:5px;"><svg class="btn-icon" aria-hidden="true" style="width:16px;height:16px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>${test.duration} phút</span>
             </div>
             <span style="display:inline-block;background:var(--color-lilac-wash);color:var(--color-iris-bolt);font-size:12px;font-weight:600;padding:4px 12px;border-radius:100px;">Mã: ${testCode.toUpperCase()}</span>
           </div>
@@ -574,7 +710,7 @@
 
           <button onclick="startTest()"
             style="width:100%;height:52px;background:var(--color-deep-indigo);color:white;font-size:15px;font-weight:600;border:none;border-radius:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;">
-            <span style="font-size:20px;">🚀</span>
+            <svg class="btn-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h13"/><path d="m13 6 6 6-6 6"/></svg>
             <span>Bắt đầu làm bài</span>
           </button>
         </div>`;
@@ -839,15 +975,21 @@
       ).join('');
 
       main.innerHTML = `
+        <div class="exam-shell">
         <!-- Sticky Test Header -->
-        <div class="test-header" style="margin:0 -16px;padding:16px 16px 12px;">
+        <div class="test-header exam-toolbar" style="margin:0;padding:0 0 20px;border-bottom:1px solid var(--color-mist-border);">
           <div style="max-width:900px;margin:0 auto;">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:12px;">
               <h2 style="font-size:16px;font-weight:700;color:var(--color-ink-charcoal);margin:0;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(testData.title)}</h2>
               <div style="display:flex;align-items:center;gap:10px;flex-shrink:0;">
-                <div id="timer" class="timer-normal" style="font-size:22px;font-family:ui-monospace,monospace;font-weight:700;padding:6px 12px;border-radius:10px;"></div>
-                <button onclick="submitTest()" class="btn-submit" style="padding:0 18px;height:40px;font-size:14px;border-radius:10px;">
-                  📝 Nộp bài
+                <div class="exam-timer-label">
+                  <svg class="btn-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+                  <span>Còn lại</span>
+                  <div id="timer" class="timer-normal" style="font-size:22px;font-family:ui-monospace,monospace;font-weight:700;padding:6px 12px;border-radius:10px;"></div>
+                </div>
+                <button onclick="submitTest()" class="btn-submit" style="padding:0 18px;height:44px;font-size:14px;border-radius:10px;">
+                  <svg class="btn-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h13"/><path d="m13 6 6 6-6 6"/></svg>
+                  <span>Nộp bài</span>
                 </button>
               </div>
             </div>
@@ -863,13 +1005,26 @@
           </div>
         </div>
 
-        <!-- Questions Container -->
-        <div id="questionsContainer" style="margin-top:20px;display:flex;flex-direction:column;gap:12px;">${questionsHtml}</div>
+        <div class="exam-body">
+          <div>
+            <!-- Questions Container -->
+            <div id="questionsContainer" style="margin-top:0;display:flex;flex-direction:column;gap:12px;">${questionsHtml}</div>
+          </div>
+          <aside class="exam-progress-card" aria-label="Tiến độ bài thi">
+            <div class="progress-ring" id="progressRing" style="--progress:0%;">
+              <div class="progress-ring-content">
+                <strong id="progressRingPercent" style="font-size:22px;color:var(--color-ink-charcoal);">0%</strong>
+                <div style="font-size:12px;color:var(--color-slate-veil);">hoàn thành</div>
+              </div>
+            </div>
+            <div style="text-align:center;font-size:14px;color:var(--color-slate-veil);"><strong id="progressTextSide">0/${questionMapping.questionOrder.length}</strong> câu đã trả lời</div>
+          </aside>
+        </div>
 
         <!-- Question Navigation -->
-        <div class="glass-card" style="margin-top:16px;padding:20px;">
+        <div class="glass-card" style="margin-top:24px;padding:20px;">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-            <h3 style="font-size:13px;font-weight:700;color:var(--color-ink-charcoal);margin:0;">Danh sách câu hỏi</h3>
+            <h3 style="font-size:13px;font-weight:700;color:var(--color-ink-charcoal);margin:0;display:flex;align-items:center;gap:7px;"><svg class="btn-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="6" height="6"/><rect x="14" y="4" width="6" height="6"/><rect x="4" y="14" width="6" height="6"/><rect x="14" y="14" width="6" height="6"/></svg>Danh sách câu hỏi</h3>
             <button id="flagFilterBtn" onclick="toggleFlagFilter()"
               style="font-size:12px;padding:6px 12px;border-radius:8px;font-weight:600;border:none;cursor:pointer;background:var(--color-chalk-canvas);color:var(--color-slate-veil);">
               Xem lại
@@ -880,16 +1035,22 @@
             <span style="display:flex;align-items:center;gap:6px;"><span style="width:16px;height:16px;border-radius:5px;background:#fffbeb;border:2px solid #d97706;display:inline-block;"></span>Cần xem lại</span>
             <span style="display:flex;align-items:center;gap:6px;"><span style="width:16px;height:16px;border-radius:5px;background:white;border:2px solid var(--color-mist-border);display:inline-block;"></span>Chưa làm</span>
           </div>
-          <div class="question-nav">${navButtons}</div>
+          <div class="exam-question-list"><div class="question-nav">${navButtons}</div></div>
+        </div>
+
+        <div class="exam-nav">
+          <button type="button" class="exam-nav-button" onclick="scrollToQuestion(Math.max(0, getCurrentQuestionIndex() - 1))" aria-label="Câu trước">← Câu trước</button>
+          <button type="button" class="exam-nav-button" onclick="scrollToQuestion(Math.min(questionMapping.questionOrder.length - 1, getCurrentQuestionIndex() + 1))" aria-label="Câu tiếp theo">Câu tiếp theo →</button>
         </div>
 
         <!-- Final Submit -->
-        <div style="text-align:center;padding:32px 0 16px;">
+        <div class="exam-final-submit" style="text-align:center;padding:32px 0 16px;">
           <button onclick="submitTest()" class="btn-submit" style="padding:0 40px;height:52px;font-size:16px;border-radius:14px;">
-            <span style="font-size:20px;">📝</span>
+            <svg class="btn-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h13"/><path d="m13 6 6 6-6 6"/></svg>
             <span>Nộp bài kiểm tra</span>
           </button>
           <p style="font-size:13px;color:var(--color-fog-mist);margin-top:10px;">Hãy kiểm tra kỹ trước khi nộp bài</p>
+        </div>
         </div>`;
 
       startTimer(endTime);
@@ -900,6 +1061,18 @@
       document.querySelectorAll('.flag-btn').forEach(btn => {
         if (btn.textContent.includes('__FLAG_ICON_OUTLINE__')) btn.innerHTML = svgO;
       });
+    }
+
+    function getCurrentQuestionIndex() {
+      const cards = [...document.querySelectorAll('[id^="q-card-"]')];
+      if (!cards.length) return 0;
+      let current = 0;
+      let closest = Number.POSITIVE_INFINITY;
+      cards.forEach((card, index) => {
+        const distance = Math.abs(card.getBoundingClientRect().top - 180);
+        if (distance < closest) { closest = distance; current = index; }
+      });
+      return current;
     }
 
     function scrollToQuestion(index) {
@@ -1102,8 +1275,8 @@
       } catch (e) {
         document.getElementById('mainContent').innerHTML = `
           <div class="glass-card" style="padding:32px;text-align:center;">
-            <div style="font-size:48px;margin-bottom:16px;">❌</div>
-            <p style="color:#dc2626;font-weight:600;font-size:16px;">Lỗi: ${e.message}</p>
+            <svg aria-hidden="true" style="width:48px;height:48px;color:var(--color-danger);margin:0 auto 16px;display:block;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="m9 9 6 6M15 9l-6 6"/></svg>
+            <p style="color:var(--color-danger);font-weight:600;font-size:16px;">Lỗi: ${e.message}</p>
           </div>`;
       }
     }
@@ -1157,7 +1330,9 @@
             <div style="flex:1;">
               <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:6px;">
                 <p style="font-size:15px;font-weight:600;color:var(--color-ink-charcoal);margin:0;flex:1;">${escapeHtml(q.content||'')}</p>
-                <span style="font-size:20px;flex-shrink:0;">${isCorrect?'✅':'❌'}</span>
+                <span style="display:flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;background:${isCorrect?'var(--color-success-soft)':'var(--color-danger-soft)'};color:${isCorrect?'var(--color-success)':'var(--color-danger)'};font-size:0;flex-shrink:0;">
+                  <svg aria-hidden="true" style="width:15px;height:15px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">${isCorrect?'<path d="m5 12 4 4L19 6"/>':'<path d="m7 7 10 10M17 7 7 17"/>'}</svg>
+                </span>
               </div>
               ${q.image_url ? `<div style="margin-bottom:10px;"><img src="${q.image_url}" alt="Hình minh họa" style="max-width:100%;border-radius:12px;border:1px solid var(--color-mist-border);max-height:280px;object-fit:contain;"></div>` : ''}
               <span style="font-size:12px;color:var(--color-fog-mist);">${qo.points} điểm</span>
@@ -1216,7 +1391,8 @@
         <div style="text-align:center;padding-bottom:40px;">
           <a href="index.html"
             style="display:inline-flex;align-items:center;gap:10px;background:var(--color-deep-indigo);color:white;padding:14px 32px;border-radius:14px;font-weight:600;font-size:16px;text-decoration:none;">
-            ← Về trang chủ
+            <svg class="btn-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 11 9-8 9 8"/><path d="M5 10v10h14V10M9 20v-6h6v6"/></svg>
+            <span>Về trang chủ</span>
           </a>
         </div>`;
     }
@@ -1275,7 +1451,7 @@
       return `
         <div class="bg-red-50 border border-red-200 rounded-xl p-4 mb-6 text-left">
           <div class="flex gap-2 items-start">
-            <span class="text-red-600 text-lg flex-shrink-0">🛡️</span>
+            <svg aria-hidden="true" style="width:22px;height:22px;color:var(--color-warning);flex-shrink:0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3 20 6v5c0 5-3.4 8.7-8 10-4.6-1.3-8-5-8-10V6l8-3Z"/><path d="m9 12 2 2 4-4"/></svg>
             <div class="text-sm text-gray-700">
               <p class="font-semibold text-red-700 mb-1">Bài thi áp dụng chế độ thi nghiêm túc:</p>
               <ul class="space-y-1 text-xs">
@@ -1376,7 +1552,7 @@
         border: 1px solid rgba(255,255,255,0.1);
       `;
       banner.innerHTML = `
-        <span style="color:#4ade80">🛡️</span>
+        <svg aria-hidden="true" style="width:18px;height:18px;color:#86efac;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3 20 6v5c0 5-3.4 8.7-8 10-4.6-1.3-8-5-8-10V6l8-3Z"/><path d="m9 12 2 2 4-4"/></svg>
         <span>Chế độ nghiêm túc</span>
         ${strictConfig.block_tab_switch ? `<span style="opacity:0.4">·</span><span id="antiCheatBannerCount">Vi phạm: 0/${strictConfig.max_violations}</span>` : ''}
       `;
