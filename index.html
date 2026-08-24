@@ -3,419 +3,498 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hệ thống thi trắc nghiệm - Trường TC Kinh tế Kỹ thuật TP Cần Thơ</title>
+  <title>DaQuiz — Hệ thống thi trắc nghiệm</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <script src="supabase-config.js"></script>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
-    
+    :root {
+      --color-iris-bolt: #4255ff;
+      --color-ink-charcoal: #282e3e;
+      --color-deep-indigo: #2e3856;
+      --color-slate-veil: #586380;
+      --color-fog-mist: #939bb4;
+      --color-pure-black: #000000;
+      --color-chalk-canvas: #f6f7fb;
+      --color-paper-white: #ffffff;
+      --color-lilac-wash: #edefff;
+      --color-mist-border: #d9dde8;
+    }
+
     * {
-      font-family: 'Inter', sans-serif;
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      box-sizing: border-box;
     }
-    
+
     body {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background-color: var(--color-chalk-canvas);
       min-height: 100vh;
-      position: relative;
-      overflow-x: hidden;
+      margin: 0;
     }
-    
-    /* Animated Background Particles */
-    .particle {
-      position: absolute;
-      background: rgba(255, 255, 255, 0.1);
+
+    /* ===== HEADER ===== */
+    .site-header {
+      background: var(--color-paper-white);
+      border-bottom: 1px solid var(--color-mist-border);
+      padding: 0 2rem;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .header-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+
+    .header-logo img {
+      height: 36px;
+      object-fit: contain;
+    }
+
+    .header-logo-text {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--color-ink-charcoal);
+      letter-spacing: -0.3px;
+    }
+
+    .header-logo-text span {
+      color: var(--color-iris-bolt);
+    }
+
+    .header-nav-link {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--color-deep-indigo);
+      text-decoration: none;
+      padding: 8px 20px;
+      border: 2px solid var(--color-deep-indigo);
+      border-radius: 10px;
+      transition: background 0.18s, color 0.18s;
+    }
+
+    .header-nav-link:hover {
+      background: var(--color-deep-indigo);
+      color: var(--color-paper-white);
+    }
+
+    /* ===== HERO ===== */
+    .hero {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 64px 2rem 80px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 64px;
+      align-items: center;
+      min-height: calc(100vh - 64px);
+    }
+
+    /* --- Cột trái: hình minh họa --- */
+    .hero-illustration {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .hero-illustration-img {
+      width: 100%;
+      max-width: 520px;
+      height: auto;
+      display: block;
+    }
+
+    /* --- Cột phải: nội dung --- */
+    .hero-content {
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+
+    .hero-school-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--color-lilac-wash);
+      color: var(--color-iris-bolt);
+      font-size: 13px;
+      font-weight: 600;
+      padding: 6px 14px;
+      border-radius: 100px;
+      width: fit-content;
+    }
+
+    .hero-title {
+      font-size: 40px;
+      font-weight: 700;
+      color: var(--color-ink-charcoal);
+      line-height: 1.2;
+      letter-spacing: -0.5px;
+      margin: 0;
+    }
+
+    .hero-title span {
+      color: var(--color-iris-bolt);
+    }
+
+    .hero-subtitle {
+      font-size: 17px;
+      color: var(--color-slate-veil);
+      line-height: 1.6;
+      margin: 0;
+    }
+
+    /* --- Khối nhập mã --- */
+    .quiz-entry-card {
+      background: var(--color-paper-white);
+      border: 1px solid var(--color-mist-border);
+      border-radius: 20px;
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .quiz-entry-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--color-slate-veil);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+
+    .quiz-entry-input-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    .quiz-code-input {
+      flex: 1;
+      height: 52px;
+      border: 2px solid var(--color-mist-border);
+      border-radius: 12px;
+      padding: 0 18px;
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--color-ink-charcoal);
+      background: var(--color-paper-white);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .quiz-code-input::placeholder {
+      color: var(--color-fog-mist);
+      font-weight: 400;
+      letter-spacing: 2px;
+      font-size: 16px;
+    }
+
+    .quiz-code-input:focus {
+      border-color: var(--color-iris-bolt);
+      box-shadow: 0 0 0 4px rgba(66, 85, 255, 0.12);
+    }
+
+    .quiz-code-input.error {
+      border-color: #e53e3e;
+      box-shadow: 0 0 0 4px rgba(229, 62, 62, 0.1);
+    }
+
+    .btn-enter {
+      height: 52px;
+      padding: 0 24px;
+      background: var(--color-iris-bolt);
+      color: var(--color-paper-white);
+      font-size: 15px;
+      font-weight: 600;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.18s, transform 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-enter:hover {
+      background: #3346e0;
+      transform: translateY(-1px);
+    }
+
+    .btn-enter:active {
+      transform: translateY(0);
+    }
+
+    .btn-enter:disabled {
+      background: var(--color-fog-mist);
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-enter .spinner {
+      width: 18px;
+      height: 18px;
+      border: 2px solid rgba(255,255,255,0.4);
+      border-top-color: white;
       border-radius: 50%;
-      pointer-events: none;
-      animation: float 20s infinite;
+      animation: spin 0.7s linear infinite;
     }
-    
-    @keyframes float {
-      0%, 100% { transform: translateY(0) translateX(0) rotate(0deg); }
-      33% { transform: translateY(-100px) translateX(50px) rotate(120deg); }
-      66% { transform: translateY(-50px) translateX(-50px) rotate(240deg); }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .quiz-entry-hint {
+      font-size: 13px;
+      color: var(--color-fog-mist);
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
-    
-    .particle:nth-child(1) { width: 80px; height: 80px; top: 10%; left: 10%; animation-delay: 0s; }
-    .particle:nth-child(2) { width: 120px; height: 120px; top: 60%; left: 80%; animation-delay: 4s; }
-    .particle:nth-child(3) { width: 60px; height: 60px; top: 80%; left: 20%; animation-delay: 8s; }
-    .particle:nth-child(4) { width: 100px; height: 100px; top: 20%; right: 15%; animation-delay: 12s; }
-    .particle:nth-child(5) { width: 70px; height: 70px; bottom: 15%; right: 30%; animation-delay: 16s; }
-    
-    /* Glassmorphism Card */
-    .glass-card {
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-    }
-    
-    /* Animated Gradient Text */
-    .gradient-text {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
-      background-size: 200% 200%;
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      animation: gradient-shift 3s ease infinite;
-    }
-    
-    @keyframes gradient-shift {
-      0%, 100% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-    }
-    
-    /* Button Hover Effects */
-    .btn-primary {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-      position: relative;
-      overflow: hidden;
-    }
-    
-    .btn-primary::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-      transition: left 0.5s;
-    }
-    
-    .btn-primary:hover::before {
-      left: 100%;
-    }
-    
-    .btn-primary:hover {
-      transform: translateY(-2px) scale(1.02);
-      box-shadow: 0 20px 40px -10px rgba(102, 126, 234, 0.5);
-    }
-    
-    .btn-primary:active {
-      transform: translateY(0) scale(0.98);
-    }
-    
-    .btn-success {
-      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-      position: relative;
-      overflow: hidden;
-    }
-    
-    .btn-success::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-      transition: left 0.5s;
-    }
-    
-    .btn-success:hover::before {
-      left: 100%;
-    }
-    
-    .btn-success:hover {
-      transform: translateY(-2px) scale(1.02);
-      box-shadow: 0 20px 40px -10px rgba(16, 185, 129, 0.5);
-    }
-    
-    .btn-success:active {
-      transform: translateY(0) scale(0.98);
-    }
-    
-    /* Input Focus Animation */
-    .input-code {
-      transition: all 0.3s ease;
-      border: 2px solid rgba(209, 213, 219, 0.5);
-    }
-    
-    .input-code:focus {
-      border-color: #667eea;
-      box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
-      transform: translateY(-2px);
-    }
-    
-    /* Icon Bounce Animation */
-    @keyframes bounce-slow {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-10px); }
-    }
-    
-    .icon-bounce {
-      animation: bounce-slow 2s ease-in-out infinite;
-    }
-    
-    /* Divider Animation */
+
+    /* --- Nút giáo viên --- */
     .divider {
-      position: relative;
-      text-align: center;
-      margin: 24px 0;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: var(--color-fog-mist);
+      font-size: 13px;
+      font-weight: 500;
     }
-    
+
     .divider::before,
     .divider::after {
       content: '';
-      position: absolute;
-      top: 50%;
-      width: calc(50% - 60px);
+      flex: 1;
       height: 1px;
-      background: linear-gradient(to right, transparent, rgba(156, 163, 175, 0.4), transparent);
+      background: var(--color-mist-border);
     }
-    
-    .divider::before { left: 0; }
-    .divider::after { right: 0; }
-    
-    /* Loading Spinner */
-    .spinner {
-      border: 3px solid rgba(255, 255, 255, 0.3);
-      border-top: 3px solid #667eea;
-      border-radius: 50%;
-      width: 40px;
-      height: 40px;
-      animation: spin 0.8s linear infinite;
-      margin: 0 auto;
+
+    .btn-teacher {
+      height: 52px;
+      width: 100%;
+      background: var(--color-paper-white);
+      color: var(--color-deep-indigo);
+      font-size: 15px;
+      font-weight: 600;
+      border: 2px solid var(--color-deep-indigo);
+      border-radius: 12px;
+      cursor: pointer;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: background 0.18s, color 0.18s, transform 0.15s;
     }
-    
-    @keyframes spin {
-      to { transform: rotate(360deg); }
+
+    .btn-teacher:hover {
+      background: var(--color-deep-indigo);
+      color: var(--color-paper-white);
+      transform: translateY(-1px);
     }
-    
-    /* Feature Cards */
-    .feature-card {
-      background: rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      transition: all 0.3s ease;
+
+    .btn-teacher:active {
+      transform: translateY(0);
     }
-    
-    .feature-card:hover {
-      background: rgba(255, 255, 255, 0.15);
-      transform: translateY(-5px);
-      box-shadow: 0 15px 30px -10px rgba(0, 0, 0, 0.2);
+
+    /* --- Credit --- */
+    .hero-credit {
+      font-size: 12px;
+      color: var(--color-fog-mist);
+      line-height: 1.5;
     }
-    
-    /* Fade In Animation */
-    @keyframes fadeInUp {
-      from {
-        opacity: 0;
-        transform: translateY(30px);
+
+    /* ===== FOOTER ===== */
+    .site-footer {
+      border-top: 1px solid var(--color-mist-border);
+      background: var(--color-paper-white);
+      padding: 20px 2rem;
+      text-align: center;
+    }
+
+    .site-footer p {
+      font-size: 13px;
+      color: var(--color-fog-mist);
+      margin: 0;
+    }
+
+    /* ===== MOBILE ===== */
+    @media (max-width: 768px) {
+      .site-header { padding: 0 1rem; }
+      .header-logo-text { font-size: 16px; }
+      .hero {
+        grid-template-columns: 1fr;
+        padding: 32px 1rem 48px;
+        gap: 32px;
+        min-height: auto;
       }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+      .hero-illustration { order: 2; }
+      .hero-content { order: 1; gap: 24px; }
+      .hero-illustration-img { max-width: 300px; margin: 0 auto; }
+      .hero-title { font-size: 28px; }
+      .hero-subtitle { font-size: 15px; }
+      .quiz-entry-input-row { flex-direction: column; }
+      .btn-enter { justify-content: center; }
     }
-    
-    .fade-in-up {
-      animation: fadeInUp 0.6s ease-out forwards;
+
+    @media (max-width: 480px) {
+      .hero-illustration-img { max-width: 240px; }
     }
-    
-    .delay-1 { animation-delay: 0.1s; opacity: 0; }
-    .delay-2 { animation-delay: 0.2s; opacity: 0; }
-    .delay-3 { animation-delay: 0.3s; opacity: 0; }
-    .delay-4 { animation-delay: 0.4s; opacity: 0; }
-    
-    /* Mobile Responsive */
-    @media (max-width: 640px) {
-      .glass-card {
-        margin: 1rem;
-      }
+
+    /* ===== SHAKE ANIMATION ===== */
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-8px); }
+      60% { transform: translateX(8px); }
+      80% { transform: translateX(-4px); }
+    }
+
+    .shake {
+      animation: shake 0.35s ease-in-out;
     }
   </style>
 </head>
-<body class="flex items-center justify-center min-h-screen p-4 relative">
-  
-  <!-- Animated Background Particles -->
-  <div class="particle"></div>
-  <div class="particle"></div>
-  <div class="particle"></div>
-  <div class="particle"></div>
-  <div class="particle"></div>
-  
-  <!-- Main Card -->
-  <div class="glass-card rounded-3xl shadow-2xl p-8 md:p-10 max-w-lg w-full text-center relative z-10 fade-in-up">
-    
-    <!-- Logo trường -->
-    <div class="mb-4 icon-bounce delay-1 fade-in-up">
-      <img src="https://www.tcktktct.edu.vn/assets_site/images/logo.webp" alt="Logo trường" class="h-20 mx-auto object-contain" onerror="this.style.display='none'">
-    </div>
+<body>
 
-    <!-- Title -->
-    <h1 class="text-2xl md:text-3xl font-black mb-1 gradient-text delay-2 fade-in-up">
-      Trường Trung cấp Kinh tế Kỹ thuật
-    </h1>
-    <h2 class="text-xl md:text-2xl font-bold mb-2 gradient-text delay-2 fade-in-up">
-      Thành phố Cần Thơ
-    </h2>
-    <p class="text-gray-500 text-sm mb-1 delay-2 fade-in-up">Hệ thống thi trắc nghiệm trực tuyến</p>
-    <p class="text-gray-400 text-xs mb-6 delay-2 fade-in-up">Thực hiện bởi: Nguyễn Văn Đức An — Khoa CNTT</p>
-    
-    <!-- Feature Highlights
-    <div class="grid grid-cols-3 gap-3 mb-8 delay-3 fade-in-up">
-      <div class="feature-card rounded-xl p-3 text-center">
-        <div class="text-2xl mb-1">⚡</div>
-        <div class="text-xs text-white font-semibold">Nhanh chóng</div>
+  <!-- Header -->
+  <header class="site-header">
+    <a href="index.html" class="header-logo">
+      <img src="https://www.tcktktct.edu.vn/assets_site/images/logo.webp" alt="Logo Trường TC Kinh tế Kỹ thuật TP Cần Thơ" onerror="this.style.display='none'">
+      <span class="header-logo-text">Da<span>Quiz</span></span>
+    </a>
+    <a href="teacher-login.html" class="header-nav-link">Giáo viên</a>
+  </header>
+
+  <!-- Hero -->
+  <main>
+    <div class="hero">
+
+      <!-- Cột trái: hình minh họa -->
+      <div class="hero-illustration">
+        <img
+          src="quiz-hero.svg"
+          alt="Nhóm giáo viên và học sinh tương tác với bài thi DaQuiz"
+          class="hero-illustration-img"
+          loading="eager"
+          width="520"
+          height="390"
+        >
       </div>
-      <div class="feature-card rounded-xl p-3 text-center">
-        <div class="text-2xl mb-1">🔒</div>
-        <div class="text-xs text-white font-semibold">Bảo mật</div>
-      </div>
-      <div class="feature-card rounded-xl p-3 text-center">
-        <div class="text-2xl mb-1">📊</div>
-        <div class="text-xs text-white font-semibold">Thống kê</div>
-      </div>
-    </div> -->
-    
-    <!-- Action Buttons -->
-    <div class="space-y-4 delay-4 fade-in-up">
-      
-      <!-- Teacher Login Button -->
-      <a href="teacher-login.html"
-         class="btn-primary block w-full text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 shadow-lg hover:shadow-2xl text-base md:text-lg">
-        <span class="flex items-center justify-center gap-3">
-          <span class="text-2xl">👨‍🏫</span>
-          <span>Giáo viên đăng nhập</span>
-        </span>
-      </a>
-      
-      <!-- Divider -->
-      <div class="divider">
-        <span class="text-gray-400 text-sm font-medium bg-white px-4 relative z-10">
-          hoặc
-        </span>
-      </div>
-      
-      <!-- Student Section -->
-      <div class="space-y-3">
-        <label class="block text-left text-sm font-semibold text-gray-700 mb-2">
-          <span class="flex items-center gap-2">
-            <span>🎓</span>
-            <span>Học sinh - Nhập mã bài kiểm tra</span>
-          </span>
-        </label>
-        
-        <div class="relative">
-          <input 
-            type="text" 
-            id="testCode" 
-            placeholder="VD: ABC123"
-            class="input-code w-full rounded-xl px-5 py-4 text-center focus:outline-none text-xl tracking-widest font-bold uppercase placeholder:text-gray-300 placeholder:font-normal"
-            maxlength="6"
-            autocomplete="off"
-            oninput="this.value = this.value.toUpperCase()">
-          
-          <!-- Input Icon -->
-          <div class="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
+
+      <!-- Cột phải: nội dung -->
+      <div class="hero-content">
+
+        <div>
+          <div class="hero-school-badge">
+            <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838l-2.727 1.17 1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zm5.99 7.176A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z"/>
             </svg>
+            TC Kinh tế Kỹ thuật TP. Cần Thơ
+          </div>
+
+          <h1 class="hero-title" style="margin-top: 16px;">
+            Thi trắc nghiệm<br>thật <span>dễ dàng</span>
+          </h1>
+
+          <p class="hero-subtitle" style="margin-top: 12px;">
+            Nhập mã bài kiểm tra từ giáo viên và bắt đầu ngay — không cần tạo tài khoản.
+          </p>
+        </div>
+
+        <!-- Khối nhập mã -->
+        <div class="quiz-entry-card">
+          <div class="quiz-entry-label">Mã bài kiểm tra</div>
+
+          <div class="quiz-entry-input-row">
+            <input
+              type="text"
+              id="testCode"
+              class="quiz-code-input"
+              placeholder="VD: ABC123"
+              maxlength="6"
+              autocomplete="off"
+              spellcheck="false"
+              oninput="this.value = this.value.toUpperCase()"
+            >
+            <button class="btn-enter" id="enterBtn" onclick="goToStudent()">
+              <span id="enterBtnText">Vào thi</span>
+            </button>
+          </div>
+
+          <div class="quiz-entry-hint">
+            <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor" style="flex-shrink:0;color:var(--color-fog-mist)">
+              <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+            </svg>
+            Mã gồm 4–6 ký tự, giáo viên cung cấp trước khi thi
           </div>
         </div>
-        
-        <button 
-          onclick="goToStudent()"
-          class="btn-success w-full text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 shadow-lg hover:shadow-2xl text-base md:text-lg">
-          <span class="flex items-center justify-center gap-3">
-            <span class="text-2xl">🚀</span>
-            <span>Vào thi ngay</span>
-          </span>
-        </button>
+
+        <!-- Divider -->
+        <div class="divider">hoặc</div>
+
+        <!-- Nút giáo viên -->
+        <a href="teacher-login.html" class="btn-teacher">
+          <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z"/>
+          </svg>
+          Giáo viên đăng nhập
+        </a>
+
+        <!-- Credit -->
+        <div class="hero-credit">
+          Thực hiện bởi <strong style="color:var(--color-slate-veil)">Nguyễn Văn Đức An</strong> — Khoa CNTT
+        </div>
+
       </div>
-      
     </div>
-    
-    <!-- Footer Info -->
-    <div class="mt-8 pt-6 border-t border-gray-200">
-      <p class="text-xs text-gray-500 flex items-center justify-center gap-2">
-        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-          <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
-        </svg>
-        <span>Đảm bảo kết nối internet ổn định khi làm bài</span>
-      </p>
-    </div>
-    
-  </div>
-  
-  <!-- Quick Stats (Optional)
-  <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 hidden md:flex gap-8 text-white text-sm font-medium fade-in-up delay-4">
-    <div class="flex items-center gap-2 bg-white bg-opacity-10 backdrop-blur-md px-4 py-2 rounded-full">
-      <span class="text-lg">✅</span>
-      <span>100% An toàn</span>
-    </div>
-    <div class="flex items-center gap-2 bg-white bg-opacity-10 backdrop-blur-md px-4 py-2 rounded-full">
-      <span class="text-lg">⚡</span>
-      <span>Chấm điểm tức thì</span>
-    </div>
-    <div class="flex items-center gap-2 bg-white bg-opacity-10 backdrop-blur-md px-4 py-2 rounded-full">
-      <span class="text-lg">📱</span>
-      <span>Hỗ trợ mobile</span>
-    </div>
-  </div> -->
-  
+  </main>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <p>© 2025 DaQuiz · Trường Trung cấp Kinh tế Kỹ thuật TP. Cần Thơ · Đảm bảo kết nối internet ổn định khi làm bài</p>
+  </footer>
+
   <script>
     function goToStudent() {
-      const code = document.getElementById('testCode').value.trim();
-      
+      const input = document.getElementById('testCode');
+      const btn = document.getElementById('enterBtn');
+      const btnText = document.getElementById('enterBtnText');
+      const code = input.value.trim();
+
       if (!code || code.length < 4) {
-        // Shake animation on error
-        const input = document.getElementById('testCode');
-        input.classList.add('animate-shake');
-        input.style.borderColor = '#ef4444';
-        
-        setTimeout(() => {
-          input.classList.remove('animate-shake');
-          input.style.borderColor = '';
-        }, 500);
-        
-        alert('⚠️ Vui lòng nhập mã bài kiểm tra (4-6 ký tự)');
+        input.classList.add('error', 'shake');
+        input.focus();
+        setTimeout(() => input.classList.remove('shake'), 400);
+        setTimeout(() => input.classList.remove('error'), 2000);
         return;
       }
-      
-      // Show loading state
-      const btn = event.target;
-      const originalHTML = btn.innerHTML;
-      btn.innerHTML = '<div class="spinner"></div>';
+
+      // Loading state
+      btnText.innerHTML = '<div class="spinner"></div>';
       btn.disabled = true;
-      
-      // Navigate after brief delay for UX
+      input.disabled = true;
+
       setTimeout(() => {
         window.location.href = `student.html?code=${encodeURIComponent(code)}`;
       }, 300);
     }
 
-    // Allow Enter key to submit
     document.getElementById('testCode').addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        goToStudent();
-      }
+      if (e.key === 'Enter') goToStudent();
     });
-    //123
-    // Auto-focus input on page load
+
     window.addEventListener('load', () => {
-      setTimeout(() => {
-        document.getElementById('testCode').focus();
-      }, 500);
+      setTimeout(() => document.getElementById('testCode').focus(), 200);
     });
-    
-    // Add shake animation CSS
-    const style = document.createElement('style');
-    style.textContent = `
-      @keyframes shake {
-        0%, 100% { transform: translateX(0); }
-        25% { transform: translateX(-10px); }
-        75% { transform: translateX(10px); }
-      }
-      .animate-shake {
-        animation: shake 0.3s ease-in-out;
-      }
-    `;
-    document.head.appendChild(style);
   </script>
-  
+
 </body>
 </html>
