@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" role="img" aria-labelledby="title desc">
+  <title id="title">Nền doodle nhẹ cho màn hình làm bài</title>
+  <desc id="desc">Các nét vẽ giáo dục pastel rất nhẹ nằm ở bốn góc, chừa trống hoàn toàn vùng trung tâm để học sinh tập trung làm bài.</desc>
+  <rect width="1600" height="1000" fill="#f6f7fb"/>
+  <circle cx="90" cy="80" r="235" fill="#edefff" opacity=".46"/>
+  <circle cx="1530" cy="922" r="240" fill="#edefff" opacity=".40"/>
+  <circle cx="1510" cy="85" r="150" fill="#fff4df" opacity=".38"/>
+  <circle cx="74" cy="906" r="165" fill="#eaf8f2" opacity=".52"/>
+
+  <!-- Top-left: timer, pencil and friendly hand -->
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round" opacity=".34">
+    <g transform="translate(58 52)" stroke="#4255ff" stroke-width="13">
+      <circle cx="108" cy="112" r="76"/>
+      <path d="M108 67v50l36 22M83 19h50M108 19v18"/>
+    </g>
+    <g transform="translate(236 54) rotate(13 45 105)" stroke="#ff9f45" stroke-width="13">
+      <path d="M30 10h42v178L51 222 30 188Z"/>
+      <path d="M30 48h42M30 168h42"/>
+    </g>
+    <g stroke="#68c6a3" stroke-width="13">
+      <path d="M84 288c-12-28-16-55-2-59 14-3 17 28 22 46 2-31 8-56 22-53 14 3 6 34 8 53 9-27 21-45 33-37 12 8-4 36-10 52 15-14 30-19 37-8 10 15-15 36-30 51-24 21-61 15-80-10"/>
+    </g>
+    <path d="m328 268 8 18 20 2-15 14 4 20-17-10-18 10 5-20-15-14 20-2Z" stroke="#ffb647" stroke-width="11"/>
+  </g>
+
+  <!-- Top-right: shield, check and stars -->
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round" opacity=".30">
+    <g transform="translate(1308 52)" stroke="#4255ff" stroke-width="14">
+      <path d="M108 5c38 25 74 31 108 31v94c0 70-42 118-108 151C42 248 0 200 0 130V36c34 0 70-6 108-31Z"/>
+      <path d="m56 134 34 34 72-89"/>
+    </g>
+    <path d="m1253 89 10 23 25 3-19 17 6 25-22-13-22 13 6-25-19-17 25-3Z" stroke="#ffb647" stroke-width="12"/>
+    <path d="M1516 312h42M1537 291v42" stroke="#f185b3" stroke-width="12"/>
+  </g>
+
+  <!-- Bottom-left: two subtle doodle students and a book -->
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round" opacity=".28">
+    <g transform="translate(35 690)">
+      <circle cx="105" cy="91" r="73" stroke="#4ba8d8" stroke-width="14"/>
+      <path d="M37 84C48 29 86 3 129 17c27 8 44 30 50 59" stroke="#4ba8d8" stroke-width="14"/>
+      <path d="M80 91h1M130 91h1" stroke="#282e3e" stroke-width="14"/>
+      <path d="M81 120c16 14 33 14 49-2" stroke="#f185b3" stroke-width="10"/>
+      <path d="M63 154c-34 24-48 61-43 106M147 152c36 26 50 64 45 107" stroke="#4ba8d8" stroke-width="15"/>
+    </g>
+    <g transform="translate(202 732)">
+      <circle cx="87" cy="67" r="61" stroke="#68c6a3" stroke-width="13"/>
+      <path d="M29 59C40 16 72-3 110 10c22 7 35 23 39 43" stroke="#68c6a3" stroke-width="13"/>
+      <path d="M65 67h1M108 67h1" stroke="#282e3e" stroke-width="12"/>
+      <path d="M66 93c14 12 28 12 42-1" stroke="#ff9f45" stroke-width="9"/>
+      <path d="M51 126c-27 20-38 49-35 83M122 124c28 20 40 49 38 83" stroke="#68c6a3" stroke-width="14"/>
+    </g>
+    <path d="M57 930c88-32 173-32 259 0l35-101c-88-32-173-32-259 0Z" stroke="#4255ff" stroke-width="13"/>
+    <path d="M204 817v111" stroke="#4255ff" stroke-width="11"/>
+    <path d="m350 768 8 18 20 2-15 14 4 20-17-10-18 10 5-20-15-14 20-2Z" stroke="#ffb647" stroke-width="11"/>
+  </g>
+
+  <!-- Bottom-right: answer cards and cheering faces -->
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round" opacity=".27">
+    <g transform="translate(1264 672)">
+      <rect x="0" y="0" width="272" height="196" rx="28" stroke="#4255ff" stroke-width="14"/>
+      <circle cx="42" cy="52" r="14" stroke="#4255ff" stroke-width="9"/>
+      <path d="M76 52h142" stroke="#586380" stroke-width="13"/>
+      <circle cx="42" cy="105" r="14" stroke="#4255ff" stroke-width="9"/>
+      <path d="M76 105h119" stroke="#586380" stroke-width="13"/>
+      <circle cx="42" cy="158" r="15" stroke="#4255ff" stroke-width="9"/>
+      <path d="m34 158 7 7 14-18" stroke="#4255ff" stroke-width="7"/>
+      <path d="M76 158h157" stroke="#4255ff" stroke-width="13"/>
+    </g>
+    <g transform="translate(1114 784)">
+      <circle cx="76" cy="63" r="57" stroke="#f185b3" stroke-width="13"/>
+      <path d="M55 63h1M96 63h1" stroke="#282e3e" stroke-width="12"/>
+      <path d="M56 88c13 12 27 12 40-1" stroke="#68c6a3" stroke-width="9"/>
+      <path d="M41 118c-24 20-34 45-31 73M111 117c24 18 34 44 32 72" stroke="#f185b3" stroke-width="13"/>
+    </g>
+    <path d="M1454 910c-11-28-15-54-2-58 14-4 17 28 22 45 2-30 8-54 21-51 14 3 6 32 8 50 9-25 20-42 31-35 12 8-3 34-9 49 14-13 28-18 35-7 9 14-14 33-28 47-22 20-58 15-78-9" stroke="#ff9f45" stroke-width="12"/>
+  </g>
+
+  <!-- Sparse middle-edge details only; central reading area remains blank -->
+  <g fill="none" stroke-linecap="round" opacity=".18">
+    <path d="M18 456h64M50 424v64" stroke="#4255ff" stroke-width="11"/>
+    <path d="M1517 470c26-22 52-22 78 0M1517 503c26-22 52-22 78 0" stroke="#68c6a3" stroke-width="11"/>
+    <circle cx="111" cy="528" r="14" fill="#ff9f45" stroke="none"/>
+    <circle cx="1495" cy="566" r="13" fill="#4255ff" stroke="none"/>
+  </g>
+</svg>

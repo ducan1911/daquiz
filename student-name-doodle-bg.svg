@@ -1,0 +1,122 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
+  <title id="title">Nền doodle dễ thương cho màn hình nhập tên học sinh</title>
+  <desc id="desc">Các nhân vật và bàn tay nét vẽ pastel tập trung ở hai góc dưới, chừa khoảng trống giữa cho biểu mẫu nhập tên.</desc>
+  <rect width="1600" height="900" fill="#f6f7fb"/>
+  <circle cx="120" cy="135" r="205" fill="#edefff" opacity=".72"/>
+  <circle cx="1490" cy="124" r="190" fill="#fff4df" opacity=".72"/>
+  <path d="M0 733C244 664 368 732 520 789c166 62 295 39 449-13 170-57 356-81 631 3v121H0Z" fill="#fff" opacity=".92"/>
+
+  <!-- Small upper decorations -->
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M122 126c31-43 71-58 115-45" stroke="#4255ff" stroke-width="13"/>
+    <path d="m178 64 10-28M211 69l25-25M145 76l-9-28" stroke="#ff9f45" stroke-width="12"/>
+    <path d="m1387 80 9 22 24 3-18 16 5 24-20-12-21 12 5-24-18-16 24-3Z" stroke="#ffb647" stroke-width="12"/>
+    <path d="M1448 164c34-22 66-23 97-2" stroke="#f185b3" stroke-width="12"/>
+    <circle cx="289" cy="131" r="12" fill="#68c6a3" stroke="none"/>
+    <circle cx="1307" cy="162" r="11" fill="#4255ff" stroke="none"/>
+  </g>
+
+  <!-- Left doodle crowd -->
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Waving hand -->
+    <g stroke="#f185b3" stroke-width="14">
+      <path d="M61 536c-14-29-30-64-14-72 17-9 31 31 40 49-7-38-11-76 7-78 19-2 20 44 24 71 0-43 6-85 26-82 18 3 11 50 12 82 9-36 25-65 40-57 17 10-6 52-14 78 20-25 42-38 54-23 15 19-23 54-40 78-21 29-59 47-91 31-24-12-31-44-44-77Z"/>
+      <path d="M90 548c28-3 48 8 60 32"/>
+    </g>
+
+    <!-- Green striped student -->
+    <g transform="translate(138 392)">
+      <circle cx="124" cy="86" r="72" stroke="#68c6a3" stroke-width="14"/>
+      <path d="M73 55c23-33 66-44 103-19" stroke="#68c6a3" stroke-width="14"/>
+      <path d="M94 86h1M151 86h1" stroke="#282e3e" stroke-width="15"/>
+      <path d="M99 116c18 16 36 16 52-2" stroke="#ff9f45" stroke-width="11"/>
+      <path d="M85 154c-35 23-51 62-48 119M166 153c36 24 51 64 47 120" stroke="#68c6a3" stroke-width="16"/>
+      <path d="M69 180h112M58 220h135M46 258h157" stroke="#68c6a3" stroke-width="13"/>
+      <path d="M88 22 75-7M119 14l1-33M151 22l17-27" stroke="#ff9f45" stroke-width="11"/>
+    </g>
+
+    <!-- Blue long hair character -->
+    <g transform="translate(321 471)">
+      <path d="M33 79C20 14 54-29 112-24c56 5 82 53 60 112" stroke="#4ba8d8" stroke-width="16"/>
+      <circle cx="104" cy="78" r="65" stroke="#4ba8d8" stroke-width="14"/>
+      <path d="M81 75h1M127 75h1" stroke="#282e3e" stroke-width="14"/>
+      <path d="M82 103c15 13 30 13 45-1" stroke="#f185b3" stroke-width="10"/>
+      <path d="M67 138c-30 23-43 61-38 103M140 137c31 23 44 59 42 102" stroke="#4ba8d8" stroke-width="15"/>
+      <path d="M48 177c32 14 71 15 108 0M40 214c42 15 88 14 130-2" stroke="#4ba8d8" stroke-width="13"/>
+    </g>
+
+    <!-- Curly orange student -->
+    <g transform="translate(254 608)">
+      <path d="M33 59C29 16 61-12 102 0c18-18 48-7 51 15 29-4 46 27 29 48" stroke="#ff9f45" stroke-width="14"/>
+      <circle cx="105" cy="73" r="62" stroke="#ff9f45" stroke-width="14"/>
+      <path d="M82 72h1M128 72h1" stroke="#282e3e" stroke-width="14"/>
+      <path d="M83 101c15 14 30 14 46-2" stroke="#68c6a3" stroke-width="10"/>
+      <path d="M65 132c-28 24-38 55-34 93M143 132c28 22 41 53 38 91" stroke="#ff9f45" stroke-width="15"/>
+    </g>
+
+    <!-- Rainbow -->
+    <g transform="translate(34 695)" stroke-width="14">
+      <path d="M9 128C15 52 68 5 133 6c66 1 114 49 117 122" stroke="#f185b3"/>
+      <path d="M42 128c4-55 43-88 91-87 48 1 83 36 85 87" stroke="#ffb647"/>
+      <path d="M76 128c2-32 25-51 56-51s53 20 54 51" stroke="#68c6a3"/>
+    </g>
+
+    <!-- Floating hands -->
+    <g stroke="#4255ff" stroke-width="13">
+      <path d="M389 349c-8-34-8-62 7-65 14-2 15 30 17 51 4-35 11-63 26-60 15 4 6 38 7 61 11-31 24-51 37-43 13 9-3 39-10 58 17-17 34-23 42-11 11 17-18 40-35 57-27 25-70 20-91-10"/>
+    </g>
+    <circle cx="468" cy="684" r="43" stroke="#f185b3" stroke-width="13"/>
+    <path d="M452 678h1M481 678h1M453 699c9 8 19 8 28-1" stroke="#282e3e" stroke-width="10"/>
+  </g>
+
+  <!-- Right doodle crowd -->
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Big cheerful reader -->
+    <g transform="translate(1185 310)">
+      <circle cx="155" cy="105" r="87" stroke="#ffb647" stroke-width="16"/>
+      <path d="M75 91c18-59 75-91 131-63M87 54c19-21 45-31 72-31" stroke="#4ba8d8" stroke-width="15"/>
+      <path d="M123 103h1M184 103h1" stroke="#282e3e" stroke-width="16"/>
+      <path d="M123 140c20 20 43 20 64-2" stroke="#f185b3" stroke-width="12"/>
+      <path d="M95 188c-40 27-56 73-49 124M214 185c41 31 57 74 50 126" stroke="#ffb647" stroke-width="17"/>
+      <path d="M104 234 18 206 8 310l119 34 28-94 29 94 118-34-10-104-86 28" stroke="#68c6a3" stroke-width="15"/>
+      <path d="m73 257 32 9M216 264l31-9" stroke="#ff9f45" stroke-width="11"/>
+      <path d="M101 7 88-24M135 0l2-38M172 6l20-31" stroke="#4255ff" stroke-width="12"/>
+    </g>
+
+    <!-- Pink curly student -->
+    <g transform="translate(1007 478)">
+      <path d="M25 67C18 21 54-10 95 4c13-22 49-19 57 6 31-4 49 27 31 52" stroke="#f185b3" stroke-width="14"/>
+      <circle cx="104" cy="80" r="66" stroke="#f185b3" stroke-width="14"/>
+      <path d="M80 79h1M129 79h1" stroke="#282e3e" stroke-width="14"/>
+      <path d="M81 110c16 14 33 14 49-2" stroke="#4ba8d8" stroke-width="10"/>
+      <path d="M62 142c-30 23-41 59-36 101M145 140c32 25 45 62 40 102" stroke="#f185b3" stroke-width="16"/>
+      <path d="M48 184c38 14 78 14 116 0M38 222c47 14 94 13 140-1" stroke="#4ba8d8" stroke-width="12"/>
+    </g>
+
+    <!-- Mint student -->
+    <g transform="translate(1374 551)">
+      <circle cx="83" cy="71" r="63" stroke="#68c6a3" stroke-width="14"/>
+      <path d="M25 60C37 16 72-5 111 10c20 7 33 24 37 45" stroke="#68c6a3" stroke-width="15"/>
+      <path d="M61 70h1M106 70h1" stroke="#282e3e" stroke-width="13"/>
+      <path d="M61 98c15 13 30 13 45-1" stroke="#ff9f45" stroke-width="10"/>
+      <path d="M45 130c-27 21-37 53-34 88M120 129c29 22 39 51 37 87" stroke="#68c6a3" stroke-width="15"/>
+    </g>
+
+    <!-- Orange waving hand -->
+    <g stroke="#ff9f45" stroke-width="14">
+      <path d="M1500 331c-14-34-21-70-4-75 16-4 22 37 29 59-2-42 2-79 20-77 18 2 11 45 14 75 9-37 23-68 39-60 17 9-2 51-9 76 18-25 38-38 50-24 14 18-19 54-36 76-24 31-70 45-99 24-22-16-24-46-34-74Z"/>
+    </g>
+
+    <!-- Small faces and hands -->
+    <circle cx="1194" cy="754" r="48" stroke="#4255ff" stroke-width="13"/>
+    <path d="M1177 749h1M1210 749h1M1178 772c10 8 21 8 31-2" stroke="#282e3e" stroke-width="10"/>
+    <path d="M1082 710c-13-29-17-57-3-61 14-4 18 29 23 47 2-31 9-55 22-52 14 3 6 32 8 52 9-26 21-43 32-35 12 8-4 35-10 50 15-13 29-18 36-7 9 14-15 34-29 48-23 21-59 15-79-9" stroke="#68c6a3" stroke-width="12"/>
+  </g>
+
+  <!-- Pale lower crowd creates the soft fade -->
+  <g fill="none" stroke="#d9dde8" stroke-width="12" stroke-linecap="round" opacity=".46">
+    <circle cx="555" cy="831" r="51"/><circle cx="673" cy="845" r="43"/><circle cx="807" cy="832" r="54"/><circle cx="932" cy="848" r="45"/><circle cx="1051" cy="829" r="52"/>
+    <path d="M534 829h1M575 829h1M650 843h1M688 843h1M784 830h1M827 830h1M910 846h1M947 846h1M1028 827h1M1070 827h1"/>
+    <path d="M536 850c13 11 26 11 39-1M652 862c12 9 24 9 36-1M785 854c14 11 29 10 42-2M911 866c12 9 24 9 36-1M1029 851c14 11 28 11 41-1"/>
+  </g>
+</svg>
