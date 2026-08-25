@@ -347,6 +347,10 @@
      .action-menu-list button:hover { background: var(--color-lilac-wash); color: var(--color-iris-bolt); }
      .omr-modal-card { padding: 30px; }
      .omr-modal-card input, .omr-modal-card select { min-height: 48px; font-size: 14px; }
+     .folder-manager-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; }
+     .folder-manager-item { padding: 16px; border: 1px solid var(--color-mist-border); border-radius: 14px; background: var(--color-paper-white); transition: border-color .18s, background .18s; }
+     .folder-manager-item:hover { border-color: var(--color-iris-bolt); background: var(--color-lilac-wash); }
+     .folder-manager-icon { width: 36px; height: 36px; display: grid; place-items: center; border-radius: 10px; background: var(--color-lilac-wash); color: var(--color-iris-bolt); }
      @media (max-width: 560px) {
        .omr-modal-card { padding: 20px; }
        .omr-modal-card .grid-cols-2 { grid-template-columns: 1fr; }
@@ -808,23 +812,21 @@
       const category = document.getElementById('qFilterCategory').value;
       const search = document.getElementById('qFilterSearch').value.trim().toLowerCase();
       
-      let query = supabase.from('questions').select('*').eq('teacher_id', currentUser.id).order('created_at', { ascending: false });
-      if (type) query = query.eq('type', type);
-      if (category) query = query.eq('category', category);
+       const { data } = await supabase.from('questions').select('*').eq('teacher_id', currentUser.id).order('created_at', { ascending: false });
+       allQuestions = data || [];
+       
+       let filtered = allQuestions;
+       if (type) filtered = filtered.filter(q => q.type === type);
+       if (category) filtered = filtered.filter(q => (q.category || '') === category);
+       if (search) filtered = filtered.filter(q => q.content?.toLowerCase().includes(search));
+
       
-      const { data } = await query;
-      allQuestions = data || [];
-      
-      let filtered = allQuestions;
-      if (search) {
-        filtered = allQuestions.filter(q => q.content?.toLowerCase().includes(search));
-      }
-      
-      const categories = [...new Set(allQuestions.map(q => q.category).filter(Boolean))];
-      const catSelect = document.getElementById('qFilterCategory');
-      const currentCat = catSelect.value;
-      catSelect.innerHTML = '<option value="">📁 Tất cả chủ đề</option>' + categories.map(c => `<option value="${c}">${c}</option>`).join('');
-      catSelect.value = currentCat;
+       const categories = [...new Set(allQuestions.map(q => q.category?.trim()).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'vi'));
+       const catSelect = document.getElementById('qFilterCategory');
+       const currentCat = catSelect.value;
+       catSelect.replaceChildren(new Option('Tất cả chủ đề', ''));
+       categories.forEach(categoryName => catSelect.add(new Option(categoryName, categoryName)));
+       catSelect.value = categories.includes(currentCat) ? currentCat : '';
       
       const list = document.getElementById('questionList');
       if (!filtered.length) {
@@ -2934,23 +2936,23 @@ YÊU CẦU:
         grouped[cat].push(q);
       });
 
-      const folderListHTML = Object.entries(grouped).map(([cat, qs]) => `
-        <div class="border-2 border-gray-200 rounded-xl p-4 hover:border-indigo-300 transition-all">
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-3">
-              <span class="text-2xl">📁</span>
+       const folderListHTML = Object.entries(grouped).map(([cat, qs]) => `
+         <div class="folder-manager-item">
+           <div class="flex items-center justify-between gap-3">
+             <div class="flex items-center gap-3 min-w-0">
+               <span class="folder-manager-icon" aria-hidden="true"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></span>
               <div>
                 <p class="font-semibold text-gray-800">${cat}</p>
                 <p class="text-xs text-gray-500">${qs.length} câu hỏi</p>
               </div>
             </div>
             <div class="flex gap-2">
-              <button onclick="openRenameFolderModal(${JSON.stringify(qs.map(q=>q.id))}, ${JSON.stringify(cat)})" class="text-xs bg-indigo-50 text-indigo-600 hover:bg-indigo-100 px-3 py-1.5 rounded-lg transition-all font-medium">
-                ✏️ Đổi tên
-              </button>
-              <button onclick="filterByFolder(${JSON.stringify(cat)})" class="text-xs bg-gray-50 text-gray-600 hover:bg-gray-100 px-3 py-1.5 rounded-lg transition-all font-medium">
-                🔍 Xem
-              </button>
+               <button type="button" data-folder-action="rename" data-folder-name="${escapeHtml(cat)}" data-folder-ids="${qs.map(q => q.id).join(',')}" class="folder-action-button text-xs bg-indigo-50 text-indigo-600 hover:bg-indigo-100 px-3 py-1.5 rounded-lg transition-all font-medium">
+                 Đổi tên
+               </button>
+               <button type="button" data-folder-action="view" data-folder-name="${escapeHtml(cat)}" class="folder-action-button text-xs bg-gray-50 text-gray-600 hover:bg-gray-100 px-3 py-1.5 rounded-lg transition-all font-medium">
+                 Xem
+               </button>
             </div>
           </div>
         </div>
@@ -2984,10 +2986,17 @@ YÊU CẦU:
           </div>
         </div>
       `;
-      document.getElementById('modalContainer').innerHTML = modal;
-    }
+       document.getElementById('modalContainer').innerHTML = modal;
+       document.querySelectorAll('.folder-action-button').forEach(button => {
+         button.addEventListener('click', () => {
+           const name = button.dataset.folderName;
+           if (button.dataset.folderAction === 'view') filterByFolder(name);
+           else openRenameFolderModal(button.dataset.folderIds.split(','), name);
+         });
+       });
+     }
 
-    function createNewFolder() {
+     function createNewFolder() {
       const name = document.getElementById('newFolderName').value.trim();
       if (!name) return showAppNotice('Vui lòng nhập tên thư mục');
       const exists = allQuestions.some(q => (q.category || '').trim().toLowerCase() === name.toLowerCase());
@@ -2999,11 +3008,9 @@ YÊU CẦU:
     function filterByFolder(category) {
       const catSelect = document.getElementById('qFilterCategory');
       if (catSelect) {
-        // Add option if not exists
-        let exists = false;
-        for (const opt of catSelect.options) { if (opt.value === category) { exists = true; break; } }
-        if (!exists) catSelect.innerHTML += `<option value="${category}">${category}</option>`;
-        catSelect.value = category;
+         let exists = [...catSelect.options].some(option => option.value === category);
+         if (!exists) catSelect.add(new Option(category, category));
+         catSelect.value = category;
         loadQuestions();
       }
       closeModal();
