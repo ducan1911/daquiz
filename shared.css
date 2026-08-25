@@ -1,0 +1,77 @@
+:root {
+  --color-iris-bolt: #4255ff;
+  --color-ink-charcoal: #282e3e;
+  --color-deep-indigo: #2e3856;
+  --color-slate-veil: #586380;
+  --color-fog-mist: #939bb4;
+  --color-chalk-canvas: #f6f7fb;
+  --color-paper-white: #ffffff;
+  --color-lilac-wash: #edefff;
+  --color-mist-border: #d9dde8;
+  --color-success: #2f855a;
+  --color-success-soft: #e8f7ef;
+  --color-danger: #d64545;
+  --color-danger-soft: #fff0f0;
+  --color-warning: #d97706;
+  --color-warning-soft: #fff7e6;
+  --font-daquiz: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+[data-theme="dark"] {
+  --color-ink-charcoal: #f6f7fb;
+  --color-deep-indigo: #b9c2ff;
+  --color-slate-veil: #b7bfd5;
+  --color-fog-mist: #8993ad;
+  --color-chalk-canvas: #171b28;
+  --color-paper-white: #22283a;
+  --color-lilac-wash: #30375a;
+  --color-mist-border: #414a66;
+  --color-success-soft: #183b2b;
+  --color-danger-soft: #47252b;
+  --color-warning-soft: #493719;
+}
+
+.daquiz-skeleton {
+  background: linear-gradient(90deg, var(--color-mist-border) 25%, var(--color-lilac-wash) 37%, var(--color-mist-border) 63%);
+  background-size: 400% 100%;
+  animation: daquiz-skeleton-shimmer 1.4s ease infinite;
+  border-radius: 8px;
+}
+
+@keyframes daquiz-skeleton-shimmer { 0% { background-position: 100% 0; } 100% { background-position: -100% 0; } }
+
+.daquiz-theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  border: 1px solid var(--color-mist-border);
+  border-radius: 10px;
+  background: var(--color-paper-white);
+  color: var(--color-slate-veil);
+  cursor: pointer;
+}
+
+.daquiz-theme-toggle:hover,
+.daquiz-theme-toggle:focus-visible { background: var(--color-lilac-wash); color: var(--color-iris-bolt); outline: none; }
+
+.daquiz-app-notice {
+  position: fixed;
+  top: 76px;
+  right: 20px;
+  z-index: 100;
+  max-width: min(420px, calc(100vw - 40px));
+  padding: 13px 16px;
+  border: 1px solid var(--color-mist-border);
+  border-radius: 12px;
+  background: var(--color-paper-white);
+  color: var(--color-ink-charcoal);
+  box-shadow: 0 8px 24px rgba(40, 46, 62, .12);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .daquiz-skeleton { animation: none; }
+}
