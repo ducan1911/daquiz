@@ -17,19 +17,6 @@
   --font-daquiz: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
-[data-theme="dark"] {
-  --color-ink-charcoal: #f6f7fb;
-  --color-deep-indigo: #b9c2ff;
-  --color-slate-veil: #b7bfd5;
-  --color-fog-mist: #8993ad;
-  --color-chalk-canvas: #171b28;
-  --color-paper-white: #22283a;
-  --color-lilac-wash: #30375a;
-  --color-mist-border: #414a66;
-  --color-success-soft: #183b2b;
-  --color-danger-soft: #47252b;
-  --color-warning-soft: #493719;
-}
 
 .daquiz-skeleton {
   background: linear-gradient(90deg, var(--color-mist-border) 25%, var(--color-lilac-wash) 37%, var(--color-mist-border) 63%);
@@ -39,22 +26,6 @@
 }
 
 @keyframes daquiz-skeleton-shimmer { 0% { background-position: 100% 0; } 100% { background-position: -100% 0; } }
-
-.daquiz-theme-toggle {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 44px;
-  min-height: 44px;
-  border: 1px solid var(--color-mist-border);
-  border-radius: 10px;
-  background: var(--color-paper-white);
-  color: var(--color-slate-veil);
-  cursor: pointer;
-}
-
-.daquiz-theme-toggle:hover,
-.daquiz-theme-toggle:focus-visible { background: var(--color-lilac-wash); color: var(--color-iris-bolt); outline: none; }
 
 .daquiz-app-notice {
   position: fixed;
