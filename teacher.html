@@ -357,7 +357,19 @@
        .omr-modal-card .flex.gap-3.pt-2 { flex-direction: column; }
        .omr-modal-card .flex.gap-3.pt-2 button { width: 100%; min-height: 48px; }
      }
-     .app-notice { position: fixed; top: 76px; right: 20px; z-index: 100; max-width: min(420px, calc(100vw - 40px)); padding: 13px 16px; border: 1px solid var(--color-mist-border); border-radius: 12px; background: var(--color-paper-white); color: var(--color-ink-charcoal); box-shadow: 0 8px 24px rgba(40,46,62,0.12); font-size: 14px; font-weight: 600; }
+      .ui-icon { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; vertical-align: -3px; flex: 0 0 auto; }
+      .status-icon { font-size: 15px; line-height: 1; font-weight: 700; }
+      .test-action-button { display:inline-flex; align-items:center; justify-content:center; gap:6px; }
+      .app-notice { position: fixed; top: 76px; right: 20px; z-index: 100; max-width: min(420px, calc(100vw - 40px)); padding: 13px 16px; border: 1px solid var(--color-mist-border); border-radius: 12px; background: var(--color-paper-white); color: var(--color-ink-charcoal); box-shadow: 0 8px 24px rgba(40,46,62,0.12); font-size: 14px; font-weight: 600; }
+      .teacher-layout { align-items: stretch; }
+      .teacher-layout > aside { width: 240px !important; display: block !important; min-height: calc(100vh - 60px); }
+      .teacher-main { min-height: calc(100vh - 60px); }
+      @media (max-width: 767px) {
+        .teacher-layout > aside { display: none !important; }
+        .teacher-main { padding: 20px 16px 36px !important; }
+        header > div { padding: 0 16px !important; }
+      }
+
      
 
   </style>
@@ -365,7 +377,7 @@
 <body>
   <!-- ===== HEADER ===== -->
   <header style="background:var(--color-paper-white);border-bottom:1px solid var(--color-mist-border);height:60px;display:flex;align-items:center;padding:0 1.5rem;position:sticky;top:0;z-index:40;">
-    <div style="max-width:1280px;width:100%;margin:0 auto;display:flex;align-items:center;justify-content:space-between;">
+    <div style="width:100%;padding:0 28px;display:flex;align-items:center;justify-content:space-between;">
       <!-- Logo -->
       <div style="display:flex;align-items:center;gap:10px;">
         <img src="https://www.tcktktct.edu.vn/assets_site/images/logo.webp" alt="Logo" style="height:32px;object-fit:contain;" onerror="this.style.display='none'">
@@ -376,8 +388,7 @@
       </div>
       <!-- Right -->
       <div style="display:flex;align-items:center;gap:10px;">
-                 <button type="button" class="daquiz-theme-toggle" onclick="toggleDaquizTheme()" aria-label="Chuyển chế độ sáng tối" title="Chuyển chế độ sáng tối">◐</button>
-         <button onclick="showSection('profile')" class="teacher-profile-button" style="display:flex;align-items:center;gap:8px;border:1px solid var(--color-mist-border);border-radius:10px;padding:6px 14px;cursor:pointer;font-size:13px;font-weight:600;color:var(--color-slate-veil);transition:background 0.18s;">
+                 <button onclick="showSection('profile')" class="teacher-profile-button" style="display:flex;align-items:center;gap:8px;border:1px solid var(--color-mist-border);border-radius:10px;padding:6px 14px;cursor:pointer;font-size:13px;font-weight:600;color:var(--color-slate-veil);transition:background 0.18s;">
           <span id="teacherAvatarBtn" style="width:28px;height:28px;border-radius:50%;background:var(--color-lilac-wash);display:flex;align-items:center;justify-content:center;overflow:hidden;">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-iris-bolt)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
           </span>
@@ -392,7 +403,7 @@
   </header>
 
   <!-- ===== LAYOUT ===== -->
-  <div style="display:flex;max-width:1280px;margin:0 auto;">
+  <div class="teacher-layout" style="display:flex;width:100%;margin:0;">
 
     <!-- SIDEBAR -->
     <aside id="sidebar" style="width:220px;flex-shrink:0;background:var(--color-paper-white);border-right:1px solid var(--color-mist-border);min-height:calc(100vh - 60px);display:none;" class="md-sidebar">
@@ -425,7 +436,7 @@
     </aside>
 
     <!-- MAIN -->
-    <main style="flex:1;padding:24px;min-width:0;overflow:hidden;" id="mainContent">
+    <main class="teacher-main" style="flex:1;padding:28px 36px 48px;min-width:0;overflow:hidden;" id="mainContent">
       <!-- Loading -->
       <div id="loadingOverlay" style="display:flex;align-items:center;justify-content:center;padding:80px 0;">
         <div style="text-align:center;">
@@ -472,7 +483,7 @@
               <option value="truefalse">True/False</option>
             </select>
             <select id="qFilterCategory" class="form-select" style="width:auto;" onchange="loadQuestions()">
-              <option value="">📁 Tất cả chủ đề</option>
+              <option value="">Tất cả chủ đề</option>
             </select>
             <input type="text" id="qFilterSearch" placeholder="🔍 Tìm kiếm câu hỏi..." class="form-input" style="flex:1;min-width:200px;" oninput="debounce(loadQuestions, 300)()">
           </div>
@@ -489,7 +500,7 @@
             <p style="font-size:14px;color:var(--color-slate-veil);margin:0;">Tạo và quản lý bài kiểm tra</p>
           </div>
           <button onclick="openCreateTestModal()" class="btn-primary" style="display:inline-flex;align-items:center;gap:7px;padding:10px 20px;font-size:14px;">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            <svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             Tạo bài kiểm tra
           </button>
         </div>
@@ -673,16 +684,6 @@
       window.setTimeout(() => notice.remove(), type === 'error' ? 6000 : 3500);
     }
 
-    function applyDaquizTheme() {
-      document.documentElement.dataset.theme = localStorage.getItem('daquiz-theme') || 'light';
-    }
-    function toggleDaquizTheme() {
-      const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
-      localStorage.setItem('daquiz-theme', next);
-      applyDaquizTheme();
-    }
-    applyDaquizTheme();
-
     // ==== BIẾN TOÀN CỤC ====
     let currentUser = null;
     let allQuestions = [];
@@ -846,9 +847,9 @@
               <div style="flex:1;min-width:0;">
                 <div style="display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:10px;">
                   <span class="badge" style="${typeColors[q.type]}">${typeLabels[q.type]}</span>
-                  ${q.category ? `<span class="badge" style="background:var(--color-chalk-canvas);color:var(--color-slate-veil);">📁 ${q.category}</span>` : ''}
+                  ${q.category ? `<span class="badge" style="background:var(--color-chalk-canvas);color:var(--color-slate-veil);"><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>${q.category}</span>` : ''}
                   <span class="badge" style="background:#fffbeb;color:#b45309;">⭐ ${q.points} điểm</span>
-                  ${q.image_url ? '<span class="badge" style="background:#fdf2f8;color:#be185d;">🖼️ Có hình ảnh</span>' : ''}
+                  ${q.image_url ? '<span class="badge" style="background:#fdf2f8;color:#be185d;"><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9" r="1.5"/><path d="m21 15-5-5L5 20"/></svg>Có hình ảnh</span>' : ''}
                 </div>
                 <p style="color:var(--color-ink-charcoal);font-size:15px;font-weight:600;line-height:1.5;margin:0 0 12px;">${q.content || 'N/A'}</p>
                 ${q.image_url ? `<div style="margin-bottom:12px;"><img src="${q.image_url}" alt="Hình minh họa" style="max-width:360px;max-height:200px;object-fit:contain;border:1px solid var(--color-mist-border);border-radius:10px;cursor:pointer;display:block;" onclick="window.open('${q.image_url}','_blank')" title="Click để xem ảnh đầy đủ"></div>` : ''}
@@ -947,7 +948,7 @@
                 <label class="block text-sm font-semibold text-gray-700 mb-2">🖼️ Hình ảnh minh họa</label>
                 ${currentImageHTML}
                 <div class="upload-area" onclick="document.getElementById('qImageInput').click()">
-                  <div class="text-3xl mb-1">📷</div>
+                  <svg class="ui-icon" style="width:30px;height:30px;margin:0 auto 6px;display:block;" aria-hidden="true" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9" r="1.5"/><path d="m21 15-5-5L5 20"/></svg>
                   <p class="text-sm text-gray-600">${q.image_url ? 'Click để thay ảnh mới' : 'Click để chọn ảnh'}</p>
                   <p class="text-xs text-gray-400">JPG, PNG, GIF (tối đa 5MB)</p>
                 </div>
@@ -1031,7 +1032,7 @@
       const modal = `
         <div class="modal show fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" onclick="if(event.target===this) closeModal()">
           <div class="modal-card" style="width:100%;max-width:640px;max-height:90vh;overflow-y:auto;">
-            <div class="modal-header">➕ Thêm câu hỏi mới</div>
+            <div class="modal-header"><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Thêm câu hỏi mới</div>
             <div class="p-6 space-y-4">
               <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-2">Loại câu hỏi</label>
@@ -1106,7 +1107,7 @@
         <div class="flex items-center gap-2 option-row">
           <input type="${inputType}" name="correctOpt" value="${optionCounter}" class="w-5 h-5 text-indigo-600 rounded focus:ring-2 focus:ring-indigo-500">
           <input type="text" placeholder="Nhập đáp án..." class="flex-1 border-2 border-gray-200 rounded-xl px-4 py-2 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all option-text">
-          <button type="button" onclick="this.closest('.option-row').remove()" class="text-red-500 hover:text-red-700 p-2">🗑️</button>
+          <button type="button" onclick="this.closest('.option-row').remove()" class="text-red-500 hover:text-red-700 p-2" aria-label="Xóa đáp án"><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M9 7V4h6v3M6 7l1 14h10l1-14"/></svg></button>
         </div>
       `;
       document.getElementById('optionsList').insertAdjacentHTML('beforeend', html);
@@ -1186,13 +1187,13 @@
         let statusColor = '';
         
         if (now < start) {
-          statusBadge = '⏰ Chưa mở';
+           statusBadge = '<span class="ui-icon status-icon" aria-hidden="true">○</span> Chưa mở';
           statusColor = 'bg-yellow-100 text-yellow-700';
         } else if (now > end) {
-          statusBadge = '🔒 Đã đóng';
+           statusBadge = '<span class="ui-icon status-icon" aria-hidden="true">×</span> Đã đóng';
           statusColor = 'bg-red-100 text-red-700';
         } else {
-          statusBadge = '✅ Đang mở';
+           statusBadge = '<span class="ui-icon status-icon" aria-hidden="true">✓</span> Đang mở';
           statusColor = 'bg-green-100 text-green-700';
         }
         
@@ -1202,23 +1203,23 @@
               <h3 style="font-size:17px;font-weight:700;color:var(--color-ink-charcoal);margin:0 0 10px;">${t.title || 'Untitled'}</h3>
               <div style="display:flex;flex-wrap:wrap;gap:6px;">
                 <span class="badge" style="${statusBadge.includes('Đang') ? 'background:#f0fdf4;color:#15803d;' : statusBadge.includes('Chưa') ? 'background:#fffbeb;color:#b45309;' : 'background:#fff5f5;color:#b91c1c;'}">${statusBadge}</span>
-                <span class="badge" style="background:var(--color-lilac-wash);color:var(--color-iris-bolt);">📝 ${t.questions?.length || 0} câu</span>
-                <span class="badge" style="background:var(--color-chalk-canvas);color:var(--color-slate-veil);">⏱️ ${t.duration} phút</span>
-                <span class="badge" style="background:#fffbeb;color:#b45309;">🔑 ${t.test_code}</span>
-                ${t.strict_mode?.enabled ? '<span class="badge" style="background:#fff5f5;color:#b91c1c;">🛡️ Nghiêm túc</span>' : ''}
+                <span class="badge" style="background:var(--color-lilac-wash);color:var(--color-iris-bolt);"><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 11h8M8 15h5"/></svg>${t.questions?.length || 0} câu</span>
+                <span class="badge" style="background:var(--color-chalk-canvas);color:var(--color-slate-veil);"><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>${t.duration} phút</span>
+                <span class="badge" style="background:#fffbeb;color:#b45309;"><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>${t.test_code}</span>
+                ${t.strict_mode?.enabled ? '<span class="badge" style="background:#fff5f5;color:#b91c1c;"><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3 20 6v5c0 5-3.4 8.7-8 10-4.6-1.3-8-5-8-10V6z"/><path d="m9 12 2 2 4-4"/></svg>Nghiêm túc</span>' : ''}
               </div>
             </div>
             <div style="font-size:12px;color:var(--color-slate-veil);line-height:1.8;margin-bottom:16px;">
-              <div>📅 Mở: ${start.toLocaleString('vi-VN')}</div>
-              <div>📅 Đóng: ${end.toLocaleString('vi-VN')}</div>
+               <div><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg> Mở: ${start.toLocaleString('vi-VN')}</div>
+               <div><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg> Đóng: ${end.toLocaleString('vi-VN')}</div>
             </div>
             <div style="display:flex;gap:6px;flex-wrap:wrap;">
-              <button onclick="viewTestDetails('${t.id}')" style="flex:1;min-width:120px;height:38px;background:var(--color-lilac-wash);color:var(--color-iris-bolt);border:none;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;">👁️ Xem chi tiết</button>
-              <button onclick="duplicateTest('${t.id}')" style="width:38px;height:38px;background:#f0fdf4;color:#15803d;border:none;border-radius:9px;cursor:pointer;" title="Nhân bản bài thi">📋</button>
-              <button onclick="openEditTimeModal('${t.id}')" style="width:38px;height:38px;background:#fffbeb;color:#b45309;border:none;border-radius:9px;cursor:pointer;" title="Chỉnh thời gian">🕐</button>
-              <button onclick="showQRModal('${t.test_code}', '${t.title}')" style="width:38px;height:38px;background:#eff6ff;color:#2563eb;border:none;border-radius:9px;cursor:pointer;" title="QR Code">📱</button>
-              <button onclick="exportExamPDF('${t.id}')" style="width:38px;height:38px;background:#f5f3ff;color:#6d28d9;border:none;border-radius:9px;cursor:pointer;" title="Xuất đề thi PDF">📄</button>
-              <button onclick="deleteTest('${t.id}')" style="width:38px;height:38px;background:#fff5f5;color:#dc2626;border:none;border-radius:9px;cursor:pointer;" title="Xóa">🗑️</button>
+               <button onclick="viewTestDetails('${t.id}')" class="test-action-button" style="flex:1;min-width:120px;height:38px;background:var(--color-lilac-wash);color:var(--color-iris-bolt);border:none;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;"><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12z"/><circle cx="12" cy="12" r="2.5"/></svg> Xem chi tiết</button>
+               <button onclick="duplicateTest('${t.id}')" class="test-action-button" style="width:38px;height:38px;background:#f0fdf4;color:#15803d;border:none;border-radius:9px;cursor:pointer;" title="Nhân bản bài thi" aria-label="Nhân bản bài thi"><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg></button>
+               <button onclick="openEditTimeModal('${t.id}')" class="test-action-button" style="width:38px;height:38px;background:#fffbeb;color:#b45309;border:none;border-radius:9px;cursor:pointer;" title="Chỉnh thời gian" aria-label="Chỉnh thời gian"><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></button>
+               <button onclick="showQRModal('${t.test_code}', '${t.title}')" class="test-action-button" style="width:38px;height:38px;background:#eff6ff;color:#2563eb;border:none;border-radius:9px;cursor:pointer;" title="QR Code" aria-label="Mở QR Code"><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24"><rect x="4" y="4" width="6" height="6"/><rect x="14" y="4" width="6" height="6"/><rect x="4" y="14" width="6" height="6"/><path d="M14 14h3v3h-3zM18 18h2M14 20h3"/></svg></button>
+               <button onclick="exportExamPDF('${t.id}')" class="test-action-button" style="width:38px;height:38px;background:#f5f3ff;color:#6d28d9;border:none;border-radius:9px;cursor:pointer;" title="Xuất đề thi PDF" aria-label="Xuất đề thi PDF"><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h6"/></svg></button>
+               <button onclick="deleteTest('${t.id}')" class="test-action-button" style="width:38px;height:38px;background:#fff5f5;color:#dc2626;border:none;border-radius:9px;cursor:pointer;" title="Xóa" aria-label="Xóa bài thi"><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M9 7V4h6v3M6 7l1 14h10l1-14"/></svg></button>
             </div>
           </div>
         `;
@@ -1297,9 +1298,9 @@
       const end = new Date(test.end_time);
       let statusBadge = '';
       let statusColor = '';
-      if (now < start) { statusBadge = '⏰ Chưa mở'; statusColor = 'text-yellow-600'; }
-      else if (now > end) { statusBadge = '🔒 Đã đóng'; statusColor = 'text-red-600'; }
-      else { statusBadge = '✅ Đang mở'; statusColor = 'text-green-600'; }
+       if (now < start) { statusBadge = 'Chưa mở'; statusColor = 'text-yellow-600'; }
+       else if (now > end) { statusBadge = 'Đã đóng'; statusColor = 'text-red-600'; }
+       else { statusBadge = 'Đang mở'; statusColor = 'text-green-600'; }
 
       const modal = `
         <div class="modal show fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" onclick="if(event.target===this) closeModal()">
@@ -1651,7 +1652,7 @@
                 <!-- Lọc theo chủ đề + chọn nguyên chủ đề -->
                 <div class="flex flex-wrap items-center gap-2 mb-2">
                   <select id="qSelectCategoryFilter" onchange="filterQuestionCheckboxes()" class="border-2 border-gray-200 rounded-lg px-3 py-2 text-sm focus:border-indigo-500 transition-all">
-                    <option value="">📁 Tất cả chủ đề</option>
+                    <option value="">Tất cả chủ đề</option>
                     ${categoryOptionsHTML}
                   </select>
                   <button type="button" onclick="selectAllVisible(true)" class="text-xs font-medium text-green-700 bg-green-50 hover:bg-green-100 px-3 py-2 rounded-lg transition-all">☑️ Chọn nguyên chủ đề (theo lọc)</button>
@@ -2962,14 +2963,14 @@ YÊU CẦU:
         <div class="modal show fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" onclick="if(event.target===this) closeModal()">
           <div class="modal-card" style="width:100%;max-width:640px;max-height:90vh;overflow-y:auto;">
             <div class="modal-header">
-              <h3 class="text-2xl font-bold">📁 Quản lý thư mục</h3>
+              <h3 class="text-2xl font-bold"><svg class="ui-icon" style="width:24px;height:24px;" aria-hidden="true" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg> Quản lý thư mục</h3>
               <p class="text-sm opacity-80 mt-1">Tổ chức câu hỏi theo chủ đề / thư mục</p>
             </div>
             <div class="p-6 space-y-4">
               <div class="flex gap-3">
                 <input type="text" id="newFolderName" placeholder="Tên thư mục mới..." class="flex-1 border-2 border-gray-200 rounded-xl px-4 py-2.5 focus:border-amber-400 focus:ring-2 focus:ring-amber-100 transition-all">
                 <button onclick="createNewFolder()" class="bg-amber-500 hover:bg-amber-600 text-white px-5 py-2.5 rounded-xl font-medium transition-all">
-                  ➕ Tạo
+                   <svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Tạo
                 </button>
               </div>
 
@@ -3402,7 +3403,7 @@ D. 6</code></pre>
           <div class="modal-card omr-modal-card" style="width:100%;max-width:680px;max-height:92vh;overflow-y:auto;">
             <div class="flex justify-between items-start mb-6">
               <div>
-                <h3 class="text-xl font-bold text-gray-800">🖨️ In phiếu trả lời OMR</h3>
+                <h3 class="text-xl font-bold text-gray-800"><svg class="ui-icon" style="width:20px;height:20px;" aria-hidden="true" viewBox="0 0 24 24"><path d="M6 9V3h12v6"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v7H6z"/></svg> In phiếu trả lời OMR</h3>
                 <p class="text-sm text-gray-500 mt-1">Thiết lập thông tin trước khi tạo phiếu tô đáp án</p>
               </div>
               <button type="button" onclick="closeModal()" aria-label="Đóng modal OMR" class="text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>
@@ -3443,7 +3444,7 @@ D. 6</code></pre>
               </div>
               <div class="flex gap-3 pt-2">
                 <button onclick="generateOmrSheet()" class="flex-1 btn-primary text-white py-3 rounded-xl font-bold transition-all">
-                  🖨️ Tạo & In phiếu
+                   <svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M6 9V3h12v6"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v7H6z"/></svg> Tạo & In phiếu
                 </button>
                 <button onclick="closeModal()" class="flex-1 bg-gray-100 text-gray-700 py-3 rounded-xl font-medium hover:bg-gray-200 transition-all">
                   Hủy
