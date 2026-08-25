@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Hệ thống thi trắc nghiệm - TC Kinh tế Kỹ thuật TP Cần Thơ</title>
+  <link rel="stylesheet" href="shared.css">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
@@ -333,7 +334,20 @@
     .rounded-2xl { border-radius: 16px !important; }
     .hover\\:shadow-xl:hover, .hover\\:shadow-2xl:hover { box-shadow: 0 6px 18px rgba(40,46,62,0.12) !important; }
     .focus\\:border-indigo-500:focus { border-color: var(--color-iris-bolt) !important; }
-    .focus\\:ring-indigo-200:focus { box-shadow: 0 0 0 3px rgba(66,85,255,0.1) !important; }
+     .focus\\:ring-indigo-200:focus { box-shadow: 0 0 0 3px rgba(66,85,255,0.1) !important; }
+     .teacher-profile-button { background: var(--color-chalk-canvas); }
+     .teacher-profile-button:hover { background: var(--color-lilac-wash); }
+     .teacher-logout-button:hover { background: #b91c1c !important; }
+     .action-menu { position: relative; }
+     .action-menu > summary { list-style: none; }
+     .action-menu > summary::-webkit-details-marker { display: none; }
+     .action-menu[open] .action-menu-list { display: flex; }
+     .action-menu-list { display: none; position: absolute; right: 0; top: calc(100% + 8px); z-index: 20; min-width: 210px; padding: 6px; flex-direction: column; gap: 4px; background: var(--color-paper-white); border: 1px solid var(--color-mist-border); border-radius: 12px; box-shadow: 0 8px 24px rgba(40,46,62,0.12); }
+     .action-menu-list button { width: 100%; display: flex; align-items: center; gap: 8px; padding: 9px 10px; border: 0; border-radius: 8px; background: transparent; color: var(--color-ink-charcoal); font-size: 13px; font-weight: 600; text-align: left; cursor: pointer; }
+     .action-menu-list button:hover { background: var(--color-lilac-wash); color: var(--color-iris-bolt); }
+     .app-notice { position: fixed; top: 76px; right: 20px; z-index: 100; max-width: min(420px, calc(100vw - 40px)); padding: 13px 16px; border: 1px solid var(--color-mist-border); border-radius: 12px; background: var(--color-paper-white); color: var(--color-ink-charcoal); box-shadow: 0 8px 24px rgba(40,46,62,0.12); font-size: 14px; font-weight: 600; }
+     
+
   </style>
 </head>
 <body>
@@ -350,11 +364,15 @@
       </div>
       <!-- Right -->
       <div style="display:flex;align-items:center;gap:10px;">
-        <button onclick="showSection('profile')" style="display:flex;align-items:center;gap:8px;background:var(--color-chalk-canvas);border:1px solid var(--color-mist-border);border-radius:10px;padding:6px 14px;cursor:pointer;font-size:13px;font-weight:600;color:var(--color-slate-veil);transition:background 0.18s;" onmouseover="this.style.background='var(--color-lilac-wash)'" onmouseout="this.style.background='var(--color-chalk-canvas)'">
-          <span id="teacherAvatarBtn" style="width:28px;height:28px;border-radius:50%;background:var(--color-lilac-wash);display:flex;align-items:center;justify-content:center;font-size:14px;overflow:hidden;">👤</span>
+                 <button type="button" class="daquiz-theme-toggle" onclick="toggleDaquizTheme()" aria-label="Chuyển chế độ sáng tối" title="Chuyển chế độ sáng tối">◐</button>
+         <button onclick="showSection('profile')" class="teacher-profile-button" style="display:flex;align-items:center;gap:8px;border:1px solid var(--color-mist-border);border-radius:10px;padding:6px 14px;cursor:pointer;font-size:13px;font-weight:600;color:var(--color-slate-veil);transition:background 0.18s;">
+          <span id="teacherAvatarBtn" style="width:28px;height:28px;border-radius:50%;background:var(--color-lilac-wash);display:flex;align-items:center;justify-content:center;overflow:hidden;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-iris-bolt)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </span>
           <span id="teacherName" style="color:var(--color-ink-charcoal);"></span>
         </button>
-        <button onclick="logout()" style="background:#dc2626;color:white;border:none;border-radius:10px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;transition:background 0.18s;" onmouseover="this.style.background='#b91c1c'" onmouseout="this.style.background='#dc2626'">
+        <button onclick="logout()" class="teacher-logout-button" style="display:flex;align-items:center;gap:7px;background:#dc2626;color:white;border:none;border-radius:10px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;transition:background 0.18s;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
           Đăng xuất
         </button>
       </div>
@@ -368,22 +386,28 @@
     <aside id="sidebar" style="width:220px;flex-shrink:0;background:var(--color-paper-white);border-right:1px solid var(--color-mist-border);min-height:calc(100vh - 60px);display:none;" class="md-sidebar">
       <nav style="padding:16px 12px;display:flex;flex-direction:column;gap:4px;">
         <a href="#" onclick="showSection('questions')" class="sidebar-link" data-section="questions">
-          <span>📚</span><span>Ngân hàng câu hỏi</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+          <span>Ngân hàng câu hỏi</span>
         </a>
         <a href="#" onclick="showSection('tests')" class="sidebar-link" data-section="tests">
-          <span>📋</span><span>Bài kiểm tra</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 11h8M8 15h5"/></svg>
+          <span>Bài kiểm tra</span>
         </a>
         <a href="#" onclick="showSection('results')" class="sidebar-link" data-section="results">
-          <span>📊</span><span>Kết quả & Thống kê</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          <span>Kết quả & Thống kê</span>
         </a>
         <a href="#" onclick="showSection('leaderboard')" class="sidebar-link" data-section="leaderboard">
-          <span>🏆</span><span>Bảng xếp hạng Live</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M8 12l-4 9h16l-4-9"/><path d="M9 21l3-5 3 5"/></svg>
+          <span>Bảng xếp hạng Live</span>
         </a>
         <a href="#" onclick="showSection('battle')" class="sidebar-link" data-section="battle">
-          <span>⚡</span><span>Battle Realtime</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          <span>Battle Realtime</span>
         </a>
         <a href="#" onclick="showSection('profile')" class="sidebar-link" data-section="profile" style="display:none;">
-          <span>👤</span><span>Hồ sơ cá nhân</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <span>Hồ sơ cá nhân</span>
         </a>
       </nav>
     </aside>
@@ -393,8 +417,9 @@
       <!-- Loading -->
       <div id="loadingOverlay" style="display:flex;align-items:center;justify-content:center;padding:80px 0;">
         <div style="text-align:center;">
-          <div style="width:36px;height:36px;border:3px solid var(--color-mist-border);border-top-color:var(--color-iris-bolt);border-radius:50%;animation:spin 0.7s linear infinite;margin:0 auto 14px;"></div>
-          <p style="color:var(--color-slate-veil);font-size:14px;">Đang tải...</p>
+          <div class="daquiz-skeleton" style="width:180px;height:14px;margin:0 auto 14px;"></div>
+          <div class="daquiz-skeleton" style="width:280px;height:10px;margin:0 auto 8px;"></div>
+          <div class="daquiz-skeleton" style="width:220px;height:10px;margin:0 auto;"></div>
         </div>
       </div>
 
@@ -405,13 +430,24 @@
             <h2 style="font-size:24px;font-weight:700;color:var(--color-ink-charcoal);margin:0 0 4px;">Ngân hàng câu hỏi</h2>
             <p style="font-size:14px;color:var(--color-slate-veil);margin:0;">Quản lý tất cả câu hỏi của bạn</p>
           </div>
-          <div style="display:flex;flex-wrap:wrap;gap:8px;">
-            <button onclick="openFolderManagerModal()" style="background:#f59e0b;color:white;border:none;border-radius:10px;padding:9px 16px;font-size:13px;font-weight:600;cursor:pointer;">📁 Thư mục</button>
-            <button onclick="openAiGenerateModal()" style="background:#7c3aed;color:white;border:none;border-radius:10px;padding:9px 16px;font-size:13px;font-weight:600;cursor:pointer;">🤖 AI tạo câu hỏi</button>
-            <button onclick="openExportPdfModal()" style="background:#dc2626;color:white;border:none;border-radius:10px;padding:9px 16px;font-size:13px;font-weight:600;cursor:pointer;">📄 Xuất PDF</button>
-            <button onclick="openOmrModal()" style="background:#ea580c;color:white;border:none;border-radius:10px;padding:9px 16px;font-size:13px;font-weight:600;cursor:pointer;">🖨️ In phiếu OMR</button>
-            <button onclick="openBulkImportModal()" class="btn-success" style="padding:9px 16px;font-size:13px;">📄 Nhập từ Word</button>
-            <button onclick="openAddQuestionModal()" class="btn-primary" style="padding:9px 16px;font-size:13px;">➕ Thêm câu hỏi</button>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <button onclick="openAddQuestionModal()" class="btn-primary" style="display:inline-flex;align-items:center;gap:7px;padding:9px 16px;font-size:13px;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Thêm câu hỏi
+            </button>
+            <details class="action-menu">
+              <summary class="btn-secondary" style="display:inline-flex;align-items:center;gap:7px;padding:9px 16px;font-size:13px;cursor:pointer;">
+                Thêm...
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+              </summary>
+              <div class="action-menu-list">
+                <button onclick="openFolderManagerModal()"><span aria-hidden="true">▱</span> Thư mục</button>
+                <button onclick="openAiGenerateModal()"><span aria-hidden="true">✦</span> AI tạo câu hỏi</button>
+                <button onclick="openBulkImportModal()"><span aria-hidden="true">↥</span> Nhập từ Word</button>
+                <button onclick="openExportPdfModal()"><span aria-hidden="true">▤</span> Xuất PDF</button>
+                <button onclick="openOmrModal()"><span aria-hidden="true">▣</span> In phiếu OMR</button>
+              </div>
+            </details>
           </div>
         </div>
 
@@ -440,7 +476,10 @@
             <h2 style="font-size:24px;font-weight:700;color:var(--color-ink-charcoal);margin:0 0 4px;">Bài kiểm tra</h2>
             <p style="font-size:14px;color:var(--color-slate-veil);margin:0;">Tạo và quản lý bài kiểm tra</p>
           </div>
-          <button onclick="openCreateTestModal()" class="btn-primary" style="padding:10px 20px;font-size:14px;">➕ Tạo bài kiểm tra</button>
+          <button onclick="openCreateTestModal()" class="btn-primary" style="display:inline-flex;align-items:center;gap:7px;padding:10px 20px;font-size:14px;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Tạo bài kiểm tra
+          </button>
         </div>
         <div id="testList" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px;"></div>
       </div>
@@ -493,9 +532,14 @@
           <div class="card" style="padding:24px;">
             <h3 style="font-size:16px;font-weight:700;color:var(--color-ink-charcoal);margin:0 0 20px;">Thông tin cơ bản</h3>
             <div style="display:flex;flex-direction:column;align-items:center;margin-bottom:20px;">
-              <div id="avatarPreview" onclick="document.getElementById('avatarInput').click()" title="Nhấn để đổi ảnh" style="width:88px;height:88px;border-radius:50%;background:var(--color-lilac-wash);display:flex;align-items:center;justify-content:center;font-size:36px;margin-bottom:10px;cursor:pointer;border:3px solid var(--color-mist-border);overflow:hidden;">👤</div>
+              <div id="avatarPreview" onclick="document.getElementById('avatarInput').click()" title="Nhấn để đổi ảnh" style="width:88px;height:88px;border-radius:50%;background:var(--color-lilac-wash);display:flex;align-items:center;justify-content:center;margin-bottom:10px;cursor:pointer;border:3px solid var(--color-mist-border);overflow:hidden;">
+                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--color-iris-bolt)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              </div>
               <input type="file" id="avatarInput" accept="image/*" style="display:none;" onchange="previewAvatar(this)">
-              <button onclick="document.getElementById('avatarInput').click()" style="background:none;border:none;color:var(--color-iris-bolt);font-size:13px;cursor:pointer;font-weight:500;">📷 Đổi ảnh đại diện</button>
+              <button onclick="document.getElementById('avatarInput').click()" style="display:inline-flex;align-items:center;gap:5px;background:none;border:none;color:var(--color-iris-bolt);font-size:13px;cursor:pointer;font-weight:500;">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                Đổi ảnh đại diện
+              </button>
             </div>
             <div style="display:flex;flex-direction:column;gap:14px;">
               <div>
@@ -507,7 +551,10 @@
                 <input type="email" id="profileEmail" disabled style="width:100%;height:42px;border:2px solid var(--color-mist-border);border-radius:10px;padding:0 14px;font-size:14px;color:var(--color-fog-mist);background:var(--color-chalk-canvas);">
                 <p style="font-size:12px;color:var(--color-fog-mist);margin:4px 0 0;">Email không thể thay đổi</p>
               </div>
-              <button onclick="updateProfile()" class="btn-primary" style="width:100%;height:44px;font-size:14px;">💾 Lưu thông tin</button>
+              <button onclick="updateProfile()" class="btn-primary" style="display:inline-flex;align-items:center;justify-content:center;gap:7px;width:100%;height:44px;font-size:14px;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                Lưu thông tin
+              </button>
             </div>
           </div>
           <!-- Mật khẩu -->
@@ -522,7 +569,10 @@
                 <label style="display:block;font-size:13px;font-weight:600;color:var(--color-ink-charcoal);margin-bottom:6px;">Xác nhận mật khẩu</label>
                 <input type="password" id="confirmPassword" placeholder="Nhập lại mật khẩu mới" class="form-input" style="width:100%;">
               </div>
-              <button onclick="updatePassword()" class="btn-success" style="width:100%;height:44px;font-size:14px;">🔑 Cập nhật mật khẩu</button>
+              <button onclick="updatePassword()" class="btn-success" style="display:inline-flex;align-items:center;justify-content:center;gap:7px;width:100%;height:44px;font-size:14px;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                Cập nhật mật khẩu
+              </button>
             </div>
             <div style="margin-top:20px;padding:14px;background:var(--color-chalk-canvas);border-radius:12px;border:1px solid var(--color-mist-border);">
               <p style="font-size:13px;font-weight:600;color:var(--color-ink-charcoal);margin:0 0 4px;">Về hệ thống</p>
@@ -545,13 +595,19 @@
             <select id="battleTestSelect" class="form-select" style="flex:1;min-width:220px;">
               <option value="">-- Chọn bài kiểm tra --</option>
             </select>
-            <button onclick="startBattle()" style="background:var(--color-deep-indigo);color:white;border:none;border-radius:10px;padding:10px 20px;font-size:14px;font-weight:600;cursor:pointer;">⚡ Bắt đầu Battle</button>
-            <button onclick="stopBattle()" id="stopBattleBtn" style="background:var(--color-chalk-canvas);color:#dc2626;border:2px solid #dc2626;border-radius:10px;padding:10px 16px;font-size:14px;font-weight:600;cursor:pointer;display:none;">⏹ Dừng</button>
+            <button onclick="startBattle()" style="display:inline-flex;align-items:center;gap:7px;background:var(--color-deep-indigo);color:white;border:none;border-radius:10px;padding:10px 20px;font-size:14px;font-weight:600;cursor:pointer;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              Bắt đầu Battle
+            </button>
+            <button onclick="stopBattle()" id="stopBattleBtn" style="display:none;align-items:center;gap:7px;background:var(--color-chalk-canvas);color:#dc2626;border:2px solid #dc2626;border-radius:10px;padding:10px 16px;font-size:14px;font-weight:600;cursor:pointer;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+              Dừng
+            </button>
           </div>
         </div>
         <div id="battleContent">
           <div class="card" style="padding:48px;text-align:center;">
-            <div style="font-size:48px;margin-bottom:14px;">⚡</div>
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--color-fog-mist)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="margin:0 auto 14px;display:block;"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
             <p style="font-size:15px;font-weight:500;color:var(--color-ink-charcoal);margin:0 0 6px;">Chọn bài thi và nhấn "Bắt đầu Battle"</p>
             <p style="font-size:13px;color:var(--color-fog-mist);margin:0;">Bảng xếp hạng sẽ cập nhật realtime sau mỗi câu trả lời</p>
           </div>
@@ -564,7 +620,10 @@
   <!-- MODAL QR CODE -->
   <div id="qrModal" class="modal" style="position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:50;align-items:center;justify-content:center;padding:16px;">
     <div class="modal-card" style="width:100%;max-width:360px;text-align:center;">
-      <div class="modal-header" style="text-align:center;">📱 QR Code bài thi</div>
+      <div class="modal-header" style="text-align:center;display:flex;align-items:center;justify-content:center;gap:8px;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12" y2="18.01"/></svg>
+        QR Code bài thi
+      </div>
       <div style="padding:24px;">
         <p style="font-size:13px;color:var(--color-slate-veil);margin:0 0 16px;">Học sinh dùng điện thoại quét để vào thi ngay</p>
         <div id="qrcode" style="display:flex;justify-content:center;margin-bottom:16px;"></div>
@@ -575,7 +634,10 @@
         </div>
         <p id="qrUrlText" style="font-size:11px;color:var(--color-fog-mist);margin:0 0 16px;word-break:break-all;"></p>
         <div style="display:flex;gap:10px;">
-          <button onclick="downloadQR()" class="btn-primary" style="flex:1;height:42px;font-size:14px;">📥 Tải QR về</button>
+          <button onclick="downloadQR()" class="btn-primary" style="display:inline-flex;align-items:center;justify-content:center;gap:7px;flex:1;height:42px;font-size:14px;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Tải QR về
+          </button>
           <button onclick="closeQRModal()" style="flex:1;height:42px;background:var(--color-chalk-canvas);border:1px solid var(--color-mist-border);border-radius:10px;font-size:14px;font-weight:600;color:var(--color-slate-veil);cursor:pointer;">Đóng</button>
         </div>
       </div>
@@ -585,6 +647,30 @@
   <div id="modalContainer"></div>
 
   <script>
+    function showAppNotice(message, type = 'error') {
+      document.querySelector('.app-notice')?.remove();
+      const notice = document.createElement('div');
+      notice.className = 'app-notice';
+      notice.setAttribute('role', 'alert');
+      notice.setAttribute('aria-live', 'polite');
+      notice.style.borderColor = type === 'success' ? 'var(--color-success)' : type === 'warning' ? 'var(--color-warning)' : 'var(--color-danger)';
+      notice.style.background = type === 'success' ? 'var(--color-success-soft)' : type === 'warning' ? 'var(--color-warning-soft)' : 'var(--color-danger-soft)';
+      notice.style.color = type === 'success' ? 'var(--color-success)' : type === 'warning' ? 'var(--color-warning)' : 'var(--color-danger)';
+      notice.textContent = String(message).replace(/^[^A-Za-zÀ-ỹ]+/u, '');
+      document.body.appendChild(notice);
+      window.setTimeout(() => notice.remove(), type === 'error' ? 6000 : 3500);
+    }
+
+    function applyDaquizTheme() {
+      document.documentElement.dataset.theme = localStorage.getItem('daquiz-theme') || 'light';
+    }
+    function toggleDaquizTheme() {
+      const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+      localStorage.setItem('daquiz-theme', next);
+      applyDaquizTheme();
+    }
+    applyDaquizTheme();
+
     // ==== BIẾN TOÀN CỤC ====
     let currentUser = null;
     let allQuestions = [];
@@ -658,9 +744,9 @@
         if (statusEl) statusEl.remove();
         // Hiển thị lỗi rõ ràng
         if (error.message?.includes('Bucket not found') || error.message?.includes('bucket')) {
-          alert('❌ Lỗi: Bucket "question-images" chưa được tạo trong Supabase Storage.\n\nVui lòng vào Supabase Dashboard → Storage → New bucket → đặt tên "question-images" và bật Public.');
+          showAppNotice('❌ Lỗi: Bucket "question-images" chưa được tạo trong Supabase Storage.\n\nVui lòng vào Supabase Dashboard → Storage → New bucket → đặt tên "question-images" và bật Public.');
         } else {
-          alert('❌ Lỗi upload ảnh: ' + error.message);
+          showAppNotice('❌ Lỗi upload ảnh: ' + error.message);
         }
         return null;
       }
@@ -679,12 +765,12 @@
       if (!file) return;
       
       if (!file.type.startsWith('image/')) {
-        alert('Vui lòng chọn file hình ảnh!');
+        showAppNotice('Vui lòng chọn file hình ảnh!');
         return;
       }
       
       if (file.size > 5 * 1024 * 1024) {
-        alert('Kích thước ảnh phải nhỏ hơn 5MB!');
+        showAppNotice('Kích thước ảnh phải nhỏ hơn 5MB!');
         return;
       }
       
@@ -766,8 +852,12 @@
                 </div>
               </div>
               <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0;">
-                <button onclick="openEditQuestionModal('${q.id}')" style="width:36px;height:36px;border:1px solid var(--color-mist-border);background:var(--color-paper-white);border-radius:9px;color:var(--color-iris-bolt);cursor:pointer;" title="Sửa">✏️</button>
-                <button onclick="deleteQuestion('${q.id}')" style="width:36px;height:36px;border:1px solid #fecaca;background:#fff5f5;border-radius:9px;color:#dc2626;cursor:pointer;" title="Xóa">🗑️</button>
+                <button onclick="openEditQuestionModal('${q.id}')" style="width:36px;height:36px;border:1px solid var(--color-mist-border);background:var(--color-paper-white);border-radius:9px;color:var(--color-iris-bolt);cursor:pointer;display:flex;align-items:center;justify-content:center;" title="Sửa" aria-label="Sửa câu hỏi">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                </button>
+                <button onclick="deleteQuestion('${q.id}')" style="width:36px;height:36px;border:1px solid #fecaca;background:#fff5f5;border-radius:9px;color:#dc2626;cursor:pointer;display:flex;align-items:center;justify-content:center;" title="Xóa" aria-label="Xóa câu hỏi">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+                </button>
               </div>
             </div>
           </div>
@@ -804,7 +894,7 @@
               <div class="flex items-center gap-2 option-row">
                 <input type="${inputType}" name="correctOpt" value="${i}" class="w-5 h-5 text-indigo-600 rounded focus:ring-2 focus:ring-indigo-500" ${(q.correct_answers||[]).includes(i)?'checked':''}>
                 <input type="text" value="${opt.replace(/"/g,'&quot;')}" class="flex-1 border-2 border-gray-200 rounded-xl px-4 py-2 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all option-text">
-                <button type="button" onclick="this.closest('.option-row').remove()" class="text-red-500 hover:text-red-700 p-2">🗑️</button>
+                 <button type="button" onclick="this.closest('.option-row').remove()" class="text-red-500 hover:text-red-700 p-2" aria-label="Xóa đáp án" style="display:flex;align-items:center;justify-content:center;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg></button>
               </div>`).join('')}
           </div>
           <button type="button" onclick="addOption()" class="mt-2 text-indigo-600 hover:text-indigo-700 font-medium text-sm">+ Thêm đáp án</button>`;
@@ -814,13 +904,19 @@
         <div class="mb-3 p-3 bg-gray-50 rounded-xl border-2 border-gray-200">
           <p class="text-xs text-gray-500 mb-2 font-semibold">Ảnh hiện tại:</p>
           <img src="${q.image_url}" alt="Current" class="max-w-full rounded-lg" style="max-height:160px; object-fit:contain;">
-          <button type="button" onclick="removeCurrentImage('${id}')" class="mt-2 text-xs text-red-600 hover:text-red-700 font-medium">🗑️ Xóa ảnh này</button>
+          <button type="button" onclick="removeCurrentImage('${id}')" style="display:inline-flex;align-items:center;gap:5px;margin-top:8px;font-size:12px;color:#dc2626;background:none;border:none;cursor:pointer;font-weight:500;padding:0;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+            Xóa ảnh này
+          </button>
         </div>` : '';
 
       const modal = `
         <div class="modal show fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" onclick="if(event.target===this) closeModal()">
           <div class="modal-card" style="width:100%;max-width:640px;max-height:90vh;overflow-y:auto;">
-            <div class="modal-header">✏️ Sửa câu hỏi</div>
+            <div class="modal-header" style="display:flex;align-items:center;gap:8px;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              Sửa câu hỏi
+            </div>
             <div class="p-6 space-y-4">
               <input type="hidden" id="editQuestionId" value="${id}">
               <div>
@@ -848,14 +944,13 @@
                 <input type="file" id="qImageInput" accept="image/*" class="hidden" onchange="handleImageUpload(event)">
                 <div id="imagePreviewContainer" class="mt-3"></div>
               </div>
-              <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-2">Điểm số</label>
-                <input type="number" id="qPoints" value="${q.points||1}" min="0.1" step="0.1" class="w-full border-2 border-gray-200 rounded-xl px-4 py-2.5 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all">
-              </div>
               <div id="optionsContainer">${optionsHTML}</div>
               <div class="flex gap-3 pt-4">
                 <button onclick="closeModal()" class="flex-1 border-2 border-gray-300 text-gray-700 px-6 py-3 rounded-xl font-medium hover:bg-gray-50 transition-all">Hủy</button>
-                <button onclick="updateQuestion()" class="flex-1 btn-primary text-white px-6 py-3 rounded-xl font-medium shadow-md">💾 Lưu thay đổi</button>
+                <button onclick="updateQuestion()" class="flex-1 btn-primary text-white px-6 py-3 rounded-xl font-medium shadow-md" style="display:inline-flex;align-items:center;justify-content:center;gap:7px;">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                  Lưu thay đổi
+                </button>
               </div>
             </div>
           </div>
@@ -882,8 +977,8 @@
 
       const category = document.getElementById('qCategory').value.trim();
       const content = document.getElementById('qContent').value.trim();
-      const points = parseFloat(document.getElementById('qPoints').value);
-      if (!content) return alert('Vui lòng nhập nội dung câu hỏi');
+
+      if (!content) return showAppNotice('Vui lòng nhập nội dung câu hỏi');
 
       let options = q.options || [], correct_answers = q.correct_answers || [];
 
@@ -900,8 +995,8 @@
             if (inp?.checked) correct_answers.push(options.length - 1);
           }
         });
-        if (options.length < 2) return alert('Cần ít nhất 2 đáp án');
-        if (correct_answers.length === 0) return alert('Chọn ít nhất 1 đáp án đúng');
+        if (options.length < 2) return showAppNotice('Cần ít nhất 2 đáp án');
+        if (correct_answers.length === 0) return showAppNotice('Chọn ít nhất 1 đáp án đúng');
       }
 
       // Xử lý ảnh
@@ -916,7 +1011,7 @@
         category, content, points, options, correct_answers, image_url: imageUrl
       }).eq('id', id);
 
-      if (error) return alert('Lỗi: ' + error.message);
+      if (error) return showAppNotice('Lỗi: ' + error.message);
       closeModal();
       await loadQuestions();
     }
@@ -957,10 +1052,6 @@
                 <div id="imagePreviewContainer" class="mt-3"></div>
               </div>
               
-              <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-2">Điểm số</label>
-                <input type="number" id="qPoints" value="1" min="0.1" step="0.1" class="w-full border-2 border-gray-200 rounded-xl px-4 py-2.5 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all">
-              </div>
               <div id="optionsContainer"></div>
               <div class="flex gap-3 pt-4">
                 <button onclick="closeModal()" class="flex-1 border-2 border-gray-300 text-gray-700 px-6 py-3 rounded-xl font-medium hover:bg-gray-50 transition-all">Hủy</button>
@@ -1016,9 +1107,9 @@
       const type = document.getElementById('qType').value;
       const category = document.getElementById('qCategory').value.trim();
       const content = document.getElementById('qContent').value.trim();
-      const points = parseFloat(document.getElementById('qPoints').value);
+
       
-      if (!content) return alert('Vui lòng nhập nội dung câu hỏi');
+      if (!content) return showAppNotice('Vui lòng nhập nội dung câu hỏi');
       
       let options = [], correct_answers = [];
       
@@ -1036,8 +1127,8 @@
           }
         });
         
-        if (options.length < 2) return alert('Cần ít nhất 2 đáp án');
-        if (correct_answers.length === 0) return alert('Chọn ít nhất 1 đáp án đúng');
+        if (options.length < 2) return showAppNotice('Cần ít nhất 2 đáp án');
+        if (correct_answers.length === 0) return showAppNotice('Chọn ít nhất 1 đáp án đúng');
       }
       
       // NEW: Upload image if exists
@@ -1052,7 +1143,7 @@
         image_url: imageUrl // NEW: Save image URL
       });
       
-      if (error) return alert('Lỗi: ' + error.message);
+      if (error) return showAppNotice('Lỗi: ' + error.message);
       
       closeModal();
       await loadQuestions();
@@ -1160,7 +1251,7 @@
         strict_mode: src.strict_mode
       }).select().single();
 
-      if (error) return alert('Lỗi nhân bản: ' + error.message);
+      if (error) return showAppNotice('Lỗi nhân bản: ' + error.message);
 
       await loadTests();
       // Cuộn lên đầu và highlight bài mới
@@ -1176,7 +1267,7 @@
         });
       }, 500);
 
-      alert(`✅ Đã nhân bản thành công!\nMã thi mới: ${newCode}\nThời gian mở: ${start.toLocaleString('vi-VN')}`);
+      showAppNotice(`✅ Đã nhân bản thành công!\nMã thi mới: ${newCode}\nThời gian mở: ${start.toLocaleString('vi-VN')}`);
     }
 
     function openEditTimeModal(testId) {
@@ -1263,17 +1354,17 @@
     async function saveTestTime(testId) {
       const startVal = document.getElementById('editStartTime').value;
       const endVal = document.getElementById('editEndTime').value;
-      if (!startVal || !endVal) return alert('Vui lòng chọn đầy đủ thời gian');
+      if (!startVal || !endVal) return showAppNotice('Vui lòng chọn đầy đủ thời gian');
       const start = new Date(startVal);
       const end = new Date(endVal);
-      if (end <= start) return alert('⚠️ Thời gian đóng phải sau thời gian mở');
+      if (end <= start) return showAppNotice('⚠️ Thời gian đóng phải sau thời gian mở');
 
       const { error } = await supabase.from('tests').update({
         start_time: start.toISOString(),
         end_time: end.toISOString()
       }).eq('id', testId);
 
-      if (error) return alert('Lỗi: ' + error.message);
+      if (error) return showAppNotice('Lỗi: ' + error.message);
       closeModal();
       await loadTests();
       // Cập nhật allTests local
@@ -1292,7 +1383,7 @@
         start_time: now.toISOString(),
         end_time: newEnd.toISOString()
       }).eq('id', testId);
-      if (error) return alert('Lỗi: ' + error.message);
+      if (error) return showAppNotice('Lỗi: ' + error.message);
       closeModal();
       await loadTests();
       // Cập nhật input nếu modal vẫn còn mở
@@ -1304,7 +1395,7 @@
       const { error } = await supabase.from('tests').update({
         end_time: now.toISOString()
       }).eq('id', testId);
-      if (error) return alert('Lỗi: ' + error.message);
+      if (error) return showAppNotice('Lỗi: ' + error.message);
       closeModal();
       await loadTests();
     }
@@ -1318,7 +1409,7 @@
       const base = currentEnd > now ? currentEnd : now;
       const newEnd = new Date(base.getTime() + 30 * 60 * 1000);
       const { error } = await supabase.from('tests').update({ end_time: newEnd.toISOString() }).eq('id', testId);
-      if (error) return alert('Lỗi: ' + error.message);
+      if (error) return showAppNotice('Lỗi: ' + error.message);
       closeModal();
       await loadTests();
     }
@@ -1331,7 +1422,7 @@
       const base = currentEnd > now ? currentEnd : now;
       const newEnd = new Date(base.getTime() + 24 * 60 * 60 * 1000);
       const { error } = await supabase.from('tests').update({ end_time: newEnd.toISOString() }).eq('id', testId);
-      if (error) return alert('Lỗi: ' + error.message);
+      if (error) return showAppNotice('Lỗi: ' + error.message);
       closeModal();
       await loadTests();
     }
@@ -1631,7 +1722,7 @@
         .filter(q => q.quota > 0);
 
       if (!quotas.length) {
-        alert('⚠️ Vui lòng nhập số lượng câu hỏi muốn lấy ngẫu nhiên cho ít nhất 1 chủ đề.');
+        showAppNotice('⚠️ Vui lòng nhập số lượng câu hỏi muốn lấy ngẫu nhiên cho ít nhất 1 chủ đề.');
         return;
       }
 
@@ -1651,7 +1742,7 @@
       });
 
       updateSelectedCount();
-      alert(`✅ Đã chọn ngẫu nhiên ${totalPicked} câu hỏi theo chủ đề đã cấu hình.`);
+      showAppNotice(`✅ Đã chọn ngẫu nhiên ${totalPicked} câu hỏi theo chủ đề đã cấu hình.`);
     }
 
     // ============================================================
@@ -1684,25 +1775,20 @@
         require_fullscreen: document.getElementById('strictRequireFullscreen').checked
       };
       
-      if (!title) return alert('Vui lòng nhập tiêu đề');
-      if (!startTime || !endTime) return alert('Vui lòng chọn thời gian');
+      if (!title) return showAppNotice('Vui lòng nhập tiêu đề');
+      if (!startTime || !endTime) return showAppNotice('Vui lòng chọn thời gian');
       
       const selectedQs = Array.from(document.querySelectorAll('.question-check:checked')).map(cb => cb.value);
-      if (!selectedQs.length) return alert('Vui lòng chọn ít nhất 1 câu hỏi');
+      if (!selectedQs.length) return showAppNotice('Vui lòng chọn ít nhất 1 câu hỏi');
       
       // Lấy mã từ input trong form (đã tự sinh sẵn hoặc giáo viên sửa tay)
       const testCodeRaw = (document.getElementById('testCodeInput')?.value || '').trim().toUpperCase().replace(/[^A-Z0-9]/g,'');
       const testCode = testCodeRaw.length >= 4 ? testCodeRaw : generateTestCode();
-      if (!testCode) return alert('Mã bài thi không hợp lệ');
+      if (!testCode) return showAppNotice('Mã bài thi không hợp lệ');
       
-      // Tính điểm mỗi câu = tổng điểm / số câu (làm tròn 2 chữ số thập phân)
-      const totalScore = parseFloat(document.getElementById('testTotalScore').value) || 10;
-      if (totalScore <= 0) return alert('Tổng điểm phải lớn hơn 0');
-      const pointsPerQ = Math.round((totalScore / selectedQs.length) * 100) / 100;
-      const questions = selectedQs.map(qId => ({
-        questionId: qId,
-        points: pointsPerQ
-      }));
+      const totalScore = Number(document.getElementById('testTotalScore').value) || 10;
+      if (totalScore <= 0) return showAppNotice('Tổng điểm phải lớn hơn 0');
+      const questions = selectedQs.map(questionId => ({ questionId }));
       
       const { error } = await supabase.from('tests').insert({
         teacher_id: currentUser.id,
@@ -1713,15 +1799,16 @@
         shuffle_questions: shuffleQuestions,
         shuffle_options: shuffleOptions,
         show_answers: showAnswers,
-        strict_mode: strictMode,
-        questions
-      });
+         strict_mode: strictMode,
+         total_points: totalScore,
+         questions
+       });
       
-      if (error) return alert('Lỗi: ' + error.message);
+      if (error) return showAppNotice('Lỗi: ' + error.message);
       
       closeModal();
       await loadTests();
-      alert(`✅ Đã tạo bài kiểm tra!\n\n🔑 Mã bài thi: ${testCode}\n📋 Số câu: ${questions.length}\n⭐ Tổng điểm: ${totalScore} điểm (mỗi câu ${pointsPerQ} điểm)\n⏱️ Thời gian: ${duration} phút${strictMode.enabled ? '\n🛡️ Chế độ thi nghiêm túc: BẬT' : ''}`);
+       showAppNotice(`Đã tạo bài kiểm tra!\n\nMã bài thi: ${testCode}\nSố câu: ${questions.length}\nTổng điểm: ${totalScore} điểm\nThời gian: ${duration} phút${strictMode.enabled ? '\nChế độ thi nghiêm túc: BẬT' : ''}`);
     }
 
     function buildStrictModeSummaryHTML(strictMode) {
@@ -2166,10 +2253,10 @@
       const input = document.getElementById(`penaltyInput_${subId}`);
       if (!input) return;
       const penalty = parseFloat(input.value);
-      if (isNaN(penalty) || penalty < 0) return alert('⚠️ Điểm trừ phải là số và không được âm');
+      if (isNaN(penalty) || penalty < 0) return showAppNotice('⚠️ Điểm trừ phải là số và không được âm');
 
       const { error } = await supabase.from('submissions').update({ penalty_points: penalty }).eq('id', subId);
-      if (error) return alert('Lỗi: ' + error.message);
+      if (error) return showAppNotice('Lỗi: ' + error.message);
 
       await loadResults();
     }
@@ -2288,7 +2375,7 @@
     async function deleteSubmission(submissionId) {
       if (!confirm('Xóa bài nộp này? Hành động không thể hoàn tác.')) return;
       const { error } = await supabase.from('submissions').delete().eq('id', submissionId);
-      if (error) return alert('Lỗi khi xóa: ' + error.message);
+      if (error) return showAppNotice('Lỗi khi xóa: ' + error.message);
       await loadResults();
     }
 
@@ -2316,7 +2403,7 @@
         .order('score', { ascending: false });
       
       if (!submissions || !submissions.length) {
-        return alert('Không có dữ liệu để xuất');
+        return showAppNotice('Không có dữ liệu để xuất');
       }
       
       const totalPoints = test.questions
@@ -2458,7 +2545,7 @@
       let questions = cat ? allQuestions.filter(q => q.category === cat) : [...allQuestions];
       questions.sort(() => Math.random() - 0.5);
       if (numQ > 0) questions = questions.slice(0, numQ);
-      if (!questions.length) return alert('Không có câu hỏi để xuất');
+      if (!questions.length) return showAppNotice('Không có câu hỏi để xuất');
 
       const letters = ['A', 'B', 'C', 'D', 'E', 'F'];
 
@@ -2619,7 +2706,7 @@
           : `DeThi_${title.replace(/\s+/g,'_')}.pdf`;
         pdf.save(filename);
       } catch(err) {
-        alert('Lỗi tạo PDF: ' + err.message);
+        showAppNotice('Lỗi tạo PDF: ' + err.message);
       } finally {
         if (btnContainer && originalBtns) btnContainer.innerHTML = originalBtns;
       }
@@ -2709,11 +2796,11 @@
 
     async function generateAiQuestions() {
       const sourceText = document.getElementById('aiSourceText').value.trim();
-      if (!sourceText || sourceText.length < 50) return alert('Vui lòng nhập đoạn văn bản (ít nhất 50 ký tự)');
+      if (!sourceText || sourceText.length < 50) return showAppNotice('Vui lòng nhập đoạn văn bản (ít nhất 50 ký tự)');
 
       const apiKey = (document.getElementById('aiApiKey')?.value || '').trim();
       if (!apiKey || !apiKey.startsWith('gsk_')) {
-        return alert('⚠️ Vui lòng nhập Groq API Key (bắt đầu bằng gsk_...)\n\nLấy key miễn phí tại:\nhttps://console.groq.com/keys');
+        return showAppNotice('⚠️ Vui lòng nhập Groq API Key (bắt đầu bằng gsk_...)\n\nLấy key miễn phí tại:\nhttps://console.groq.com/keys');
       }
       localStorage.setItem('ai_api_key', apiKey);
       
@@ -2809,12 +2896,12 @@ YÊU CẦU:
         btn.innerHTML = `<button onclick="generateAiQuestions()" class="w-full btn-primary px-6 py-3 rounded-xl font-medium transition-all flex items-center justify-center gap-2">
           <span class="text-xl">✨</span><span>Tạo câu hỏi với AI</span>
         </button>`;
-        alert('Lỗi AI: ' + err.message + '\n\nVui lòng thử lại.');
+        showAppNotice('Lỗi AI: ' + err.message + '\n\nVui lòng thử lại.');
       }
     }
 
     async function saveAllAiQuestions() {
-      if (!aiGeneratedQuestions.length) return alert('Không có câu hỏi để lưu');
+      if (!aiGeneratedQuestions.length) return showAppNotice('Không có câu hỏi để lưu');
       let saved = 0;
       for (const q of aiGeneratedQuestions) {
         const { error } = await supabase.from('questions').insert({ teacher_id: currentUser.id, ...q });
@@ -2822,7 +2909,7 @@ YÊU CẦU:
       }
       closeModal();
       await loadQuestions();
-      alert(`✅ Đã lưu ${saved}/${aiGeneratedQuestions.length} câu hỏi vào ngân hàng!`);
+      showAppNotice(`✅ Đã lưu ${saved}/${aiGeneratedQuestions.length} câu hỏi vào ngân hàng!`);
     }
 
     // ============================================================
@@ -2894,7 +2981,7 @@ YÊU CẦU:
 
     function createNewFolder() {
       const name = document.getElementById('newFolderName').value.trim();
-      if (!name) return alert('Vui lòng nhập tên thư mục');
+      if (!name) return showAppNotice('Vui lòng nhập tên thư mục');
       // Set as category filter
       filterByFolder(name);
       closeModal();
@@ -3076,10 +3163,10 @@ D. 6</code></pre>
 
     async function processBulkImport() {
       const text = document.getElementById('bulkText').value.trim();
-      if (!text) return alert('Vui lòng nhập nội dung');
+      if (!text) return showAppNotice('Vui lòng nhập nội dung');
       
       const questions = parseBulkText(text);
-      if (!questions.length) return alert('Không tìm thấy câu hỏi hợp lệ');
+      if (!questions.length) return showAppNotice('Không tìm thấy câu hỏi hợp lệ');
       
       let successCount = 0;
       for (const q of questions) {
@@ -3092,7 +3179,7 @@ D. 6</code></pre>
       
       closeModal();
       await loadQuestions();
-      alert(`✅ Đã nhập ${successCount}/${questions.length} câu hỏi`);
+      showAppNotice(`✅ Đã nhập ${successCount}/${questions.length} câu hỏi`);
     }
 
     function parseBulkText(text) {
@@ -3227,7 +3314,7 @@ D. 6</code></pre>
     function previewAvatar(input) {
       const file = input.files[0];
       if (!file) return;
-      if (file.size > 2 * 1024 * 1024) return alert('Ảnh quá lớn, vui lòng chọn ảnh dưới 2MB');
+      if (file.size > 2 * 1024 * 1024) return showAppNotice('Ảnh quá lớn, vui lòng chọn ảnh dưới 2MB');
       const reader = new FileReader();
       reader.onload = (e) => {
         teacherAvatarUrl = e.target.result;
@@ -3238,7 +3325,7 @@ D. 6</code></pre>
 
     async function updateProfile() {
       const name = document.getElementById('profileName').value.trim();
-      if (!name) return alert('Vui lòng nhập họ và tên');
+      if (!name) return showAppNotice('Vui lòng nhập họ và tên');
       try {
         const updates = { name };
         if (teacherAvatarUrl) updates.avatar_url = teacherAvatarUrl;
@@ -3246,25 +3333,25 @@ D. 6</code></pre>
         if (error) throw error;
         document.getElementById('teacherName').textContent = name;
         if (teacherAvatarUrl) setAvatarDisplay(teacherAvatarUrl);
-        alert('✅ Đã cập nhật thông tin thành công!');
+        showAppNotice('✅ Đã cập nhật thông tin thành công!');
       } catch(err) {
-        alert('Lỗi: ' + err.message);
+        showAppNotice('Lỗi: ' + err.message);
       }
     }
 
     async function updatePassword() {
       const newPw = document.getElementById('newPassword').value;
       const confirmPw = document.getElementById('confirmPassword').value;
-      if (!newPw || newPw.length < 6) return alert('Mật khẩu phải có ít nhất 6 ký tự');
-      if (newPw !== confirmPw) return alert('Mật khẩu xác nhận không khớp');
+      if (!newPw || newPw.length < 6) return showAppNotice('Mật khẩu phải có ít nhất 6 ký tự');
+      if (newPw !== confirmPw) return showAppNotice('Mật khẩu xác nhận không khớp');
       try {
         const { error } = await supabase.auth.updateUser({ password: newPw });
         if (error) throw error;
         document.getElementById('newPassword').value = '';
         document.getElementById('confirmPassword').value = '';
-        alert('✅ Đã đổi mật khẩu thành công!');
+        showAppNotice('✅ Đã đổi mật khẩu thành công!');
       } catch(err) {
-        alert('Lỗi: ' + err.message);
+        showAppNotice('Lỗi: ' + err.message);
       }
     }
 
@@ -3457,7 +3544,7 @@ D. 6</code></pre>
 
     function downloadQR() {
       const canvas = document.querySelector('#qrcode canvas');
-      if (!canvas) return alert('Không tìm thấy QR code');
+      if (!canvas) return showAppNotice('Không tìm thấy QR code');
       const link = document.createElement('a');
       link.download = `QR_${document.getElementById('qrCodeText').textContent}.png`;
       link.href = canvas.toDataURL('image/png');
@@ -3485,7 +3572,7 @@ D. 6</code></pre>
 
     async function startBattle() {
       const testId = document.getElementById('battleTestSelect').value;
-      if (!testId) return alert('Vui lòng chọn bài kiểm tra');
+      if (!testId) return showAppNotice('Vui lòng chọn bài kiểm tra');
       battleStartTime = Date.now();
       stopBattle();
       await renderBattle(testId);
@@ -3614,13 +3701,13 @@ D. 6</code></pre>
     // --- Xuất BẢNG ĐIỂM sang PDF ---
     async function exportResultsPDF(testId) {
       const test = allTests.find(t => t.id === testId);
-      if (!test) return alert('Không tìm thấy bài kiểm tra');
+      if (!test) return showAppNotice('Không tìm thấy bài kiểm tra');
 
       const { data: submissions } = await supabase
         .from('submissions').select('*').eq('test_id', testId)
         .in('status', ['submitted', 'timed-out']).order('score', { ascending: false });
 
-      if (!submissions?.length) return alert('Chưa có dữ liệu để xuất');
+      if (!submissions?.length) return showAppNotice('Chưa có dữ liệu để xuất');
 
       await loadJsPDF();
       const { jsPDF } = window.jspdf;
@@ -3683,8 +3770,8 @@ D. 6</code></pre>
     // --- Xuất ĐỀ THI sang PDF (không lộ đáp án) ---
     async function exportExamPDF(testId) {
       const test = allTests.find(t => t.id === testId);
-      if (!test) return alert('Không tìm thấy bài kiểm tra');
-      if (!test.questions?.length) return alert('Bài thi chưa có câu hỏi');
+      if (!test) return showAppNotice('Không tìm thấy bài kiểm tra');
+      if (!test.questions?.length) return showAppNotice('Bài thi chưa có câu hỏi');
 
       // Load chi tiết câu hỏi từ DB nếu cần
       let questions = test.questions;
