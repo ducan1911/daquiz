@@ -357,6 +357,7 @@
        .omr-modal-card .flex.gap-3.pt-2 { flex-direction: column; }
        .omr-modal-card .flex.gap-3.pt-2 button { width: 100%; min-height: 48px; }
      }
+      .score-chart-wrap { background: var(--color-paper-white); border: 1px solid var(--color-mist-border); border-radius: 14px; padding: 16px; }
       .ui-icon { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; vertical-align: -3px; flex: 0 0 auto; }
       .status-icon { font-size: 15px; line-height: 1; font-weight: 700; }
       .test-action-button { display:inline-flex; align-items:center; justify-content:center; gap:6px; }
@@ -467,7 +468,6 @@
                 <button onclick="openFolderManagerModal()"><span aria-hidden="true">▱</span> Thư mục</button>
                 <button onclick="openAiGenerateModal()"><span aria-hidden="true">✦</span> AI tạo câu hỏi</button>
                 <button onclick="openBulkImportModal()"><span aria-hidden="true">↥</span> Nhập từ Word</button>
-                <button onclick="openExportPdfModal()"><span aria-hidden="true">▤</span> Xuất PDF</button>
                 <button onclick="openOmrModal()"><span aria-hidden="true">▣</span> In phiếu OMR</button>
               </div>
             </details>
@@ -876,8 +876,30 @@
       }).join('');
     }
 
+    function showConfirmModal(message, title = 'Xác nhận thao tác') {
+      return new Promise(resolve => {
+        const modal = document.createElement('div');
+        modal.className = 'modal show fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
+        modal.style.zIndex = '10000';
+        modal.innerHTML = `<div class="modal-card" role="dialog" aria-modal="true" style="width:100%;max-width:420px;padding:28px;">
+          <h3 style="font-size:19px;font-weight:700;color:var(--color-ink-charcoal);margin:0 0 10px;">${title}</h3>
+          <p style="font-size:14px;line-height:1.6;color:var(--color-slate-veil);margin:0 0 22px;">${message}</p>
+          <div style="display:flex;gap:10px;justify-content:flex-end;">
+            <button type="button" data-confirm-cancel style="min-height:44px;padding:0 18px;border:1px solid var(--color-mist-border);border-radius:10px;background:var(--color-paper-white);color:var(--color-deep-indigo);font-weight:600;cursor:pointer;">Hủy</button>
+            <button type="button" data-confirm-ok style="min-height:44px;padding:0 18px;border:0;border-radius:10px;background:var(--color-danger);color:white;font-weight:600;cursor:pointer;">Xác nhận</button>
+          </div>
+        </div>`;
+        document.body.appendChild(modal);
+        const close = value => { modal.remove(); resolve(value); };
+        modal.querySelector('[data-confirm-cancel]').onclick = () => close(false);
+        modal.querySelector('[data-confirm-ok]').onclick = () => close(true);
+        modal.addEventListener('click', event => { if (event.target === modal) close(false); });
+        modal.querySelector('[data-confirm-cancel]').focus();
+      });
+    }
+
     async function deleteQuestion(id) {
-      if (!confirm('Xóa câu hỏi này?')) return;
+      if (!await showConfirmModal('Câu hỏi sẽ bị xóa khỏi ngân hàng. Hành động này không thể hoàn tác.', 'Xóa câu hỏi?')) return;
       await supabase.from('questions').delete().eq('id', id);
       await loadQuestions();
     }
@@ -971,8 +993,8 @@
     }
 
     // Xóa ảnh hiện tại của câu hỏi (chỉ xóa URL trong DB, không xóa file)
-    function removeCurrentImage(questionId) {
-      if (!confirm('Xóa ảnh khỏi câu hỏi này?')) return;
+    async function removeCurrentImage(questionId) {
+      if (!await showConfirmModal('Ảnh sẽ bị gỡ khỏi câu hỏi hiện tại.', 'Xóa ảnh?')) return;
       const modal = document.getElementById('modalContainer');
       const currentImgDiv = modal.querySelector('.bg-gray-50.rounded-xl');
       if (currentImgDiv) currentImgDiv.remove();
@@ -1215,10 +1237,8 @@
             </div>
             <div style="display:flex;gap:6px;flex-wrap:wrap;">
                <button onclick="viewTestDetails('${t.id}')" class="test-action-button" style="flex:1;min-width:120px;height:38px;background:var(--color-lilac-wash);color:var(--color-iris-bolt);border:none;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;"><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12z"/><circle cx="12" cy="12" r="2.5"/></svg> Xem chi tiết</button>
-               <button onclick="duplicateTest('${t.id}')" class="test-action-button" style="width:38px;height:38px;background:#f0fdf4;color:#15803d;border:none;border-radius:9px;cursor:pointer;" title="Nhân bản bài thi" aria-label="Nhân bản bài thi"><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg></button>
                <button onclick="openEditTimeModal('${t.id}')" class="test-action-button" style="width:38px;height:38px;background:#fffbeb;color:#b45309;border:none;border-radius:9px;cursor:pointer;" title="Chỉnh thời gian" aria-label="Chỉnh thời gian"><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></button>
                <button onclick="showQRModal('${t.test_code}', '${t.title}')" class="test-action-button" style="width:38px;height:38px;background:#eff6ff;color:#2563eb;border:none;border-radius:9px;cursor:pointer;" title="QR Code" aria-label="Mở QR Code"><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24"><rect x="4" y="4" width="6" height="6"/><rect x="14" y="4" width="6" height="6"/><rect x="4" y="14" width="6" height="6"/><path d="M14 14h3v3h-3zM18 18h2M14 20h3"/></svg></button>
-               <button onclick="exportExamPDF('${t.id}')" class="test-action-button" style="width:38px;height:38px;background:#f5f3ff;color:#6d28d9;border:none;border-radius:9px;cursor:pointer;" title="Xuất đề thi PDF" aria-label="Xuất đề thi PDF"><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h6"/></svg></button>
                <button onclick="deleteTest('${t.id}')" class="test-action-button" style="width:38px;height:38px;background:#fff5f5;color:#dc2626;border:none;border-radius:9px;cursor:pointer;" title="Xóa" aria-label="Xóa bài thi"><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M9 7V4h6v3M6 7l1 14h10l1-14"/></svg></button>
             </div>
           </div>
@@ -2008,22 +2028,22 @@
         <!-- Summary Stats Cards -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
           <div class="stat-card">
-            <div class="text-3xl mb-2">👥</div>
+            <svg class="ui-icon" style="width:28px;height:28px;margin-bottom:10px;" aria-hidden="true" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 20a6 6 0 0 1 12 0M16 11a3 3 0 1 0-1-5M17 14a5 5 0 0 1 4 6"/></svg>
             <div class="text-3xl font-bold">${stats.totalStudents}</div>
             <div class="text-sm opacity-80">Học sinh đã nộp</div>
           </div>
           <div class="stat-card">
-            <div class="text-3xl mb-2">📊</div>
+            <svg class="ui-icon" style="width:28px;height:28px;margin-bottom:10px;" aria-hidden="true" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
             <div class="text-3xl font-bold">${stats.avgScoreOn10}</div>
             <div class="text-sm opacity-80">Điểm trung bình</div>
           </div>
           <div class="stat-card">
-            <div class="text-3xl mb-2">🏆</div>
+            <svg class="ui-icon" style="width:28px;height:28px;margin-bottom:10px;" aria-hidden="true" viewBox="0 0 24 24"><path d="M8 4h8v5a4 4 0 0 1-8 0z"/><path d="M8 6H4v2a4 4 0 0 0 4 4M16 6h4v2a4 4 0 0 1-4 4M12 13v5M8 21h8M9 18h6"/></svg>
             <div class="text-3xl font-bold">${stats.highestScoreOn10}</div>
             <div class="text-sm opacity-80">Điểm cao nhất</div>
           </div>
           <div class="stat-card">
-            <div class="text-3xl mb-2">⏱️</div>
+            <svg class="ui-icon" style="width:28px;height:28px;margin-bottom:10px;" aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
             <div class="text-3xl font-bold">${stats.avgTime}</div>
             <div class="text-sm opacity-80">Thời gian TB (phút)</div>
           </div>
@@ -2031,23 +2051,21 @@
         
         <!-- Score Distribution Chart -->
         <div class="card p-6 mb-6" style="overflow:hidden; max-width:100%;">
-          <h3 class="text-xl font-bold text-gray-800 mb-4">📊 Phân bố điểm số</h3>
-          <div style="position:relative; width:100%; max-width:100%;">
-            <canvas id="scoreChart" height="80"></canvas>
-          </div>
+          <h3 class="text-xl font-bold text-gray-800 mb-4"><svg class="ui-icon" style="width:21px;height:21px;margin-right:6px;" aria-hidden="true" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Phân bố điểm số</h3>
+           <div class="score-chart-wrap" style="position:relative;width:100%;height:300px;max-width:100%;">
+             <canvas id="scoreChart"></canvas>
+           </div>
         </div>
         
         <!-- Student Results Table -->
         <div class="card p-6 mb-6">
           <div class="flex items-center justify-between mb-4">
-            <h3 class="text-xl font-bold text-gray-800">📝 Kết quả chi tiết</h3>
+            <h3 class="text-xl font-bold text-gray-800"><svg class="ui-icon" style="width:21px;height:21px;margin-right:6px;" aria-hidden="true" viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 11h8M8 15h5"/></svg>Kết quả chi tiết</h3>
             <div class="flex gap-2">
               <button onclick="exportToExcel('${testId}')" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all">
                 📥 Xuất Excel
               </button>
-              <button onclick="exportResultsPDF('${testId}')" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all">
-                📄 Xuất PDF
-              </button>
+
             </div>
           </div>
           <div class="overflow-x-auto">
@@ -2167,26 +2185,34 @@
               'rgb(34, 197, 94)',
               'rgb(59, 130, 246)'
             ],
-            borderWidth: 2
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: true,
-          plugins: {
-            legend: { display: false },
-            tooltip: {
-              callbacks: {
-                label: function(context) {
-                  return `Số học sinh: ${context.parsed.y}`;
-                }
-              }
-            }
-          },
-          scales: {
-            y: { beginAtZero: true, ticks: { stepSize: 1 } }
-          }
-        }
+           borderWidth: 0,
+           borderRadius: 8,
+           borderSkipped: false,
+           maxBarThickness: 58
+           }]
+         },
+         options: {
+           responsive: true,
+           maintainAspectRatio: false,
+           animation: { duration: 500, easing: 'easeOutQuart' },
+           plugins: {
+             legend: { display: false },
+             tooltip: {
+               displayColors: false,
+               backgroundColor: '#282e3e',
+               padding: 12,
+               cornerRadius: 8,
+               callbacks: {
+                 title: context => context[0].label,
+                 label: context => `Số học sinh: ${context.parsed.y}`
+               }
+             }
+           },
+           scales: {
+             x: { grid: { display: false }, ticks: { color: '#586380', font: { size: 12, weight: '600' } } },
+             y: { beginAtZero: true, suggestedMax: Math.max(...distribution, 1) + 1, ticks: { stepSize: 1, precision: 0, color: '#586380' }, grid: { color: 'rgba(217,221,232,.7)' } }
+           }
+         }
       });
     }
 
