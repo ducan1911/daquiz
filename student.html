@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Thi trắc nghiệm - TC Kinh tế Kỹ thuật TP Cần Thơ</title>
+  <link rel="stylesheet" href="shared.css">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <script src="supabase-config.js"></script>
@@ -485,8 +486,12 @@
       .exam-toolbar h2 { max-width: 42vw; }
       .exam-body { display: flex; flex-direction: column; gap: 14px; padding-top: 14px; }
       .exam-progress-card { order: -1; position: static; padding: 12px; }
-      .progress-ring { width: 78px; height: 78px; margin: 0 auto 8px; }
-      .progress-ring::after { inset: 7px; }
+      .progress-ring { width: 100%; height: 8px; margin: 0 0 8px; border-radius: 999px; background: var(--color-mist-border); }
+      .progress-ring::after { display: none; }
+      .progress-ring-content { display: flex; align-items: center; justify-content: space-between; width: 100%; }
+      .progress-ring-content strong { font-size: 13px !important; }
+      .progress-ring-content div { font-size: 12px !important; }
+      .progress-ring[style*="--progress"] { background: linear-gradient(to right, var(--color-iris-bolt) var(--progress, 0%), var(--color-mist-border) var(--progress, 0%)); }
       .question-card p.text-gray-800 { font-size: 17px !important; }
       .question-card { padding: 18px 14px !important; }
       .exam-nav { position: sticky; bottom: 0; background: var(--color-paper-white); margin-left: -14px; margin-right: -14px; padding: 12px 14px; z-index: 10; }
@@ -531,6 +536,8 @@
   </main>
 
   <script>
+    function applyDaquizTheme() { document.documentElement.dataset.theme = localStorage.getItem('daquiz-theme') || 'light'; }
+    applyDaquizTheme();
     let testCode = null, testData = null, studentName = null;
     let currentScreen = 'name', submissionId = null, submissionData = null;
     let questionMapping = null, timerInterval = null, autoSaveInterval = null;
@@ -645,7 +652,7 @@
 
     function goWithCode() {
       const c = document.getElementById('codeInput').value.trim().toUpperCase();
-      if (!c || c.length < 4) return alert('Vui lòng nhập mã bài kiểm tra');
+      if (!c || c.length < 4) return showInlineError('Vui lòng nhập mã bài kiểm tra hợp lệ (4–6 ký tự).');
       window.location.href = `student.html?code=${encodeURIComponent(c)}`;
     }
 
@@ -716,17 +723,31 @@
         </div>`;
     }
 
+    function showInlineError(msg) {
+      let error = document.getElementById('inlineError');
+      if (!error) {
+        error = document.createElement('div');
+        error.id = 'inlineError';
+        error.setAttribute('role', 'alert');
+        error.style.cssText = 'margin:12px 0;padding:12px 14px;border:1px solid var(--color-danger);border-radius:10px;background:var(--color-danger-soft);color:var(--color-danger);font-size:14px;font-weight:600;';
+        document.getElementById('mainContent').prepend(error);
+      }
+      error.textContent = msg;
+      error.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
     function showError(msg) {
       document.getElementById('loading').style.display = 'none';
       const err = document.getElementById('errorMsg');
       err.querySelector('p').textContent = msg;
+      err.setAttribute('role', 'alert');
       err.style.display = 'block';
     }
 
     async function startTest() {
       try {
         studentName = document.getElementById('studentNameInput')?.value.trim();
-        if (!studentName) return alert('Vui lòng nhập họ và tên.');
+        if (!studentName) return showInlineError('Vui lòng nhập họ và tên.');
 
         const { data: existingSubs, error: subError } = await supabase.from('submissions')
           .select('*').eq('test_id', testData.id).eq('student_name', studentName)
@@ -739,7 +760,7 @@
 
         if (inProgressSub) {
           // Có bài đang làm dở - hỏi xem muốn tiếp tục hay làm lại
-          const continueTest = confirm(`📝 Bạn có bài làm chưa hoàn thành (Lần ${inProgressSub.attempt_number}).\n\n✅ Nhấn OK để TIẾP TỤC bài làm cũ\n❌ Nhấn Cancel để LÀM LẠI từ đầu`);
+          const continueTest = confirm(`Bạn có bài làm chưa hoàn thành (Lần ${inProgressSub.attempt_number}).\n\nNhấn OK để TIẾP TỤC bài làm cũ\nNhấn Cancel để LÀM LẠI từ đầu`);
 
           if (continueTest) {
             // Tiếp tục bài làm cũ
@@ -794,21 +815,26 @@
               submissionData.answers = inProgressSub.answers || [];
               // Render nhanh rồi nộp
               document.getElementById('mainContent').innerHTML = `
-                <div class="text-center py-20">
-                  <div class="text-6xl mb-4">🚫</div>
-                  <p class="text-red-600 font-bold text-xl mb-2">Vi phạm quy định thi!</p>
-                  <p class="text-gray-500">Bài thi đang được nộp tự động...</p>
+                <div style="text-align:center;padding:80px 20px;">
+                  <svg aria-hidden="true" style="width:64px;height:64px;color:#dc2626;margin:0 auto 16px;display:block;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m9 9 6 6M15 9l-6 6"/></svg>
+                  <p style="color:#dc2626;font-weight:700;font-size:20px;margin:0 0 8px;">Vi phạm quy định thi!</p>
+                  <p style="color:var(--color-slate-veil);font-size:14px;margin:0">Bài thi đang được nộp tự động...</p>
                 </div>`;
-              await supabase.from('submissions').update({
-                status: 'submitted',
-                submitted_at: new Date().toISOString(),
-                answers: inProgressSub.answers || [],
-                tab_switch_count: tabSwitchCount
-              }).eq('id', submissionId);
-              const score = await gradeTest(testData, inProgressSub.answers || [], questionMapping);
-              const totalPoints = (questionMapping.questionOrder||[]).reduce((sum, q) => sum + (q.points||1), 0);
-              await supabase.from('submissions').update({ score, total_points: totalPoints }).eq('id', submissionId);
-              await showResult(score, inProgressSub.answers || []);
+              try {
+                const answers = inProgressSub.answers || [];
+                const { error: submitError } = await supabase.from('submissions').update({
+                  status: 'submitted', submitted_at: new Date().toISOString(), answers,
+                  tab_switch_count: tabSwitchCount, auto_saved: false
+                }).eq('id', submissionId);
+                if (submitError) throw submitError;
+                const score = await gradeTest(testData, answers, questionMapping);
+                const totalPoints = getTestTotalScore();
+                const { error: scoreError } = await supabase.from('submissions').update({ score, total_points: totalPoints }).eq('id', submissionId);
+                if (scoreError) throw scoreError;
+                await showResult(score, answers);
+              } catch (error) {
+                showInlineError(`Không thể hoàn tất việc nộp bài: ${error.message}`);
+              }
               return;
             }
 
@@ -836,9 +862,12 @@
                 font-weight: 700; text-align: center; max-width: 380px; width: 90%;
               `;
               warn.innerHTML = `
-                <div style="font-size:22px;margin-bottom:6px">⚠️ Bạn đã thoát khỏi bài thi!</div>
-                <p style="font-size:13px;font-weight:600">Vi phạm hiện tại: ${tabSwitchCount}/${sm.max_violations}</p>
-                <p style="font-size:12px;opacity:0.9;margin-top:4px">Còn ${remaining} lần trước khi bài thi bị nộp tự động</p>
+                <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+                  <svg aria-hidden="true" style="width:22px;height:22px;flex-shrink:0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                  <span style="font-size:17px;font-weight:700;">Bạn đã thoát khỏi bài thi!</span>
+                </div>
+                <p style="font-size:13px;font-weight:600;margin:0 0 4px;">Vi phạm hiện tại: ${tabSwitchCount}/${sm.max_violations}</p>
+                <p style="font-size:12px;opacity:0.9;margin:0">Còn ${remaining} lần trước khi bài thi bị nộp tự động</p>
               `;
               document.body.appendChild(warn);
               setTimeout(() => warn.remove(), 5000);
@@ -853,13 +882,13 @@
         // Kiểm tra số lần đã submit
         const submittedCount = (existingSubs || []).filter(s => s.status === 'submitted' || s.status === 'timed-out').length;
         if (submittedCount >= (testData.max_attempts || 1)) {
-          return alert('❌ Bạn đã hết lượt làm bài này.');
+          return showInlineError('Bạn đã hết lượt làm bài này.');
         }
 
         // Tạo submission mới
         // Build mapping TRƯỚC để tính total_points chính xác
         questionMapping = buildQuestionMapping(testData);
-        const totalPointsForSub = (questionMapping.questionOrder||[]).reduce((sum, q) => sum + (q.points||1), 0);
+        const totalPointsForSub = getTestTotalScore();
 
         const attemptNum = (existingSubs?.[0]?.attempt_number || 0) + 1;
         const now = new Date();
@@ -899,8 +928,7 @@
         startAutoSave();
         activateAntiCheat();
       } catch (e) {
-        alert('Lỗi: ' + e.message);
-        await askName();
+        showInlineError('Không thể bắt đầu bài thi: ' + e.message);
       }
     }
 
@@ -908,7 +936,7 @@
       const questions = [...(test.questions || [])];
       const questionOrder = [];
       if (test.shuffle_questions) questions.sort(() => Math.random() - 0.5);
-      questions.forEach((q, i) => questionOrder.push({ qIndex: i, questionId: q.questionId || q.id, points: q.points || 1 }));
+      questions.forEach((q, i) => questionOrder.push({ qIndex: i, questionId: q.questionId || q.id }));
       return { questionOrder, optionMappings: {} };
     }
 
@@ -1155,7 +1183,7 @@
 
     function startTimer(endTime) {
       updateTimer(endTime);
-      timerInterval = setInterval(() => { if (updateTimer(endTime)) submitTest(); }, 1000);
+      timerInterval = setInterval(() => { if (updateTimer(endTime)) submitTest(true); }, 1000);
     }
 
     function updateTimer(endTime) {
@@ -1221,25 +1249,51 @@
       timerInterval = null; autoSaveInterval = null;
     }
 
-    async function submitTest() {
+    function showSubmitDialog(answered, total) {
+      return new Promise(resolve => {
+        const unanswered = total - answered;
+        const note = unanswered > 0
+          ? `Bạn còn ${unanswered} câu chưa trả lời.`
+          : flaggedQuestions.size > 0
+            ? `Bạn còn ${flaggedQuestions.size} câu được đánh dấu xem lại.`
+            : 'Bạn đã hoàn thành tất cả câu hỏi.';
+        const dialog = document.createElement('div');
+        dialog.id = 'submitDialog';
+        dialog.style.cssText = 'position:fixed;inset:0;z-index:9998;background:rgba(40,46,62,.45);display:flex;align-items:center;justify-content:center;padding:20px;';
+        dialog.innerHTML = `
+          <div role="dialog" aria-modal="true" aria-labelledby="submitDialogTitle" style="width:100%;max-width:440px;background:var(--color-paper-white);border:1px solid var(--color-mist-border);border-radius:16px;padding:28px;box-shadow:0 16px 40px rgba(40,46,62,.18);">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;">
+              <svg aria-hidden="true" style="width:24px;height:24px;color:var(--color-deep-indigo);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"/><path d="m22 2-7 20-4-9-9-4Z"/></svg>
+              <h2 id="submitDialogTitle" style="font-size:20px;font-weight:700;color:var(--color-ink-charcoal);margin:0;">Xác nhận nộp bài</h2>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:18px;">
+              <div style="text-align:center;background:var(--color-chalk-canvas);border-radius:10px;padding:12px 6px;"><strong style="display:block;font-size:20px;color:var(--color-ink-charcoal);">${total}</strong><span style="font-size:12px;color:var(--color-slate-veil);">Tổng câu</span></div>
+              <div style="text-align:center;background:var(--color-success-soft);border-radius:10px;padding:12px 6px;"><strong style="display:block;font-size:20px;color:var(--color-success);">${answered}</strong><span style="font-size:12px;color:var(--color-slate-veil);">Đã trả lời</span></div>
+              <div style="text-align:center;background:${unanswered ? 'var(--color-warning-soft)' : 'var(--color-chalk-canvas)'};border-radius:10px;padding:12px 6px;"><strong style="display:block;font-size:20px;color:${unanswered ? 'var(--color-warning)' : 'var(--color-slate-veil)'};">${unanswered}</strong><span style="font-size:12px;color:var(--color-slate-veil);">Chưa trả lời</span></div>
+            </div>
+            <p style="font-size:14px;color:var(--color-slate-veil);margin:0 0 22px;">${note}</p>
+            <div style="display:flex;gap:10px;justify-content:flex-end;">
+              <button type="button" id="cancelSubmitBtn" style="min-height:44px;padding:0 18px;border:1px solid var(--color-mist-border);border-radius:10px;background:var(--color-paper-white);color:var(--color-deep-indigo);font-weight:600;cursor:pointer;">Tiếp tục làm bài</button>
+              <button type="button" id="confirmSubmitBtn" style="min-height:44px;padding:0 18px;border:0;border-radius:10px;background:var(--color-deep-indigo);color:white;font-weight:600;cursor:pointer;">Xác nhận nộp bài</button>
+            </div>
+          </div>`;
+        document.body.appendChild(dialog);
+        const close = value => { dialog.remove(); resolve(value); };
+        dialog.querySelector('#cancelSubmitBtn').onclick = () => close(false);
+        dialog.querySelector('#confirmSubmitBtn').onclick = () => close(true);
+        dialog.addEventListener('click', event => { if (event.target === dialog) close(false); });
+        dialog.querySelector('#confirmSubmitBtn').focus();
+      });
+    }
+
+    async function submitTest(force = false) {
       if (currentScreen !== 'taking') return;
 
       const answered = countAnswered();
       const total = questionMapping.questionOrder.length;
 
-      // Tạm tắt anti-cheat khi hiện dialog để không bị tính vi phạm oan
       isDialogOpen = true;
-      let confirmed;
-      if (answered < total) {
-        confirmed = confirm(`⚠️ Bạn mới trả lời ${answered}/${total} câu.\n\nBạn có chắc chắn muốn nộp bài?`);
-      } else if (flaggedQuestions.size > 0) {
-        confirmed = confirm(`🚩 Bạn còn ${flaggedQuestions.size} câu đã đánh dấu xem lại chưa kiểm tra lại.\n\nBạn có chắc chắn muốn nộp bài?`);
-      } else {
-        confirmed = confirm('✅ Bạn có chắc chắn muốn nộp bài?');
-      }
-      // Giữ flag thêm 600ms sau khi dialog đóng — trình duyệt vẫn có thể bắn
-      // blur/visibilitychange trong khoảng này khi focus trả về trang
-      // Đồng thời reset debounce để không có vi phạm tồn đọng từ lúc mở dialog
+      const confirmed = force ? true : await showSubmitDialog(answered, total);
       if (violationDebounceTimer) clearTimeout(violationDebounceTimer);
       violationDebounceTimer = setTimeout(() => { violationDebounceTimer = null; }, 600);
       setTimeout(() => { isDialogOpen = false; }, 600);
@@ -1269,8 +1323,9 @@
         }).eq('id', submissionId);
 
         const score = await gradeTest(testData, answers, questionMapping);
-        const totalPoints = (questionMapping.questionOrder||[]).reduce((sum, q) => sum + (q.points||1), 0);
-        await supabase.from('submissions').update({ score, total_points: totalPoints, tab_switch_count: tabSwitchCount }).eq('id', submissionId);
+        const totalPoints = getTestTotalScore();
+        const { error: scoreError } = await supabase.from('submissions').update({ score, total_points: totalPoints, tab_switch_count: tabSwitchCount }).eq('id', submissionId);
+        if (scoreError) throw scoreError;
         await showResult(score, answers);
       } catch (e) {
         document.getElementById('mainContent').innerHTML = `
@@ -1281,24 +1336,33 @@
       }
     }
 
+    function getTestTotalScore() {
+      const value = Number(testData?.total_points ?? testData?.total_score ?? 10);
+      return Number.isFinite(value) && value > 0 ? value : 10;
+    }
+
+    function roundScore(value) {
+      return Math.round((Number(value) + Number.EPSILON) * 2) / 2;
+    }
+
     async function gradeTest(test, answers, mapping) {
       const qIds = mapping.questionOrder.map(q => q.questionId);
       const { data: qData } = await supabase.from('questions').select('*').in('id', qIds);
       const qMap = {}; (qData||[]).forEach(q => { qMap[q.id] = q; });
-      let totalScore = 0;
+      let correctCount = 0;
       mapping.questionOrder.forEach(qo => {
         const q = qMap[qo.questionId];
         if (!q) return;
         const correct = new Set(q.correct_answers || []);
         const selected = new Set((answers.find(a => a.questionId === qo.questionId) || {}).selectedOptions || []);
-        if (correct.size === selected.size && [...correct].every(v => selected.has(v))) totalScore += qo.points;
+        if (correct.size === selected.size && [...correct].every(v => selected.has(v))) correctCount++;
       });
-      return totalScore;
+      return roundScore((correctCount / mapping.questionOrder.length) * getTestTotalScore());
     }
 
     async function showResult(score, submittedAnswers) {
       currentScreen = 'result';
-      const totalPoints = (questionMapping.questionOrder||[]).reduce((sum, q) => sum + (q.points||1), 0);
+      const totalPoints = getTestTotalScore();
       const qIds = questionMapping.questionOrder.map(q => q.questionId);
       const { data: qData } = await supabase.from('questions').select('*').in('id', qIds);
       const qMap = {}; (qData||[]).forEach(q => { qMap[q.id] = q; });
@@ -1314,8 +1378,8 @@
         if (correct.size === selected.size && [...correct].every(v => selected.has(v))) correctCount++;
       });
 
-      const pct = totalPoints > 0 ? Math.round((score/totalPoints)*100) : 0;
-      const roundedScore = parseFloat(Math.round(score * 10) / 10);
+      const roundedScore = roundScore(score);
+      const pct = totalPoints > 0 ? Math.round((roundedScore / totalPoints) * 100) : 0;
 
       const resultHtml = testData.show_answers ? questionMapping.questionOrder.map((qo, idx) => {
         const q = qMap[qo.questionId]; if (!q) return '';
@@ -1335,7 +1399,7 @@
                 </span>
               </div>
               ${q.image_url ? `<div style="margin-bottom:10px;"><img src="${q.image_url}" alt="Hình minh họa" style="max-width:100%;border-radius:12px;border:1px solid var(--color-mist-border);max-height:280px;object-fit:contain;"></div>` : ''}
-              <span style="font-size:12px;color:var(--color-fog-mist);">${qo.points} điểm</span>
+               <span style="font-size:12px;color:var(--color-fog-mist);">Câu ${idx + 1}</span>
             </div>
           </div>
           <div style="display:flex;flex-direction:column;gap:8px;padding-left:46px;">${(q.options||[]).map((opt, oi) => {
@@ -1370,19 +1434,20 @@
           <p style="font-size:22px;opacity:0.85;margin:0 0 6px;">Điểm: ${pct}%</p>
           <p style="font-size:16px;opacity:0.75;margin:0 0 16px;">Đúng: <strong>${correctCount}</strong> / ${totalQuestions} câu</p>
           <p style="font-size:17px;font-weight:600;opacity:0.9;margin:0 0 12px;">
-            ${pct>=80?'🌟 Xuất sắc! Tiếp tục phát huy!':pct>=60?'👍 Tốt lắm! Cố gắng thêm nhé!':pct>=40?'📚 Cần cố gắng nhiều hơn!':'💪 Đừng nản chí, hãy ôn tập lại nhé!'}
+          ${pct>=80?'Xuất sắc! Tiếp tục phát huy!':pct>=60?'Tốt lắm! Cố gắng thêm nhé!':pct>=40?'Cần cố gắng nhiều hơn!':'Đừng nản chí, hãy ôn tập lại nhé!'}
           </p>
           <p style="font-size:13px;opacity:0.65;margin:0;">Học sinh: ${escapeHtml(studentName)}</p>
           ${tabSwitchCount > 0 && strictConfig.track_violations ? `
-            <p style="font-size:13px;margin-top:14px;background:rgba(255,255,255,0.15);display:inline-block;padding:6px 16px;border-radius:100px;">
-              🚫 Số lần vi phạm: <strong>${tabSwitchCount}</strong>
+            <p style="font-size:13px;margin-top:14px;background:rgba(255,255,255,0.15);display:inline-flex;align-items:center;gap:6px;padding:6px 16px;border-radius:100px;">
+              <svg aria-hidden="true" style="width:14px;height:14px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m9 9 6 6M15 9l-6 6"/></svg>
+              Số lần vi phạm: <strong>${tabSwitchCount}</strong>
             </p>` : ''}
         </div>
 
         ${testData.show_answers ? `
           <div style="margin-bottom:24px;">
             <h3 style="font-size:17px;font-weight:700;color:var(--color-ink-charcoal);margin:0 0 16px;display:flex;align-items:center;gap:8px;">
-              📋 Chi tiết bài làm
+              <svg aria-hidden="true" style="width:18px;height:18px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 11h8M8 15h5"/></svg> Chi tiết bài làm
             </h3>
             ${resultHtml}
           </div>
@@ -1639,13 +1704,13 @@
           flex-direction: column; color: white; text-align: center;
         `;
         overlay.innerHTML = `
-          <div style="font-size:64px;margin-bottom:16px">🚫</div>
+          <svg aria-hidden="true" style="width:64px;height:64px;color:white;margin-bottom:16px;opacity:0.9;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m9 9 6 6M15 9l-6 6"/></svg>
           <h2 style="font-size:24px;font-weight:800;margin-bottom:8px">Vi phạm quy định thi!</h2>
           <p style="font-size:14px;opacity:0.9;margin-bottom:20px">Bài thi sẽ được nộp tự động do vi phạm quá ${max} lần.</p>
           <div style="font-size:12px;opacity:0.7">Đang nộp bài...</div>
         `;
         document.body.appendChild(overlay);
-        setTimeout(() => submitTest(), 2000);
+        setTimeout(() => submitTest(true), 2000);
         return;
       }
 
@@ -1660,12 +1725,14 @@
         max-width: 380px; width: 90%;
       `;
       warning.innerHTML = `
-        <div style="font-size:24px;margin-bottom:6px">⚠️ Cảnh báo vi phạm!</div>
-        <p style="font-size:13px;font-weight:600">Phát hiện vi phạm lần ${count}/${max}</p>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+          <svg aria-hidden="true" style="width:22px;height:22px;flex-shrink:0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <span style="font-size:16px;font-weight:700;">Cảnh báo vi phạm!</span>
+        </div>
+        <p style="font-size:13px;font-weight:600;margin:0 0 4px;">Phát hiện vi phạm lần ${count}/${max}</p>
         ${remaining > 0 
-          ? `<p style="font-size:12px;opacity:0.9;margin-top:4px">Còn ${remaining} lần trước khi bài thi bị nộp tự động</p>` 
-          : ''}
-      `;
+          ? `<p style="font-size:12px;opacity:0.9;margin:0">Còn ${remaining} lần trước khi bài thi bị nộp tự động</p>` 
+          : ''}\n      `;
       document.body.appendChild(warning);
       setTimeout(() => warning.remove(), 4000);
 
