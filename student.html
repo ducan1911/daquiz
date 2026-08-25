@@ -375,7 +375,30 @@
     }
 
     /* ===== EXAM LAYOUT ===== */
-    .exam-shell {
+     .student-name-screen {
+       min-height: 100dvh;
+       margin: -20px -28px -80px;
+       padding: 1px 28px 80px;
+       background-color: var(--color-chalk-canvas);
+       background-image: url("student-name-doodle-bg.svg");
+       background-position: center;
+       background-repeat: no-repeat;
+       background-size: cover;
+     }
+     .quiz-screen {
+       min-height: 100dvh;
+       margin: -20px -28px -80px;
+       padding: 1px 28px 80px;
+       background-color: var(--color-chalk-canvas);
+       background-image: url("quiz-doodle-bg.svg");
+       background-position: center;
+       background-repeat: no-repeat;
+       background-size: cover;
+       background-attachment: fixed;
+     }
+     .student-name-screen > .glass-card,
+     .quiz-screen .exam-shell { position: relative; z-index: 1; background: rgba(255,255,255,.98); }
+     .exam-shell {
        width: 100%;
        max-width: 1280px;
        margin: 12px auto 0;
@@ -384,22 +407,26 @@
       border-radius: 20px;
       padding: 28px;
     }
-    .exam-toolbar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 20px;
-      padding-bottom: 20px;
-      border-bottom: 1px solid var(--color-mist-border);
-    }
-    .exam-timer-label {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      color: var(--color-slate-veil);
-      font-size: 13px;
-      font-weight: 600;
-    }
+     .exam-toolbar {
+       display: flex;
+       align-items: center;
+       justify-content: space-between;
+       gap: 28px;
+       min-height: 76px;
+       padding: 10px 0 18px;
+       border-bottom: 1px solid var(--color-mist-border);
+     }
+     .exam-toolbar h2 { font-size: 18px !important; line-height: 1.35; }
+     .exam-timer-label {
+       display: flex;
+       align-items: center;
+       gap: 10px;
+       color: var(--color-slate-veil);
+       font-size: 15px;
+       font-weight: 600;
+     }
+     .exam-timer-label .btn-icon { width: 22px; height: 22px; }
+     #timer { font-size: 24px !important; min-width: 92px; text-align: center; }
     .exam-body {
       display: grid;
       grid-template-columns: minmax(0, 1fr) 250px;
@@ -489,12 +516,14 @@
       .exam-toolbar { gap: 10px; padding-bottom: 14px; }
       .exam-toolbar h2 { max-width: 42vw; }
       .exam-body { display: flex; flex-direction: column; gap: 14px; padding-top: 14px; }
-      .exam-progress-card { order: -1; position: static; padding: 12px; }
-      .progress-ring { width: 100%; height: 8px; margin: 0 0 8px; border-radius: 999px; background: var(--color-mist-border); }
-      .progress-ring::after { display: none; }
-      .progress-ring-content { display: flex; align-items: center; justify-content: space-between; width: 100%; }
-      .progress-ring-content strong { font-size: 13px !important; }
-      .progress-ring-content div { font-size: 12px !important; }
+       .exam-progress-card { order: -1; position: static; padding: 14px; }
+       .progress-ring { width: 100%; height: 8px; margin: 0 0 14px; border-radius: 999px; background: var(--color-mist-border); }
+       .progress-ring::after { display: none; }
+       .progress-ring-content { display: flex; align-items: center; justify-content: space-between; width: 100%; padding-top: 2px; }
+       .progress-ring-content strong { font-size: 14px !important; }
+       .progress-ring-content div { font-size: 12px !important; }
+       .exam-toolbar { min-height: 64px; gap: 10px; }
+       .exam-toolbar h2 { font-size: 15px !important; }
       .progress-ring[style*="--progress"] { background: linear-gradient(to right, var(--color-iris-bolt) var(--progress, 0%), var(--color-mist-border) var(--progress, 0%)); }
       .question-card p.text-gray-800 { font-size: 17px !important; }
       .question-card { padding: 18px 14px !important; }
@@ -636,6 +665,7 @@
     function showCodeInput() {
       document.getElementById('loading').style.display = 'none';
       document.getElementById('mainContent').innerHTML = `
+        <div class="student-name-screen">
         <div class="glass-card fade-in" style="max-width:440px;margin:48px auto;padding:40px;text-align:center;">
           <img src="student-code.svg" alt="Nhập mã bài kiểm tra" width="210" style="display:block;margin:0 auto 16px;height:auto;">
           <h2 style="font-size:22px;font-weight:700;color:var(--color-ink-charcoal);margin:0 0 8px;">Nhập mã bài kiểm tra</h2>
@@ -649,6 +679,7 @@
             style="width:100%;height:52px;background:var(--color-iris-bolt);color:white;font-size:15px;font-weight:600;border:none;border-radius:12px;cursor:pointer;">
             Vào thi
           </button>
+        </div>
         </div>`;
     }
 
@@ -680,6 +711,7 @@
       }
 
       main.innerHTML = `
+        <div class="student-name-screen">
         <div class="glass-card fade-in" style="max-width:480px;margin:40px auto;padding:36px;">
           <div style="text-align:center;margin-bottom:24px;">
             <img
@@ -722,6 +754,7 @@
             <svg class="btn-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h13"/><path d="m13 6 6 6-6 6"/></svg>
             <span>Bắt đầu làm bài</span>
           </button>
+        </div>
         </div>`;
     }
 
@@ -1047,14 +1080,7 @@
               </div>
             </div>
 
-            <!-- Progress Bar -->
-            <div style="background:var(--color-mist-border);border-radius:999px;height:6px;overflow:hidden;margin-bottom:6px;">
-              <div id="progressBar" class="progress-bar" style="height:100%;width:0%;"></div>
-            </div>
-            <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--color-fog-mist);">
-              <span>Tiến độ trả lời</span>
-              <span style="font-weight:600;"><span id="progressText">0/${questionMapping.questionOrder.length}</span> câu</span>
-            </div>
+
           </div>
         </div>
 
@@ -1126,9 +1152,11 @@
         const card = document.getElementById(`q-card-${idx}`);
         if (card) card.hidden = idx !== activeQuestionIndex;
         const button = document.getElementById(`nav-${idx}`);
-        if (button) button.classList.toggle('current', idx === activeQuestionIndex);
-      }
-      const card = document.getElementById(`q-card-${activeQuestionIndex}`);
+         if (button) button.classList.toggle('current', idx === activeQuestionIndex);
+       }
+       const activeNav = document.getElementById(`nav-${activeQuestionIndex}`);
+       activeNav?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+       const card = document.getElementById(`q-card-${activeQuestionIndex}`);
       if (card) window.scrollTo({ top: card.getBoundingClientRect().top + window.pageYOffset - 180, behavior: 'smooth' });
     }
 
