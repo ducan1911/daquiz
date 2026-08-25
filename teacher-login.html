@@ -360,7 +360,6 @@
     </a>
     <div class="header-divider"></div>
      <a href="index.html" class="header-logo-text">Da<span>Quiz</span></a>
-     <button type="button" class="daquiz-theme-toggle" onclick="toggleDaquizTheme()" aria-label="Chuyển chế độ sáng tối" title="Chuyển chế độ sáng tối">◐</button>
    </header>
 
   <!-- Main -->
@@ -450,8 +449,6 @@
   </div>
 
   <script>
-    function toggleDaquizTheme() { const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'; localStorage.setItem('daquiz-theme', next); document.documentElement.dataset.theme = next; }
-    document.documentElement.dataset.theme = localStorage.getItem('daquiz-theme') || 'light';
     let isLoginMode = true;
 
     function switchTab(mode) {
