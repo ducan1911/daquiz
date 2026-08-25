@@ -376,8 +376,9 @@
 
     /* ===== EXAM LAYOUT ===== */
     .exam-shell {
-      max-width: 1180px;
-      margin: 24px auto 0;
+       width: 100%;
+       max-width: 1280px;
+       margin: 12px auto 0;
       background: var(--color-paper-white);
       border: 1px solid var(--color-mist-border);
       border-radius: 20px;
@@ -482,7 +483,8 @@
 
     .btn-icon { width: 20px; height: 20px; flex: 0 0 auto; pointer-events: none; }
 
-    @media (max-width: 767px) {
+     @media (max-width: 767px) {
+       .student-main { padding: 12px 12px 72px !important; }
       .exam-shell { margin: 12px 0 0; padding: 16px; border-radius: 14px; border-left: 0; border-right: 0; }
       .exam-toolbar { gap: 10px; padding-bottom: 14px; }
       .exam-toolbar h2 { max-width: 42vw; }
@@ -511,13 +513,12 @@
   <header>
     <div class="header-inner">
       <a href="index.html" class="header-brand">Da<span>Quiz</span></a>
-      <button type="button" class="daquiz-theme-toggle" onclick="toggleDaquizTheme()" aria-label="Chuyển chế độ sáng tối" title="Chuyển chế độ sáng tối">◐</button>
       <div id="studentInfo" class="header-student-info" style="display:none"></div>
     </div>
   </header>
 
   <!-- Main Content -->
-  <main style="max-width:900px;margin:0 auto;padding:24px 16px 80px;" id="mainContent">
+  <main class="student-main" style="width:100%;max-width:none;margin:0;padding:20px 28px 80px;" id="mainContent">
 
     <!-- Loading State -->
     <div id="loading" style="display:flex;align-items:center;justify-content:center;padding:80px 0;">
@@ -539,9 +540,6 @@
   </main>
 
   <script>
-    function applyDaquizTheme() { document.documentElement.dataset.theme = localStorage.getItem('daquiz-theme') || 'light'; }
-    function toggleDaquizTheme() { const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'; localStorage.setItem('daquiz-theme', next); applyDaquizTheme(); }
-    applyDaquizTheme();
     let testCode = null, testData = null, studentName = null;
     let currentScreen = 'name', submissionId = null, submissionData = null;
     let questionMapping = null, timerInterval = null, autoSaveInterval = null;
@@ -985,7 +983,7 @@
         questionMapping.optionMappings[qo.questionId] = optionOrder.map(o => o.originalIndex);
         const saved = answerMap[qo.questionId]; const selected = saved?.selectedOptions || [];
 
-        return `<div class="question-card p-6 mb-4 fade-in" id="q-card-${displayIdx}" data-question-index="${displayIdx}" data-question-id="${qo.questionId}" style="animation-delay: ${displayIdx * 0.05}s">
+        return `<div class="question-card p-6 mb-4 fade-in" id="q-card-${displayIdx}" data-question-index="${displayIdx}" data-question-id="${qo.questionId}"${displayIdx === 0 ? '' : ' hidden'} style="animation-delay: ${displayIdx * 0.05}s">
           <div class="flex gap-4 mb-4">
             <div class="question-number">${displayIdx+1}</div>
             <div class="flex-1">
@@ -1045,10 +1043,7 @@
                   <span>Còn lại</span>
                   <div id="timer" class="timer-normal" style="font-size:22px;font-family:ui-monospace,monospace;font-weight:700;padding:6px 12px;border-radius:10px;"></div>
                 </div>
-                <button onclick="submitTest()" class="btn-submit" style="padding:0 18px;height:44px;font-size:14px;border-radius:10px;">
-                  <svg class="btn-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h13"/><path d="m13 6 6 6-6 6"/></svg>
-                  <span>Nộp bài</span>
-                </button>
+
               </div>
             </div>
 
@@ -1125,14 +1120,14 @@
 
     function showQuestion(index) {
       const total = questionMapping?.questionOrder?.length || 0;
-      activeQuestionIndex = Math.max(0, Math.min(index, total - 1));
-      document.querySelectorAll('[id^="q-card-"]').forEach((card, idx) => {
-        card.hidden = idx !== activeQuestionIndex;
-        card.classList.toggle('question-hidden', idx !== activeQuestionIndex);
-      });
-      document.querySelectorAll('.question-nav-btn').forEach((button, idx) => {
-        button.classList.toggle('current', idx === activeQuestionIndex);
-      });
+      if (!total) return;
+      activeQuestionIndex = Math.max(0, Math.min(Number(index) || 0, total - 1));
+      for (let idx = 0; idx < total; idx++) {
+        const card = document.getElementById(`q-card-${idx}`);
+        if (card) card.hidden = idx !== activeQuestionIndex;
+        const button = document.getElementById(`nav-${idx}`);
+        if (button) button.classList.toggle('current', idx === activeQuestionIndex);
+      }
       const card = document.getElementById(`q-card-${activeQuestionIndex}`);
       if (card) window.scrollTo({ top: card.getBoundingClientRect().top + window.pageYOffset - 180, behavior: 'smooth' });
     }
@@ -1181,7 +1176,8 @@
       const svgOutline = '<svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 21V4m0 0c4-3 7 3 12 0v9c-5 3-8-3-12 0"/></svg>';
       if (flagBtn) {
         flagBtn.dataset.flagged = isFlagged ? '1' : '0';
-        flagBtn.title = isFlagged ? 'Bo danh dau' : 'Danh dau xem lai';
+           flagBtn.title = isFlagged ? 'Bỏ đánh dấu' : 'Đánh dấu xem lại';
+           flagBtn.setAttribute('aria-label', flagBtn.title);
         if (isFlagged) {
           flagBtn.className = 'flag-btn px-2 py-1 rounded-lg transition-all bg-amber-100 text-amber-500 flex-shrink-0';
           flagBtn.innerHTML = svgFilled;
@@ -1207,21 +1203,23 @@
 
     let showingFlaggedOnly = false;
     function toggleFlagFilter() {
-      showingFlaggedOnly = !showingFlaggedOnly;
       const filterBtn = document.getElementById('flagFilterBtn');
-      questionMapping.questionOrder.forEach((qo, idx) => {
-        const card = document.getElementById(`q-card-${idx}`);
-        if (!card) return;
-        if (showingFlaggedOnly && !flaggedQuestions.has(qo.questionId)) {
-          card.style.display = 'none';
-        } else {
-          card.style.display = '';
-        }
-      });
-      if (filterBtn) {
-        if (showingFlaggedOnly) {
+      if (!flaggedQuestions.size) {
+        if (filterBtn) filterBtn.textContent = 'Chưa có câu gắn cờ';
+        return;
+      }
+      showingFlaggedOnly = !showingFlaggedOnly;
+      if (showingFlaggedOnly) {
+        const firstFlaggedIndex = questionMapping.questionOrder.findIndex(qo => flaggedQuestions.has(qo.questionId));
+        if (firstFlaggedIndex >= 0) showQuestion(firstFlaggedIndex);
+        if (filterBtn) {
+          filterBtn.textContent = `Xem lại (${flaggedQuestions.size})`;
           filterBtn.classList.add('ring-2', 'ring-amber-400');
-        } else {
+        }
+      } else {
+        showQuestion(activeQuestionIndex);
+        if (filterBtn) {
+          filterBtn.textContent = flaggedQuestions.size > 0 ? `Xem lại (${flaggedQuestions.size})` : 'Xem lại';
           filterBtn.classList.remove('ring-2', 'ring-amber-400');
         }
       }
