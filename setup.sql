@@ -286,3 +286,5 @@ ALTER TABLE tests ADD COLUMN IF NOT EXISTS strict_mode JSONB DEFAULT '{
 --                    số lần vi phạm, mặc định 0 (không trừ)
 ALTER TABLE submissions ADD COLUMN IF NOT EXISTS tab_switch_count INTEGER DEFAULT 0;
 ALTER TABLE submissions ADD COLUMN IF NOT EXISTS penalty_points NUMERIC DEFAULT 0;
+
+ALTER TABLE tests ADD COLUMN IF NOT EXISTS total_points NUMERIC DEFAULT 10;
