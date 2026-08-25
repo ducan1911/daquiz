@@ -2937,7 +2937,7 @@ YÊU CẦU:
               </div>
             </div>
             <div class="flex gap-2">
-              <button onclick="bulkSetCategory(${JSON.stringify(qs.map(q=>q.id))}, '${cat}')" class="text-xs bg-indigo-50 text-indigo-600 hover:bg-indigo-100 px-3 py-1.5 rounded-lg transition-all font-medium">
+              <button onclick="openRenameFolderModal(${JSON.stringify(qs.map(q=>q.id))}, ${JSON.stringify(cat)})" class="text-xs bg-indigo-50 text-indigo-600 hover:bg-indigo-100 px-3 py-1.5 rounded-lg transition-all font-medium">
                 ✏️ Đổi tên
               </button>
               <button onclick="filterByFolder('${cat}')" class="text-xs bg-gray-50 text-gray-600 hover:bg-gray-100 px-3 py-1.5 rounded-lg transition-all font-medium">
@@ -3000,17 +3000,37 @@ YÊU CẦU:
       closeModal();
     }
 
-    async function bulkSetCategory(ids, currentName) {
-      const newName = prompt(`Đổi tên thư mục "${currentName}" thành:`, currentName);
-      if (!newName || newName === currentName) return;
-      
-      // Update all questions in this folder
+    function openRenameFolderModal(ids, currentName) {
+      const modal = `
+        <div class="modal show fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" onclick="if(event.target===this) closeModal()">
+          <div class="modal-card" style="width:100%;max-width:420px;">
+            <div class="modal-header">Đổi tên thư mục</div>
+            <div class="p-6">
+              <label for="renameFolderInput" class="block text-sm font-semibold text-gray-700 mb-2">Tên mới</label>
+              <input id="renameFolderInput" type="text" value="${String(currentName).replace(/"/g, '&quot;')}" class="form-input" style="width:100%;" autofocus>
+              <div class="flex gap-3 mt-5">
+                <button type="button" onclick="closeModal()" class="flex-1 border-2 border-gray-300 text-gray-700 px-4 py-3 rounded-xl font-medium">Hủy</button>
+                <button type="button" onclick="bulkSetCategory(${JSON.stringify(ids)}, ${JSON.stringify(currentName)}, true)" class="flex-1 btn-primary px-4 py-3">Lưu</button>
+              </div>
+            </div>
+          </div>
+        </div>`;
+      document.getElementById('modalContainer').innerHTML = modal;
+      setTimeout(() => document.getElementById('renameFolderInput')?.focus(), 0);
+    }
+
+    async function bulkSetCategory(ids, currentName, fromModal = false) {
+      const input = document.getElementById('renameFolderInput');
+      const newName = fromModal ? input?.value.trim() : currentName;
+      if (!newName || newName === currentName) return showAppNotice('Vui lòng nhập tên mới khác tên hiện tại');
       for (const id of ids) {
-        await supabase.from('questions').update({ category: newName }).eq('id', id);
+        const { error } = await supabase.from('questions').update({ category: newName }).eq('id', id);
+        if (error) return showAppNotice('Không thể đổi tên thư mục: ' + error.message);
       }
       await loadQuestions();
       closeModal();
       openFolderManagerModal();
+      showAppNotice('Đã đổi tên thư mục thành công', 'success');
     }
 
     // ============================================================
