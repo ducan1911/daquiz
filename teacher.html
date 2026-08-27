@@ -494,6 +494,12 @@
             <div class="dashboard-card"><div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px;"><h3 style="margin:0;font-size:17px;font-weight:750;color:var(--color-ink-charcoal);">Thao tác nhanh</h3><span style="font-size:20px;color:#ffb647;">✦</span></div><div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;"><button onclick="openAddQuestionModal()" class="btn-primary" style="padding:12px 10px;font-size:13px;">＋ Thêm câu hỏi</button><button onclick="openCreateTestModal()" class="btn-secondary" style="padding:12px 10px;font-size:13px;">＋ Tạo bài thi</button><button onclick="showSection('questions')" class="btn-secondary" style="padding:12px 10px;font-size:13px;">Kho câu hỏi</button><button onclick="showSection('results')" class="btn-secondary" style="padding:12px 10px;font-size:13px;">Xem kết quả</button></div></div>
             <div class="dashboard-card"><h3 style="margin:0 0 14px;font-size:17px;font-weight:750;color:var(--color-ink-charcoal);">Bài kiểm tra gần đây</h3><div id="dashboardRecentTests"><p style="margin:0;color:var(--color-fog-mist);font-size:13px;">Chưa có bài kiểm tra.</p></div></div>
           </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:16px;margin-top:16px;">
+            <div class="dashboard-card"><h3 style="margin:0 0 12px;font-size:17px;font-weight:750;color:var(--color-ink-charcoal);">Điểm trung bình theo bài thi</h3><div style="height:240px;position:relative;"><canvas id="dashboardScoreChart"></canvas></div></div>
+            <div class="dashboard-card"><h3 style="margin:0 0 12px;font-size:17px;font-weight:750;color:var(--color-ink-charcoal);">Top học sinh đạt điểm cao</h3><div id="dashboardTopStudents"><p style="margin:0;color:var(--color-fog-mist);font-size:13px;">Chưa có dữ liệu.</p></div></div>
+            <div class="dashboard-card"><h3 style="margin:0 0 12px;font-size:17px;font-weight:750;color:var(--color-ink-charcoal);">Câu hỏi cần ôn lại</h3><div id="dashboardHardQuestions"><p style="margin:0;color:var(--color-fog-mist);font-size:13px;">Chưa có dữ liệu.</p></div></div>
+            <div class="dashboard-card"><h3 style="margin:0 0 12px;font-size:17px;font-weight:750;color:var(--color-ink-charcoal);">Cảnh báo sắp hết hạn</h3><div id="dashboardExpiringTests"><p style="margin:0;color:var(--color-fog-mist);font-size:13px;">Không có cảnh báo.</p></div></div>
+          </div>
         </div>
       </div>
 
@@ -568,9 +574,15 @@
           <select id="resultTestSelect" class="form-select" style="width:100%;max-width:400px;" onchange="loadResults()">
             <option value="">-- Chọn bài kiểm tra --</option>
           </select>
-        </div>
-        <div id="resultContent"></div>
-      </div>
+         </div>
+         <div id="resultContent">
+           <div class="card" style="padding:34px 20px;text-align:center;min-height:360px;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+             <img src="empty-state.svg" alt="Chưa chọn bài kiểm tra" style="width:min(100%,280px);height:auto;margin-bottom:12px;">
+             <h3 style="margin:0 0 6px;font-size:18px;font-weight:750;color:var(--color-ink-charcoal);">Chưa có bài kiểm tra được chọn</h3>
+             <p style="margin:0;color:var(--color-slate-veil);font-size:14px;">Chọn bài kiểm tra để xem kết quả và thống kê</p>
+           </div>
+         </div>
+       </div>
 
       <!-- ===== SECTION: Leaderboard ===== -->
       <div id="section-leaderboard" class="section fade-in">
@@ -782,7 +794,7 @@
        const ids = allTests.map(test => test.id);
        let submissions = [];
        if (ids.length) {
-         const { data } = await supabase.from('submissions').select('id, test_id, status').in('test_id', ids);
+         const { data } = await supabase.from('submissions').select('id, test_id, status, score, total_points, student_name, answers').in('test_id', ids);
          submissions = data || [];
        }
        document.getElementById('dashboardTeacherName').textContent = document.getElementById('teacherName').textContent || 'Thầy/Cô';
@@ -790,7 +802,20 @@
        document.getElementById('dashboardTestCount').textContent = allTests.length;
        document.getElementById('dashboardActiveCount').textContent = active.length;
        document.getElementById('dashboardSubmissionCount').textContent = submissions.filter(s => s.status === 'submitted' || s.status === 'timed-out').length;
-       const recent = [...allTests].sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0)).slice(0, 4);
+        const completed = submissions.filter(s => s.status === 'submitted' || s.status === 'timed-out');
+        const byTest = allTests.map(test => { const rows = completed.filter(s => s.test_id === test.id); return { test, avg: rows.length ? rows.reduce((sum, s) => sum + (Number(s.score) || 0) / (Number(s.total_points) || Number(test.total_points) || 10) * 10, 0) / rows.length : 0 }; }).filter(item => item.test);
+        window.dashboardScoreChart?.destroy();
+        const chart = document.getElementById('dashboardScoreChart');
+        if (chart && byTest.length) window.dashboardScoreChart = new Chart(chart, { type: 'bar', data: { labels: byTest.map(item => (item.test.title || 'Bài thi').slice(0, 16)), datasets: [{ data: byTest.map(item => Number(item.avg.toFixed(1))), backgroundColor: '#4255ff', borderRadius: 8 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, max: 10 } } } });
+        const topStudents = [...completed].sort((a, b) => ((Number(b.score) || 0) / (Number(b.total_points) || 10)) - ((Number(a.score) || 0) / (Number(a.total_points) || 10))).slice(0, 5);
+        document.getElementById('dashboardTopStudents').innerHTML = topStudents.length ? topStudents.map((s, i) => `<div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--color-mist-border);font-size:13px;"><span>${i + 1}. ${escapeHtml(s.student_name || 'Ẩn danh')}</span><strong style="color:var(--color-iris-bolt);">${getSubmissionScoreOn10(s, allTests.find(t => t.id === s.test_id))}/10</strong></div>`).join('') : '<p style="margin:0;color:var(--color-fog-mist);font-size:13px;">Chưa có dữ liệu.</p>';
+        const questionErrors = {};
+        completed.forEach(s => (s.answers || []).forEach(answer => { const q = allQuestions.find(item => item.id === answer.questionId); if (!q) return; const correct = q.correct_answers || []; const selected = answer.selectedOptions || []; const ok = correct.length === selected.length && correct.every(value => selected.includes(value)) && selected.every(value => correct.includes(value)); if (!ok) questionErrors[answer.questionId] = (questionErrors[answer.questionId] || 0) + 1; }));
+        const hard = Object.entries(questionErrors).sort((a, b) => b[1] - a[1]).slice(0, 4);
+        document.getElementById('dashboardHardQuestions').innerHTML = hard.length ? hard.map(([id, count]) => { const q = allQuestions.find(item => item.id === id); return `<div style="padding:9px 0;border-bottom:1px solid var(--color-mist-border);font-size:13px;"><strong style="color:var(--color-ink-charcoal);">${escapeHtml((q?.content || 'Câu hỏi').slice(0, 55))}</strong><span style="display:block;color:#dc2626;margin-top:3px;">${count} lượt trả lời sai</span></div>`; }).join('') : '<p style="margin:0;color:var(--color-fog-mist);font-size:13px;">Chưa có dữ liệu.</p>';
+        const expiring = allTests.filter(test => test.end_time && new Date(test.end_time) > now && new Date(test.end_time) - now <= 3 * 24 * 60 * 60 * 1000).slice(0, 4);
+        document.getElementById('dashboardExpiringTests').innerHTML = expiring.length ? expiring.map(test => `<div style="padding:9px 0;border-bottom:1px solid var(--color-mist-border);font-size:13px;"><strong>${escapeHtml(test.title || 'Bài kiểm tra')}</strong><span style="display:block;color:#e58a20;margin-top:3px;">Đóng lúc ${new Date(test.end_time).toLocaleString('vi-VN')}</span></div>`).join('') : '<p style="margin:0;color:var(--color-fog-mist);font-size:13px;">Không có cảnh báo.</p>';
+        const recent = [...allTests].sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0)).slice(0, 4);
        document.getElementById('dashboardRecentTests').innerHTML = recent.length ? recent.map(test => `<button onclick="showSection('tests')" style="display:flex;width:100%;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border:0;border-bottom:1px solid var(--color-mist-border);background:none;text-align:left;cursor:pointer;"><span style="min-width:0;"><strong style="display:block;color:var(--color-ink-charcoal);font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(test.title || 'Bài kiểm tra')}</strong><small style="color:var(--color-fog-mist);">${test.test_code || ''}</small></span><span style="color:var(--color-iris-bolt);font-size:12px;white-space:nowrap;">Xem bài →</span></button>`).join('') : '<p style="margin:0;color:var(--color-fog-mist);font-size:13px;">Chưa có bài kiểm tra.</p>';
      }
 
