@@ -150,13 +150,6 @@ Sau mỗi lần cập nhật, cần đợi GitHub Pages build xong và dùng `Ct
 4. Chọn đáp án, kiểm tra tiến độ và nộp bài.
 5. Xem kết quả sau khi nộp nếu bài thi cho phép.
 
-## Lưu ý về tính điểm
-
-- Tổng điểm bài thi được lấy từ trường `tests.total_points`.
-- Điểm của mỗi bài nộp được lưu trong `submissions.score` và `submissions.total_points`.
-- Trang giáo viên ưu tiên `submissions.total_points` khi quy đổi điểm về thang 10 để bảo đảm kết quả lịch sử không bị tính sai.
-- Điểm hiển thị được làm tròn đến một chữ số thập phân.
-- Điểm trừ do giáo viên nhập được áp dụng sau khi quy đổi điểm về thang 10.
 
 ## Bảo mật và dữ liệu
 
