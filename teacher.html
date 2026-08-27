@@ -1973,10 +1973,25 @@
     // ==== KẾT QUẢ & THỐNG KÊ NÂNG CAO ====
     // Làm tròn điểm theo quy định giáo dục VN: quy về thang 10, làm tròn 1 chữ số thập phân
     function roundScore(raw, totalPoints) {
-      if (!totalPoints || totalPoints === 0) return 0;
-      const on10 = (raw / totalPoints) * 10;
-      return parseFloat((Math.round(on10 * 10) / 10).toFixed(1));
-    }
+       if (!totalPoints || totalPoints === 0) return 0;
+       const on10 = (raw / totalPoints) * 10;
+       return parseFloat((Math.round(on10 * 10) / 10).toFixed(1));
+     }
+
+     function getTestTotalPoints(test) {
+       const value = Number(test?.total_points ?? test?.total_score ?? 10);
+       return Number.isFinite(value) && value > 0 ? value : 10;
+     }
+
+     function getSubmissionScoreOn10(submission, test) {
+       const score = Number(submission?.score) || 0;
+       const storedTotal = Number(submission?.total_points);
+       const totalPoints = Number.isFinite(storedTotal) && storedTotal > 0
+         ? storedTotal
+         : getTestTotalPoints(test);
+       return roundScore(score, totalPoints);
+     }
+
 
     async function loadResultOptions() {
       const select = document.getElementById('resultTestSelect');
@@ -2116,11 +2131,11 @@
       const highestScore = Math.max(...scores);
 
       // Score distribution (0-20, 20-40, 40-60, 60-80, 80-100)
-      const totalPoints = test.questions.reduce((sum, q) => sum + q.points, 0);
+      const totalPoints = getTestTotalPoints(test);
 
       // Điểm cuối cùng trên thang 10 sau khi trừ điểm vi phạm (nếu có)
       const finalScoresOn10 = submissions.map(s => {
-        const rawOn10 = roundScore(s.score || 0, totalPoints);
+        const rawOn10 = getSubmissionScoreOn10(s, test);
         const penalty = parseFloat(s.penalty_points) || 0;
         return Math.max(0, parseFloat((rawOn10 - penalty).toFixed(1)));
       });
@@ -2220,9 +2235,7 @@
       const tbody = document.getElementById('resultsTableBody');
       
       // Calculate total points from questions array since test.total_points may not exist
-      const totalPoints = test.questions
-        ? test.questions.reduce((sum, q) => sum + (q.points || 1), 0)
-        : (test.total_points || 0);
+      const totalPoints = getTestTotalPoints(test);
       
       tbody.innerHTML = submissions.map((sub, idx) => {
         const timeSpent = calculateTimeSpent(sub);
@@ -2230,7 +2243,7 @@
           ? '<span class="badge bg-green-100 text-green-700">✅ Đã nộp</span>'
           : '<span class="badge bg-orange-100 text-orange-700">⏰ Hết giờ</span>';
 
-        const rawOn10 = roundScore(sub.score || 0, totalPoints);
+        const rawOn10 = getSubmissionScoreOn10(sub, test);
         const penalty = parseFloat(sub.penalty_points) || 0;
         const finalOn10 = Math.max(0, parseFloat((rawOn10 - penalty).toFixed(1)));
         const scorePercent = ((finalOn10 / 10) * 100).toFixed(0);
@@ -2312,7 +2325,7 @@
 
       // Sắp xếp học sinh theo điểm giảm dần
       const sorted = [...submissions].sort((a, b) => (b.score || 0) - (a.score || 0));
-      const totalPoints = test.questions.reduce((s, q) => s + (q.points || 1), 0);
+      const totalPoints = getTestTotalPoints(test);
 
       // Tính % đúng mỗi câu (dùng thứ tự trong test.questions, không phải question_order)
       const correctCountPerQ = new Array(qIds.length).fill(0);
@@ -2376,7 +2389,7 @@
             ${sub.student_name || 'N/A'}
           </td>
           <td class="px-3 py-3 text-center border-r border-gray-100" style="${colWidth}">
-            <span class="font-bold text-sm" style="color:${scoreColor}">${roundScore(sub.score||0, totalPoints)}</span>
+            <span class="font-bold text-sm" style="color:${scoreColor}">${getSubmissionScoreOn10(sub, test)}</span>
             <div class="text-xs text-gray-400">(${scorePercent}%)</div>
           </td>`;
 
@@ -2443,12 +2456,10 @@
         return showAppNotice('Không có dữ liệu để xuất');
       }
       
-      const totalPoints = test.questions
-        ? test.questions.reduce((sum, q) => sum + (q.points || 1), 0)
-        : (test.total_points || 0);
+      const totalPoints = getTestTotalPoints(test);
       
       const excelData = submissions.map((sub, idx) => {
-        const rawOn10 = roundScore(sub.score || 0, totalPoints);
+        const rawOn10 = getSubmissionScoreOn10(sub, test);
         const penalty = parseFloat(sub.penalty_points) || 0;
         const finalOn10 = Math.max(0, parseFloat((rawOn10 - penalty).toFixed(1)));
         return {
@@ -3116,7 +3127,7 @@ YÊU CẦU:
 
       const completed = (submissions || []).filter(s => s.status === 'submitted' || s.status === 'timed-out');
       const inProgress = (submissions || []).filter(s => s.status === 'in-progress');
-      const totalPoints = test.questions.reduce((s, q) => s + (q.points || 1), 0);
+      const totalPoints = getTestTotalPoints(test);
 
       const container = document.getElementById('leaderboardContent');
       if (!container) return;
@@ -3139,7 +3150,7 @@ YÊU CẦU:
               </div>
             </div>
             <div class="ml-4 text-right">
-              <span class="text-2xl font-black text-indigo-600">${roundScore(sub.score||0, totalPoints)}</span>
+              <span class="text-2xl font-black text-indigo-600">${getSubmissionScoreOn10(sub, test)}</span>
               <span class="text-gray-400 text-sm">/${totalPoints}</span>
             </div>
           </div>
@@ -3657,7 +3668,7 @@ D. 6</code></pre>
       const all = submissions || [];
       const completed = all.filter(s => s.status === 'submitted' || s.status === 'timed-out');
       const inProgress = all.filter(s => s.status === 'in-progress');
-      const totalPoints = test.questions.reduce((s, q) => s + (q.points || 1), 0);
+      const totalPoints = getTestTotalPoints(test);
 
       // Tính battle score: điểm + bonus tốc độ
       const scored = completed.map(sub => {
@@ -3776,8 +3787,7 @@ D. 6</code></pre>
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
 
-      const totalPoints = test.questions
-        ? test.questions.reduce((s, q) => s + (q.points || 1), 0) : (test.total_points || 0);
+      const totalPoints = getTestTotalPoints(test);
 
       // Tiêu đề
       doc.setFont('helvetica', 'bold');
@@ -3789,7 +3799,7 @@ D. 6</code></pre>
       doc.text(`Ma thi: ${test.test_code}   |   So cau: ${test.questions?.length || 0}   |   Thoi gian: ${test.duration} phut   |   Ngay xuat: ${new Date().toLocaleDateString('vi-VN')}`, 148, 29, { align: 'center' });
 
       const rows = submissions.map((sub, i) => {
-        const raw = roundScore(sub.score || 0, totalPoints);
+        const raw = getSubmissionScoreOn10(sub, test);
         const penalty = parseFloat(sub.penalty_points) || 0;
         const final = Math.max(0, parseFloat((raw - penalty).toFixed(1)));
         return [
@@ -3819,7 +3829,7 @@ D. 6</code></pre>
 
       // Footer tổng kết
       const avg = submissions.reduce((s, sub) => {
-        const raw = roundScore(sub.score || 0, totalPoints);
+        const raw = getSubmissionScoreOn10(sub, test);
         const penalty = parseFloat(sub.penalty_points) || 0;
         return s + Math.max(0, raw - penalty);
       }, 0) / submissions.length;
