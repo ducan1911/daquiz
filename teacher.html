@@ -2427,9 +2427,8 @@
          const optionRows = (q.options || []).map((option, optionIndex) => {
            const chosen = selected.includes(optionIndex);
            const answer = correct.includes(optionIndex);
-           const color = answer ? 'text-green-700 bg-green-50' : chosen ? 'text-red-700 bg-red-50' : 'text-gray-700';
-           const marker = chosen ? ' (Học sinh chọn)' : answer ? ' (Đáp án đúng)' : '';
-           return `<div class="px-3 py-2 rounded-lg ${color}">${String.fromCharCode(65 + optionIndex)}. ${escapeHtml(option)}${marker}</div>`;
+            const color = answer ? 'text-green-700 bg-green-50' : chosen ? 'text-red-700 bg-red-50' : 'text-gray-700';
+            return `<div class="px-3 py-2 rounded-lg ${color}">${String.fromCharCode(65 + optionIndex)}. ${escapeHtml(option)}</div>`;
          }).join('');
          return `<div class="border border-gray-200 rounded-xl p-4 mb-3"><div class="flex justify-between gap-3 mb-2"><div class="font-semibold text-gray-800">Câu ${index + 1}: ${escapeHtml(q.content)}</div>${status}</div>${q.image_url ? `<img src="${escapeHtml(q.image_url)}" alt="Hình câu hỏi" class="max-h-36 rounded-lg mb-3">` : ''}<div class="space-y-1 text-sm">${optionRows || '<div class="text-gray-500">Không có lựa chọn</div>'}</div></div>`;
        }).join('');
