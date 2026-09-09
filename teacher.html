@@ -1139,7 +1139,8 @@
       }
 
       const { error } = await supabase.from('questions').update({
-        category, content, points, options, correct_answers, image_url: imageUrl
+         category, content, points: q.points || 1, options, correct_answers, image_url: imageUrl
+
       }).eq('id', id);
 
       if (error) return showAppNotice('Lỗi: ' + error.message);
@@ -2386,18 +2387,57 @@
             <td class="p-3 text-center text-xs text-gray-500">
               ${sub.submitted_at ? new Date(sub.submitted_at).toLocaleString('vi-VN') : 'N/A'}
             </td>
-            <td class="p-3 text-center">
-              <button onclick="deleteSubmission('${sub.id}')"
-                class="text-red-500 hover:text-red-700 hover:bg-red-50 px-2 py-1 rounded-lg transition-all text-xs font-medium border border-red-200 hover:border-red-400">
-                🗑️ Xóa
-              </button>
-            </td>
+             <td class="p-3 text-center">
+               <div class="flex flex-col items-center gap-1">
+                 <button onclick="viewSubmissionDetails('${sub.id}', '${test.id}')"
+                   class="text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 px-2 py-1 rounded-lg transition-all text-xs font-medium border border-indigo-200 hover:border-indigo-400">
+                   Xem bài
+                 </button>
+                 <button onclick="deleteSubmission('${sub.id}')"
+                   class="text-red-500 hover:text-red-700 hover:bg-red-50 px-2 py-1 rounded-lg transition-all text-xs font-medium border border-red-200 hover:border-red-400">
+                   🗑️ Xóa
+                 </button>
+               </div>
+             </td>
           </tr>
         `;
       }).join('');
     }
 
-    async function applyPenalty(subId) {
+     async function viewSubmissionDetails(submissionId, testId) {
+       const submission = (await supabase.from('submissions').select('*').eq('id', submissionId).single()).data;
+       const test = allTests.find(t => t.id === testId);
+       if (!submission || !test) return showAppNotice('Không tìm thấy bài làm');
+
+       const qIds = (test.questions || []).map(q => q.questionId || q.id).filter(Boolean);
+       const { data: questions } = await supabase.from('questions').select('id, content, options, correct_answers, type, image_url').in('id', qIds);
+       const qMap = Object.fromEntries((questions || []).map(q => [q.id, q]));
+       const answerMap = Object.fromEntries((submission.answers || []).map(a => [a.questionId, a.selectedOptions || []]));
+       const escapeHtml = value => String(value ?? '').replace(/[&<>\"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#039;'}[char]));
+       const sameAnswers = (left, right) => left.length === right.length && left.every(value => right.includes(value));
+
+       const rows = qIds.map((questionId, index) => {
+         const q = qMap[questionId];
+         if (!q) return '';
+         const selected = answerMap[questionId];
+         const correct = q.correct_answers || [];
+         const answered = Object.prototype.hasOwnProperty.call(answerMap, questionId);
+         const isCorrect = answered && sameAnswers(selected, correct);
+         const status = !answered ? '<span class="badge bg-gray-100 text-gray-600">Chưa trả lời</span>' : isCorrect ? '<span class="badge bg-green-100 text-green-700">Đúng</span>' : '<span class="badge bg-red-100 text-red-700">Sai</span>';
+         const optionRows = (q.options || []).map((option, optionIndex) => {
+           const chosen = selected.includes(optionIndex);
+           const answer = correct.includes(optionIndex);
+           const color = answer ? 'text-green-700 bg-green-50' : chosen ? 'text-red-700 bg-red-50' : 'text-gray-700';
+           const marker = chosen ? ' (Học sinh chọn)' : answer ? ' (Đáp án đúng)' : '';
+           return `<div class="px-3 py-2 rounded-lg ${color}">${String.fromCharCode(65 + optionIndex)}. ${escapeHtml(option)}${marker}</div>`;
+         }).join('');
+         return `<div class="border border-gray-200 rounded-xl p-4 mb-3"><div class="flex justify-between gap-3 mb-2"><div class="font-semibold text-gray-800">Câu ${index + 1}: ${escapeHtml(q.content)}</div>${status}</div>${q.image_url ? `<img src="${escapeHtml(q.image_url)}" alt="Hình câu hỏi" class="max-h-36 rounded-lg mb-3">` : ''}<div class="space-y-1 text-sm">${optionRows || '<div class="text-gray-500">Không có lựa chọn</div>'}</div></div>`;
+       }).join('');
+
+       document.getElementById('modalContainer').innerHTML = `<div class="modal show fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" onclick="if(event.target===this) closeModal()"><div class="modal-card" style="width:100%;max-width:760px;max-height:90vh;overflow-y:auto;"><div class="modal-header">Chi tiết bài làm: ${escapeHtml(submission.student_name || 'N/A')}</div><div class="p-6"><div class="grid grid-cols-2 gap-3 mb-4 text-sm"><div class="bg-gray-50 rounded-lg p-3">Điểm: <strong>${getSubmissionScoreOn10(submission, test)}/10</strong></div><div class="bg-gray-50 rounded-lg p-3">Trạng thái: <strong>${submission.status === 'timed-out' ? 'Hết giờ' : 'Đã nộp'}</strong></div></div>${rows || '<p class="text-gray-500">Không có câu hỏi.</p>'}<button onclick="closeModal()" class="w-full mt-3 border-2 border-gray-300 text-gray-700 px-6 py-3 rounded-xl font-medium hover:bg-gray-50">Đóng</button></div></div></div>`;
+     }
+
+     async function applyPenalty(subId) {
       const input = document.getElementById(`penaltyInput_${subId}`);
       if (!input) return;
       const penalty = parseFloat(input.value);
